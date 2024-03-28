@@ -1,34 +1,51 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OnlineBoardCommentService } from './online_board_comment.service';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 
-@Controller('online-board-comment')
+@Controller('comments')
 export class OnlineBoardCommentController {
-  constructor(private readonly onlineBoardCommentService: OnlineBoardCommentService) {}
+  constructor(
+    private readonly onlineBoardCommentService: OnlineBoardCommentService,
+  ) {}
 
-  @Post()
-  create(@Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto) {
-    return this.onlineBoardCommentService.create(createOnlineBoardCommentDto);
+  @Post(':onlineBoardId')
+  async create(
+    @Param() onlineBoardId: number,
+    @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
+  ) {
+    return await this.onlineBoardCommentService.createComment(
+      onlineBoardId,
+      createOnlineBoardCommentDto,
+    );
   }
 
-  @Get()
-  findAll() {
-    return this.onlineBoardCommentService.findAll();
+  @Get(':onlineBoardId')
+  async findAll(@Param() onlineBoardId: number) {
+    return await this.onlineBoardCommentService.findAllComments(onlineBoardId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.onlineBoardCommentService.findOne(+id);
+  @Patch(':commentId')
+  async update(
+    @Param() commentId: number,
+    @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
+  ) {
+    return await this.onlineBoardCommentService.updateComment(
+      commentId,
+      updateOnlineBoardCommentDto,
+    );
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto) {
-    return this.onlineBoardCommentService.update(+id, updateOnlineBoardCommentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.onlineBoardCommentService.remove(+id);
+  @Delete(':commentId')
+  async remove(@Param() commentId: number) {
+    return this.onlineBoardCommentService.removeComment(commentId);
   }
 }

@@ -1,26 +1,51 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { OnlineBoardComments } from './entities/online_board_comment.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class OnlineBoardCommentService {
-  create(createOnlineBoardCommentDto: CreateOnlineBoardCommentDto) {
-    return 'This action adds a new onlineBoardComment';
+  constructor(
+    @InjectRepository(OnlineBoardComments)
+    private readonly onlineBoardCommentRepository: Repository<OnlineBoardComments>,
+  ) {}
+  async createComment(
+    onlineBoardId: number,
+    createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
+  ) {
+    const { content } = createOnlineBoardCommentDto;
+    const board = await this.onlineBoardCommentRepository.save({
+      onlineBoardId,
+      content,
+    });
+    return board;
   }
 
-  findAll() {
-    return `This action returns all onlineBoardComment`;
+  async findAllComments(onlineBoardId: number) {
+    const comments = await this.onlineBoardCommentRepository.findBy({
+      onlineBoardId,
+    });
+    return comments;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} onlineBoardComment`;
+  async updateComment(
+    commentId: number,
+    updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
+  ) {
+    const { content } = updateOnlineBoardCommentDto;
+    const comment = await this.onlineBoardCommentRepository.save({
+      id: commentId,
+      content,
+    });
+    return comment;
   }
 
-  update(id: number, updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto) {
-    return `This action updates a #${id} onlineBoardComment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} onlineBoardComment`;
+  async removeComment(commentId: number) {
+    const removeComment = await this.onlineBoardCommentRepository.softDelete({
+      id: commentId,
+    });
+    return removeComment;
   }
 }
