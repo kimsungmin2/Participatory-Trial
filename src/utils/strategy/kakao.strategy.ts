@@ -26,9 +26,10 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       const email = profile._json && profile._json.kakao_account.email;
       const nickName = profile.displayName;
       const provider = profile.provider;
-      let userInfo = await this.userService.findByEmail(email);
-      if (!userInfo) {
-        userInfo = await this.authService.createProviderUser(
+
+      let user = await this.userService.findByEmail(email);
+      if (!user) {
+        user = await this.authService.createProviderUser(
           email,
           nickName,
           provider,

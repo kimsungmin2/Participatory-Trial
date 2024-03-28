@@ -60,33 +60,22 @@ export class AuthService {
     await queryRunner.startTransaction();
 
     try {
-      // const user = await queryRunner.manager.getRepository(Users).save({});
-      if (provider === 'kakao') {
-        const userInfo = await queryRunner.manager
-          .getRepository(UserInfos)
-          .save({
-            // id: user.id,
-            email,
-            nickName,
-            provider: 'kakao',
-            // user: user,
-          });
-        await queryRunner.commitTransaction();
-        return userInfo;
-      } else {
-        const userInfo = await queryRunner.manager
-          .getRepository(UserInfos)
-          .save({
-            // id: user.id,
-            email,
-            nickName,
-            provider: 'naver',
-            // user: user,
-          });
+      const user = await queryRunner.manager.getRepository(Users).save({});
+      console.log(user);
+      const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
+        id: user.id,
+        email,
+        password: 'default',
+        nickName,
+        provider,
+        birth: 'default',
+        verifiCationCode: 0,
+        emailVerified: true,
+        user: user,
+      });
 
-        await queryRunner.commitTransaction();
-        return userInfo;
-      }
+      await queryRunner.commitTransaction();
+      return userInfo;
     } catch (error) {
       await queryRunner.rollbackTransaction();
     } finally {
