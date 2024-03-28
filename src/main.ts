@@ -1,11 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
-<<<<<<< HEAD
+
 import cookieParser from 'cookie-parser';
-=======
-import * as cookieParser from 'cookie-parser';
->>>>>>> 0fc3bbb63a912874ef8de546ec0ba4049e493ace
+
 import { setupSwagger } from './utils/swagger';
 
 async function bootstrap() {
@@ -20,10 +18,7 @@ async function bootstrap() {
       },
     }),
   );
-<<<<<<< HEAD
-=======
 
->>>>>>> 0fc3bbb63a912874ef8de546ec0ba4049e493ace
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);

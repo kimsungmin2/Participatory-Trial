@@ -20,7 +20,7 @@ export class HumorBoards {
   @Column({ type: 'int' })
   userId: number;
 
-  @Column({ type: 'varchar', unique: true, nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   title: string;
 
   @Column({ type: 'varchar', nullable: false })

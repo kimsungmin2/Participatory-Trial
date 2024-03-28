@@ -7,23 +7,50 @@ import {
   Param,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { HumorCommentsService } from './humor-comments.service';
 import { CreateHumorCommentDto } from './dto/create-humor-comment.dto';
 import { UpdateHumorCommentDto } from './dto/update-humor-comment.dto';
-
-@Controller('humor-board/:board-id/comments')
+import { HumorComments } from './entities/humor_comment.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { Users } from '../users/entities/user.entity';
+import { userInfo } from 'os';
+import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+@ApiTags('유머 게시판 댓글 API')
+@Controller('humors/:boardId/comments')
 export class HumorCommentsController {
   constructor(private readonly humorCommentsService: HumorCommentsService) {}
 
+  //유머 댓글 생성
+  @ApiOperation({ summary: '유머 게시물 댓글 생성' })
+  @ApiBody({
+    description: '유머 게시물 댓글 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string', default: '댓글을 적으세여' },
+      },
+    },
+  })
+  @ApiParam({
+    name: 'boardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async createHumorComment(
     @Body() createHumorCommentDto: CreateHumorCommentDto,
-    @Param('board-id') boardId: number,
+    @Param('boardId') boardId: number,
+    @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
     const createdComment = await this.humorCommentsService.createComment(
       createHumorCommentDto,
       boardId,
+      user,
     );
     return {
       statusCode: HttpStatus.CREATED,
@@ -32,26 +59,113 @@ export class HumorCommentsController {
     };
   }
 
+  //댓글 모두 조회
+  @ApiOperation({ summary: '유머 게시물 댓글 모두 조회' })
+  @ApiParam({
+    name: 'boardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
   @Get()
-  async findAllHumorComment() {
-    return this.humorCommentsService.findAll();
+  async findAllHumorComment(
+    @Param('boardId') boardId: number,
+  ): Promise<HumorBoardReturnValue> {
+    const foundComments: HumorComments[] =
+      await this.humorCommentsService.findAllComment(boardId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '모든 댓글 조회에 성공하였습니다.',
+      data: foundComments,
+    };
   }
 
-  @Get(':id')
-  async findOneHumorComment(@Param('id') id: number) {
-    return this.humorCommentsService.findOne(id);
+  //댓글 단건 조회
+  @ApiOperation({ summary: '유머 게시물 댓글 단건 조회' })
+  @ApiParam({
+    name: 'boardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @Get(':commentId')
+  async findOneHumorComment(
+    @Param('boardId') boardId: number,
+    @Param('commentId') commentId: number,
+  ): Promise<HumorBoardReturnValue> {
+    const foundComment = await this.humorCommentsService.findOneComment(
+      boardId,
+      commentId,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '댓글 조회에 성공하였습니다.',
+      data: foundComment,
+    };
   }
 
-  @Patch(':id')
+  //유머 댓글 수정
+  @ApiBody({
+    description: '유머 게시물 댓글 수정',
+    schema: {
+      type: 'object',
+      properties: {
+        content: { type: 'string', default: '댓글을 적으세여' },
+      },
+    },
+  })
+  @ApiOperation({ summary: '유머 게시물 댓글 수정' })
+  @ApiParam({
+    name: 'boardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':commentId')
   async updateHumorComment(
-    @Param('id') id: number,
+    @Param('boardId') boardId: number,
+    @Param('commentId') commentId: number,
     @Body() updateHumorCommentDto: UpdateHumorCommentDto,
-  ) {
-    return this.humorCommentsService.update(+id, updateHumorCommentDto);
+    @UserInfo() user: Users,
+  ): Promise<HumorBoardReturnValue> {
+    const updatedComment = await this.humorCommentsService.updateComment(
+      boardId,
+      commentId,
+      updateHumorCommentDto,
+      user,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: '성공적으로 댓글 수정을 완료하였습니다.',
+      data: updatedComment,
+    };
   }
 
-  @Delete(':id')
-  deleteHumorComment(@Param('id') id: number) {
-    return this.humorCommentsService.remove(+id);
+  //유머 댓글 삭제
+  @ApiOperation({ summary: '유머 게시물 댓글 삭제' })
+  @ApiParam({
+    name: 'boardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':commentId')
+  async deleteHumorComment(
+    @Param('commentId') commentId: number,
+    @Param('boardId') boardId: number,
+    @UserInfo() user: Users,
+  ): Promise<HumorBoardReturnValue> {
+    await this.humorCommentsService.deleteHumorComment(
+      commentId,
+      boardId,
+      user,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: `${commentId}번 댓글을 성공적으로 삭제하였습니다.`,
+    };
   }
 }

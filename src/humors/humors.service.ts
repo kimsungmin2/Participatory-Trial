@@ -20,10 +20,14 @@ export class HumorsService {
 
   //게시물 생성
 
-  async createHumorBoard(createHumorBoardDto: CreateHumorBoardDto) {
+  async createHumorBoard(
+    createHumorBoardDto: CreateHumorBoardDto,
+    user: Users,
+  ) {
+    console.log(user.id);
     const createdBoard = await this.HumorBoardRepository.save({
-      id: 1,
-      ...CreateHumorBoardDto,
+      userId: user.id,
+      ...createHumorBoardDto,
     });
     return createdBoard;
   }
@@ -48,11 +52,12 @@ export class HumorsService {
   async updateHumorBoard(
     id: number,
     updateHumorDto: UpdateHumorDto,
+    user: Users,
   ): Promise<HumorBoards> {
     const findHumorBoard = await this.findOneHumorBoard(id);
-    // if (findHumorBoard.userId !== user.id) {
-    //   throw new ForbiddenException('해당 게시물을 수정할 권한이 없습니다.');
-    // }
+    if (findHumorBoard.userId !== user.id) {
+      throw new ForbiddenException('해당 게시물을 수정할 권한이 없습니다.');
+    }
     const updatedHumorBoardDao = this.HumorBoardRepository.merge(
       findHumorBoard,
       updateHumorDto,
@@ -69,11 +74,11 @@ export class HumorsService {
 
   //게시물 삭제
 
-  async removeHumorBoard(id: number) {
+  async removeHumorBoard(id: number, user: Users) {
     const findHumorBoard = await this.findOneHumorBoard(id);
-    // if (findHumorBoard.userId !== user.id) {
-    //   throw new ForbiddenException('해당 게시물을 삭제할 권한이 없습니다.');
-    // }
+    if (findHumorBoard.userId !== user.id) {
+      throw new ForbiddenException('해당 게시물을 삭제할 권한이 없습니다.');
+    }
     const deletedHumorBoard = await this.HumorBoardRepository.delete({
       id,
     });

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -14,11 +15,14 @@ import { UpdateHumorDto } from './dto/update-humor.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Users } from '../users/entities/user.entity';
 import { HumorBoards } from './entities/humor-board.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { AuthGuard } from '@nestjs/passport';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
   constructor(private readonly humorsService: HumorsService) {}
 
+  @ApiOperation({ summary: '유머 게시판 게시물 생성' })
   @ApiBody({
     description: '유머 게시물 생성',
     schema: {
@@ -29,13 +33,16 @@ export class HumorsController {
       },
     },
   })
-  @ApiOperation({ summary: '유머 게시판 게시물 생성' })
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async createHumorBoard(
     @Body() createHumorBoardDto: CreateHumorBoardDto,
+    @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
-    const createdBoard =
-      await this.humorsService.createHumorBoard(createHumorBoardDto);
+    const createdBoard = await this.humorsService.createHumorBoard(
+      createHumorBoardDto,
+      user,
+    );
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -43,9 +50,7 @@ export class HumorsController {
       data: createdBoard,
     };
   }
-  @ApiBody({
-    description: '모든 게시물 조회',
-  })
+
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
   @Get()
   async getAllHumorBoards(): Promise<HumorBoardReturnValue> {
@@ -60,6 +65,7 @@ export class HumorsController {
   }
 
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   @ApiParam({
     name: 'id',
@@ -78,7 +84,8 @@ export class HumorsController {
       data: findHumorBoard,
     };
   }
-
+  @ApiOperation({ summary: '유머 게시물 수정' })
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   @ApiBody({
     description: '유머 게시물 수정',
@@ -96,13 +103,16 @@ export class HumorsController {
     description: '유머 게시물 ID',
     type: Number,
   })
+  @UseGuards(AuthGuard('jwt'))
   async updateHumorBoard(
     @Param('id') id: number,
     @Body() updateHumorDto: UpdateHumorDto,
+    @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
     const updatedHumorBoard = await this.humorsService.updateHumorBoard(
       id,
       updateHumorDto,
+      user,
     );
     return {
       statusCode: HttpStatus.OK,
@@ -110,7 +120,7 @@ export class HumorsController {
       data: updatedHumorBoard,
     };
   }
-
+  @ApiOperation({ summary: '유머 게시물 삭제' })
   @Delete(':id')
   @ApiParam({
     name: 'id',
@@ -118,10 +128,12 @@ export class HumorsController {
     description: '유머 게시물 ID',
     type: Number,
   })
+  @UseGuards(AuthGuard('jwt'))
   async removeHumorBoard(
     @Param('id') id: number,
+    @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
-    await this.humorsService.removeHumorBoard(id);
+    await this.humorsService.removeHumorBoard(id, user);
 
     return {
       statusCode: HttpStatus.OK,
