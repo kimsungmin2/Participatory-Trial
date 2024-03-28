@@ -5,7 +5,6 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryColumn,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from './user.entity';
@@ -26,6 +25,15 @@ export class UserInfos {
 
   @Column({ type: 'varchar', nullable: false })
   birth: string;
+
+  @Column({ type: 'varchar', select: true, nullable: false, default: 'local' })
+  provider: string;
+
+  @Column({ type: 'int', nullable: false })
+  verifiCationCode: number;
+
+  @Column({ type: 'boolean', nullable: false, default: false })
+  emailVerified: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
