@@ -12,7 +12,9 @@ import {
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
 
-@Entity()
+@Entity({
+  name: "trials"
+})
 export class Trials {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
@@ -44,7 +46,7 @@ export class Trials {
   @ManyToOne(() => Users, (user) => user.trial, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(() => Votes, (vote) => vote.trial, { cascade: true })

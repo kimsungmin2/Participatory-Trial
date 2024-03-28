@@ -16,7 +16,9 @@ import { HumorComments } from '../../humors/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 
-@Entity()
+@Entity({
+  name: "users"
+})
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
@@ -39,7 +41,9 @@ export class Users {
   )
   onlineBoardComment: OnlineBoardComments[];
 
-  @OneToMany(() => Trials, (trial) => trial.user)
+  @OneToMany(() => Trials, (trial) => trial.user, {
+    eager: true
+  })
   trial: Trials[];
 
   @OneToMany(() => HumorBoards, (humorBoard) => humorBoard.user)
