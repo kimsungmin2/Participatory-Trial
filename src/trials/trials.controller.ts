@@ -3,7 +3,7 @@ import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { UserInfo } from '../utils/decorators/userInfo.decorator';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { userInfo } from 'os';
 import { MyTrialsGuard } from './guards/myTrials.guard';
