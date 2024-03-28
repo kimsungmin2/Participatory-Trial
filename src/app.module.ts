@@ -8,6 +8,7 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import Joi from 'joi';
 
 export const typeOrmModuleOptions = {
@@ -20,6 +21,7 @@ export const typeOrmModuleOptions = {
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
     autoLoadEntities: true,
+    entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get<boolean>('DB_SYNC'),
     logging: false,
   }),
@@ -46,6 +48,7 @@ console.log(Joi.object);
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    HumorCommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
