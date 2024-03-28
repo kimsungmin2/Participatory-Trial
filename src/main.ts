@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import { setupSwagger } from './utils/swagger';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -15,6 +16,7 @@ async function bootstrap() {
       },
     }),
   );
+  setupSwagger(app);
   const port = 3000;
   await app.listen(port);
   logger.log(`${port}번 포트에서 어플리케이션 실행`);
