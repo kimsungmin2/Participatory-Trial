@@ -19,7 +19,7 @@ import { VerifiCation } from './dto/verification.dto';
 import { LoginDto } from './dto/login.dto';
 
 @ApiTags('로그인, 회원가입')
-@Controller('oauth')
+@Controller('')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
