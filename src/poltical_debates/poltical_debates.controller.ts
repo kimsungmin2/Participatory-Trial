@@ -1,15 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+} from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 
-@Controller('poltical-debates')
+@Controller('poltical_debates')
 export class PolticalDebatesController {
-  constructor(private readonly polticalDebatesService: PolticalDebatesService) {}
+  constructor(
+    private readonly polticalDebatesService: PolticalDebatesService,
+  ) {}
 
   @Post()
   create(@Body() createPolticalDebateDto: CreatePolticalDebateDto) {
-    return this.polticalDebatesService.create(createPolticalDebateDto);
+    const data = this.polticalDebatesService.create(createPolticalDebateDto);
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: '정치 토론방을  생성하였습니다.',
+      data,
+    };
   }
 
   @Get()
@@ -23,7 +40,10 @@ export class PolticalDebatesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePolticalDebateDto: UpdatePolticalDebateDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePolticalDebateDto: UpdatePolticalDebateDto,
+  ) {
     return this.polticalDebatesService.update(+id, updatePolticalDebateDto);
   }
 

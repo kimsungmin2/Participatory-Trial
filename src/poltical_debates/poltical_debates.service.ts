@@ -1,11 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { PolticalDebateBoards } from 'src/poltical_debates/entities/poltical_debate.entity';
+import { Repository } from 'typeorm';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 
 @Injectable()
 export class PolticalDebatesService {
+  constructor(
+    @InjectRepository(PolticalDebateBoards)
+    private readonly polticalDebateBoards: Repository<PolticalDebateBoards>,
+  ) {}
   create(createPolticalDebateDto: CreatePolticalDebateDto) {
-    return 'This action adds a new polticalDebate';
+    const poltical_debate_board = this.polticalDebateBoards.save({
+      ...createPolticalDebateDto,
+    });
+    return poltical_debate_board;
   }
 
   findAll() {
