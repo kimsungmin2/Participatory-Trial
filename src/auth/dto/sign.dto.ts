@@ -1,10 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class SignUpDto {
   @IsEmail()
   @ApiProperty({
-    example: 'song123@gmail.com',
+    example: 'anrl8913@naver.com',
     description: '이메일',
   })
   @IsNotEmpty({ message: '이메일을 입력해주세요.' })
@@ -34,4 +40,12 @@ export class SignUpDto {
   })
   @IsNotEmpty({ message: '비밀번호를 입력해주세요.' })
   nickName: string;
+
+  @IsDateString()
+  @ApiProperty({
+    example: '1996-05-24',
+    description: '생년 월일',
+  })
+  @IsNotEmpty({ message: '생년 월일을 입력해주세요.' })
+  birth: string;
 }

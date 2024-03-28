@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { DataSource, Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
-import _ from 'lodash';
+import * as _ from 'lodash';
 import { Role } from '../users/types/userRole.type';
 import { Users } from '../users/entities/user.entity';
 import { SignUpDto } from './dto/sign.dto';
@@ -60,24 +60,32 @@ export class AuthService {
     await queryRunner.startTransaction();
 
     try {
+      // const user = await queryRunner.manager.getRepository(Users).save({});
       if (provider === 'kakao') {
-        const user = await queryRunner.manager.getRepository(UserInfos).save({
-          email,
-          nickName,
-          provider: 'kakao',
-        });
-        await queryRunner.manager.getRepository(Users).save({ userInfo: user });
+        const userInfo = await queryRunner.manager
+          .getRepository(UserInfos)
+          .save({
+            // id: user.id,
+            email,
+            nickName,
+            provider: 'kakao',
+            // user: user,
+          });
         await queryRunner.commitTransaction();
-        return user;
+        return userInfo;
       } else {
-        const user = await queryRunner.manager.getRepository(UserInfos).save({
-          email,
-          nickName,
-          provider: 'naver',
-        });
-        await queryRunner.manager.getRepository(Users).save({ userInfo: user });
+        const userInfo = await queryRunner.manager
+          .getRepository(UserInfos)
+          .save({
+            // id: user.id,
+            email,
+            nickName,
+            provider: 'naver',
+            // user: user,
+          });
+
         await queryRunner.commitTransaction();
-        return user;
+        return userInfo;
       }
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -107,20 +115,24 @@ export class AuthService {
       const code = Math.floor(Math.random() * 900000) + 100000;
       await this.emailService.sendVerificationToEmail(signUpdto.email, code);
       const hashedPassword = await hash(signUpdto.password, 10);
-      const user = await queryRunner.manager.getRepository(UserInfos).save({
+
+      const user = await queryRunner.manager.getRepository(Users).save({});
+
+      await queryRunner.manager.getRepository(UserInfos).save({
+        id: user.id,
         email: signUpdto.email,
         password: hashedPassword,
         nickName: signUpdto.nickName,
+        birth: signUpdto.birth,
         verifiCationCode: code,
-      });
-      await queryRunner.manager.getRepository(Users).save({
-        userInfo: user,
+        user: user,
       });
 
       await queryRunner.commitTransaction();
       return user;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -128,7 +140,6 @@ export class AuthService {
 
   async verifiCationEmail(verifiCation: VerifiCation) {
     const user = await this.usersService.findByEmail(verifiCation.email);
-
     if (user.verifiCationCode !== verifiCation.code) {
       throw new ConflictException('인증 코드가 일치하지 않습니다.');
     }

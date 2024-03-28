@@ -11,8 +11,8 @@ import {
   Patch,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { KakaoAuthGuard } from '../users/utils/guard/kakao.guard';
-import { NaverAuthGuard } from '../users/utils/guard/naver.guard';
+import { KakaoAuthGuard } from '../utils/guard/kakao.guard';
+import { NaverAuthGuard } from '../utils/guard/naver.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SignUpDto } from './dto/sign.dto';
 import { VerifiCation } from './dto/verification.dto';

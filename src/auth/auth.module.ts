@@ -2,13 +2,16 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from '../user/user.module';
-import { KakaoStrategy } from '../utils/strategy/kakao.strategy';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { NaverStrategy } from 'src/utils/strategy/naver.strategy';
-import { JwtStrategy } from 'src/utils/strategy/jwt.strategy';
+import { UsersModule } from '../users/users.module';
+import { Users } from '../users/entities/user.entity';
+import { KakaoStrategy } from '../utils/strategy/kakao.strategy';
+import { NaverStrategy } from '../utils/strategy/naver.strategy';
+import { JwtStrategy } from '../utils/strategy/jwt.strategy';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
 
 @Module({
   imports: [
@@ -18,10 +21,17 @@ import { JwtStrategy } from 'src/utils/strategy/jwt.strategy';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([User]),
-    UserModule,
+    TypeOrmModule.forFeature([Users, UserInfos]),
+    UsersModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, NaverStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    KakaoStrategy,
+    NaverStrategy,
+    JwtStrategy,
+    UsersService,
+    EmailService,
+  ],
 })
 export class AuthModule {}
