@@ -7,25 +7,33 @@ import {
   Param,
   Delete,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { OnlineBoardCommentService } from './online_board_comment.service';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
+import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
+import { UserInfos } from 'src/users/entities/user-info.entity';
+import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 
-@Controller('comments')
+@UseGuards(AuthGuard('jwt'))
+@Controller('comments/:onlineBoardId')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
 
-  @Post(':onlineBoardId')
+  @Post()
   async create(
     @Param() onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
+    @UserInfo() userInfo: UserInfos,
   ) {
     const comment = await this.onlineBoardCommentService.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,
+      userInfo,
     );
 
     return {
@@ -35,13 +43,13 @@ export class OnlineBoardCommentController {
     };
   }
 
-  @Get(':onlineBoardId')
+  @Get()
   async findAll(@Param() onlineBoardId: number) {
     const comments =
       await this.onlineBoardCommentService.findAllComments(onlineBoardId);
 
     return {
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
       message: '게시판의 댓글을 조회합니다.',
       data: comments,
     };
@@ -49,27 +57,35 @@ export class OnlineBoardCommentController {
 
   @Patch(':commentId')
   async update(
-    @Param() commentId: number,
+    @Param() paramOnlineBoardComment: ParamOnlineBoardComment,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
+    @UserInfo() userInfo: UserInfos,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
-      commentId,
+      paramOnlineBoardComment,
       updateOnlineBoardCommentDto,
+      userInfo,
     );
 
     return {
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
       message: '댓글을 수정했습니다.',
       data: comment,
     };
   }
 
   @Delete(':commentId')
-  async remove(@Param() commentId: number) {
-    this.onlineBoardCommentService.removeComment(commentId);
+  async remove(
+    @Param() paramOnlineBoardComment: ParamOnlineBoardComment,
+    @UserInfo() userInfo: UserInfos,
+  ) {
+    this.onlineBoardCommentService.removeComment(
+      paramOnlineBoardComment,
+      userInfo,
+    );
 
     return {
-      statusCode: HttpStatus.CREATED,
+      statusCode: HttpStatus.OK,
       message: '댓글을 삭제하였습니다.',
     };
   }

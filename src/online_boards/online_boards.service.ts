@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -60,7 +64,12 @@ export class OnlineBoardsService {
     userInfo: UserInfos,
   ) {
     const foundUser = this.usersService.findByUserId(userInfo.id);
-    await this.findBoardByUserId(id, foundUser.id);
+    const foundBoard = await this.findBoardId(id);
+
+    if (foundBoard.id !== foundUser.id) {
+      throw new ForbiddenException('접근 권한이 없습니다.');
+    }
+
     const { title, content } = updateOnlineBoardDto;
     const board = await this.onlineBoardsRepository.save({
       id,
@@ -73,18 +82,26 @@ export class OnlineBoardsService {
   // 자유게시판 삭제
   async removeBoard(id: number, userInfo: UserInfos) {
     const foundUser = this.usersService.findByUserId(userInfo.id);
-    await this.findBoardByUserId(id, foundUser.id);
+    const foundBoard = await this.findBoardId(id);
+
+    if (foundBoard.id !== foundUser.id) {
+      throw new ForbiddenException('접근 권한이 없습니다.');
+    }
+
     await this.onlineBoardsRepository.softDelete({ id });
     return `This action removes a #${id} onlineBoard`;
   }
 
-  async findBoardByUserId(boardId: number, userId: number) {
+  // 자유게시판 아이디 조회
+  async findBoardId(id: number) {
     const foundBoard = await this.onlineBoardsRepository.findOneBy({
-      id: boardId,
+      id,
     });
 
-    if (foundBoard.id !== userId) {
-      throw new ForbiddenException('접근 권한이 없습니다.');
+    if (!foundBoard) {
+      throw new NotFoundException('해당 게시물이 존재하지 않습니다.');
     }
+
+    return foundBoard;
   }
 }
