@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus, Query } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
@@ -109,7 +109,10 @@ export class TrialsController {
   }
 
   // 판례 조회 API
-
+  @Get('cases')
+  async getCaseDetails(@Query('caseId') caseId: string) {
+    return await this.trialsService.getCaseDetails(caseId);
+  }
 
 
 

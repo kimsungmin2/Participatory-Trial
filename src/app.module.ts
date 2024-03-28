@@ -19,6 +19,7 @@ import { HumorComments } from './humors/entities/humor_comment.entity';
 import { HumorBoards } from './humors/entities/humor.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
+import { HttpModule } from '@nestjs/axios';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -30,16 +31,7 @@ export const typeOrmModuleOptions = {
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
     entities: [
-      Users,
-      UserInfos,
-      Trials,
-      Votes,
-      OnlineBoardComments,
-      OnlineBoards,
-      HumorComments,
-      HumorBoards,
-      PolticalDebateBoards,
-      PolticalDebateComments,
+      __dirname + '/**/*.entity{.ts,.js}',
     ],
     synchronize: configService.get<boolean>('DB_SYNC'),
     logging: false,
@@ -67,6 +59,7 @@ console.log(Joi.object);
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    HttpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,7 +4,8 @@ import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trials } from './entities/trial.entity';
 import { DataSource, Repository } from 'typeorm';
-import { retry } from 'rxjs';
+import { firstValueFrom, map, retry } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class TrialsService {
@@ -12,6 +13,7 @@ export class TrialsService {
     @InjectRepository(Trials)
     private trialsRepository: Repository<Trials>,
     private dataSource: DataSource,
+    private httpService: HttpService
   ){}
 
   async createTrial(userId: number, createTrialDto: CreateTrialDto) {
@@ -171,5 +173,11 @@ async findByUserTrials(userId: number) {
         },
       }
     })
+  }
+
+
+  // 판례 조회
+  async getCaseDetails(caseId: string) {
+    
   }
 }
