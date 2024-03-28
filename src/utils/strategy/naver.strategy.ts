@@ -1,18 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Strategy, Profile } from 'passport-naver';
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy } from 'passport-kakao';
-import { UsersService } from '../../users.service';
-import { AuthService } from '../../../auth/auth.service';
+import { Injectable } from '@nestjs/common';
+// import { AuthService } from '../../auth/auth.service';
+import { UsersService } from '../../users/users.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
-export class KakaoStrategy extends PassportStrategy(Strategy) {
+export class NaverStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UsersService,
+    private authService: AuthService,
+    private userService: UsersService,
   ) {
     super({
-      clientID: process.env.KAKAO_CLIENT_ID,
-      callbackURL: process.env.KAKAO_REDIRECT_URI,
+      clientID: process.env.NAVER_CLIENT_ID,
+      clientSecret: process.env.NAVER_SECRET,
+      callbackURL: process.env.NAVER_REDIRECT_URI,
     });
   }
 
@@ -20,12 +22,14 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: Function,
+    done: any,
   ) {
     try {
-      const email = profile._json && profile._json.kakao_account.email;
-      const nickName = profile.displayName;
-      const provider = profile.provider;
+      const email = profile._json.email;
+      console.log(email);
+      const nickName = profile._json.nickname;
+      const provider = 'naver';
+
       let user = await this.userService.findByEmail(email);
       if (!user) {
         user = await this.authService.createProviderUser(
@@ -34,7 +38,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
           provider,
         );
       }
-      //createProviderUser
+
       const token = await this.authService.createToken(email);
       const accessToken = token.accessToken;
       const refreshToken = token.refreshToken;

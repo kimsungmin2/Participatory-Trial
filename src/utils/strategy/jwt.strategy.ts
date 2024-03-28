@@ -6,8 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UsersService } from '../../users.service';
-import _ from 'lodash';
+import { UsersService } from '../../users/users.service';
+import * as _ from 'lodash';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

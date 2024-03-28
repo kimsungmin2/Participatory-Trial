@@ -1,20 +1,18 @@
-import { Strategy, Profile } from 'passport-naver';
-import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-// import { AuthService } from '../../auth/auth.service';
-import { UsersService } from '../../users.service';
-import { AuthService } from '../../../auth/auth.service';
+import { PassportStrategy } from '@nestjs/passport';
+import { Profile, Strategy } from 'passport-kakao';
+import { UsersService } from '../../users/users.service';
+import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
-export class NaverStrategy extends PassportStrategy(Strategy) {
+export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private authService: AuthService,
-    private userService: UsersService,
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
   ) {
     super({
-      clientID: process.env.NAVER_CLIENT_ID,
-      clientSecret: process.env.NAVER_SECRET,
-      callbackURL: process.env.NAVER_REDIRECT_URI,
+      clientID: process.env.KAKAO_CLIENT_ID,
+      callbackURL: process.env.KAKAO_REDIRECT_URI,
     });
   }
 
@@ -22,13 +20,12 @@ export class NaverStrategy extends PassportStrategy(Strategy) {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: any,
+    done: Function,
   ) {
     try {
-      const email = profile._json.email;
-      console.log(email);
-      const nickName = profile._json.nickname;
-      const provider = 'naver';
+      const email = profile._json && profile._json.kakao_account.email;
+      const nickName = profile.displayName;
+      const provider = profile.provider;
 
       let user = await this.userService.findByEmail(email);
       if (!user) {

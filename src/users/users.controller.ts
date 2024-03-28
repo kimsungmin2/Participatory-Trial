@@ -5,16 +5,20 @@ import {
   Delete,
   Req,
   ForbiddenException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateDto } from './dto/update.dto';
 import { DeleteDto } from './dto/delete.dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@ApiTags('USER_UD')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @ApiOperation({ summary: '닉네임 변경', description: '업데이트' })
+  @UseGuards(AuthGuard('jwt'))
   @Patch('')
   async userUpdate(@Body() updateDto: UpdateDto, @Req() req) {
     const { id } = req.user;
@@ -26,6 +30,7 @@ export class UsersController {
     return userUpdate;
   }
   @ApiOperation({ summary: '유저 삭제', description: '삭제' })
+  @UseGuards(AuthGuard('jwt'))
   @Delete('')
   async userDelete(@Body() deleteDto: DeleteDto, @Req() req) {
     const { id } = req.user;
