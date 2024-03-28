@@ -19,16 +19,16 @@ export const typeOrmModuleOptions = {
   ): Promise<TypeOrmModuleOptions> => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
-    username: configService.get('DB_USERNAME'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
-    autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
-    synchronize: configService.get('DB_SYNC'),
-    logging: false, // DB에서 query가 발생할때마다 rawquery가 출력된다.
+    username: configService.get<string>('DB_USERNAME'),
+    password: configService.get<string>('DB_PASSWORD'),
+    database: configService.get<string>('DB_NAME'),
+    autoLoadEntities: true,
+    synchronize: configService.get<boolean>('DB_SYNC'),
+    logging: false,
   }),
   inject: [ConfigService],
 };
-
+console.log(Joi.object);
 @Module({
   imports: [
     ConfigModule.forRoot({
