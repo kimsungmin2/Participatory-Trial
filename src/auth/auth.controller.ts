@@ -17,6 +17,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SignUpDto } from './dto/sign.dto';
 import { VerifiCation } from './dto/verification.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleAuthGuard } from '../utils/guard/google.guard';
 
 @ApiTags('로그인, 회원가입')
 @Controller('')
@@ -105,7 +106,25 @@ export class AuthController {
   @UseGuards(NaverAuthGuard)
   @Get('/naver/callback')
   async naverCallbacks(@Req() req, @Res() res) {
-    console.log(req.user.accessToken);
+    const accessToken = req.user.accessToken;
+    const refreshToken = req.user.refreshToken;
+
+    res.cookie('authorization', `Bearer ${accessToken}`);
+    res.cookie('refreshToken', refreshToken);
+    res.redirect('/');
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('/google')
+  redirectToGoogleAuth(@Res() res) {
+    const googleURL = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}&response_type=code&scope=email%20profile`;
+
+    res.redirect(HttpStatus.TEMPORARY_REDIRECT, googleURL);
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('/google/callback')
+  async googleCallbacks(@Req() req, @Res() res) {
     const accessToken = req.user.accessToken;
     const refreshToken = req.user.refreshToken;
 
