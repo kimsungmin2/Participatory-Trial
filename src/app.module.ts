@@ -8,6 +8,9 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { OnlineBoardCommentController } from './online_boards/online_board_comment.controller';
+import { OnlineBoardCommentService } from './online_boards/online_board_comment.service';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import Joi from 'joi';
 
 export const typeOrmModuleOptions = {
@@ -46,8 +49,9 @@ export const typeOrmModuleOptions = {
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    OnlineBoardCommentModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, OnlineBoardCommentController],
+  providers: [AppService, OnlineBoardCommentService],
 })
 export class AppModule {}

@@ -1,34 +1,46 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OnlineBoardsService } from './online_boards.service';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
+import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 
 @Controller('online-boards')
 export class OnlineBoardsController {
   constructor(private readonly onlineBoardsService: OnlineBoardsService) {}
 
   @Post()
-  create(@Body() createOnlineBoardDto: CreateOnlineBoardDto) {
-    return this.onlineBoardsService.create(createOnlineBoardDto);
+  async create(@Body() createOnlineBoardDto: CreateOnlineBoardDto) {
+    return await this.onlineBoardsService.createBoard(createOnlineBoardDto);
   }
 
   @Get()
-  findAll() {
-    return this.onlineBoardsService.findAll();
+  findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
+    return this.onlineBoardsService.findAllBoard(findAllOnlineBoardDto);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.onlineBoardsService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.onlineBoardsService.findBoard(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOnlineBoardDto: UpdateOnlineBoardDto) {
-    return this.onlineBoardsService.update(+id, updateOnlineBoardDto);
+  update(
+    @Param('id') id: number,
+    @Body() updateOnlineBoardDto: UpdateOnlineBoardDto,
+  ) {
+    return this.onlineBoardsService.updateBoard(id, updateOnlineBoardDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.onlineBoardsService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.onlineBoardsService.removeBoard(id);
   }
 }

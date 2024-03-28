@@ -4,13 +4,11 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoards } from './online_board.entity';
+import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
 
 @Entity()
 export class OnlineBoardComments {
