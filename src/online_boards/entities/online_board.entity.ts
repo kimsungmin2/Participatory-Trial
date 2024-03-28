@@ -40,7 +40,7 @@ export class OnlineBoards {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.onlineBoard)
+  @ManyToOne(() => Users, (user) => user.onlineBoard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;
 

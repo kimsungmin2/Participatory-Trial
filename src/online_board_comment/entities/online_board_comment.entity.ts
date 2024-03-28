@@ -33,11 +33,12 @@ export class OnlineBoardComments {
   @ManyToOne(
     () => OnlineBoards,
     (onlineBoard) => onlineBoard.OnlineBoardComment,
+    { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'online_board_id', referencedColumnName: 'id' })
   onlineBoard: Users;
 
-  @ManyToOne(() => Users, (user) => user.onlineBoard)
+  @ManyToOne(() => Users, (user) => user.onlineBoard, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;
 }
