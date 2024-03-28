@@ -26,10 +26,10 @@ export class Trials {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 1 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -41,7 +41,9 @@ export class Trials {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.trial)
+  @ManyToOne(() => Users, (user) => user.trial, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;
 
