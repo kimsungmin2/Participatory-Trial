@@ -42,7 +42,7 @@ export class OnlineBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: Users;
 
   @OneToMany(

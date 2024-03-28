@@ -16,6 +16,7 @@ async function bootstrap() {
       },
     }),
   );
+
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);

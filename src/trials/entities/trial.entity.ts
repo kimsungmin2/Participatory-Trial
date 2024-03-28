@@ -12,7 +12,9 @@ import {
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
 
-@Entity()
+@Entity({
+  name: "trials"
+})
 export class Trials {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
@@ -26,10 +28,10 @@ export class Trials {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 1 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -41,8 +43,10 @@ export class Trials {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.trial)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @ManyToOne(() => Users, (user) => user.trial, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(() => Votes, (vote) => vote.trial, { cascade: true })
