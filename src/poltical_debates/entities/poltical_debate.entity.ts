@@ -34,7 +34,7 @@ export class PolticalDebateBoards {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.onlineBoard)
+  @ManyToOne(() => Users, (user) => user.polticalDebateBoards)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;
 
