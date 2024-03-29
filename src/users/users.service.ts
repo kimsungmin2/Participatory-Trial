@@ -31,4 +31,12 @@ export class UsersService {
 
     return this.usersInfoRepository.delete(id);
   }
+
+  async findByUserId(userId: number) {
+    const user = await this.usersInfoRepository.findOneBy({
+      id: userId,
+    });
+    if (!user) throw new NotFoundException('유저정보를 찾을 수 없습니다.');
+    return user;
+  }
 }

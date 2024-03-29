@@ -49,16 +49,16 @@ describe('OnlineBoardsService', () => {
 
     const userInfo: UserInfos = {
       id: 1,
-      // email: 'aaaa@gmail.com',
-      // password: '1234',
-      // nickName: '프로현질러',
-      // birth: '2000-10-10',
-      // provider: '1234',
-      // verifiCationCode: 1234,
-      // emailVerified: true,
-      // createdAt: '2024-04-02',
-      // updatedAt: ,
-      // user: Users,
+      email: 'aaaa@gmail.com',
+      password: '1234',
+      nickName: '프로현질러',
+      birth: '2000-10-10',
+      provider: '1234',
+      verifiCationCode: 1234,
+      emailVerified: true,
+      createdAt: '2024-04-02',
+      updatedAt: ,
+      user: Users,
     };
 
     // 사용자 서비스가 findByUserId 메서드를 호출했을 때 반환할 사용자 정보 설정
