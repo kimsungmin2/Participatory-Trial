@@ -14,9 +14,11 @@ import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { ApiTags } from '@nestjs/swagger';
+
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { MyTrialsGuard } from './guards/myTrials.guard';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 
 @ApiTags('Trials')
 @Controller('trials')
