@@ -26,10 +26,10 @@ export class Votes {
   @Column({ type: 'varchar', nullable: false })
   title2: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   voteCount1: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   voteCount2: number;
 
   @CreateDateColumn({ type: 'timestamp' })
