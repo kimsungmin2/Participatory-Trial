@@ -11,6 +11,7 @@ import { OnlineBoardsService } from 'src/online_boards/online_boards.service';
 import { UsersService } from 'src/users/users.service';
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class OnlineBoardCommentService {
