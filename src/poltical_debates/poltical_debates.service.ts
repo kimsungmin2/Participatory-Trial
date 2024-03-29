@@ -1,36 +1,49 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PolticalDebateBoards } from 'src/poltical_debates/entities/poltical_debate.entity';
+import { UserInfos } from 'src/users/entities/user-info.entity';
+import { UsersService } from 'src/users/users.service';
 import { Repository } from 'typeorm';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 
 @Injectable()
 export class PolticalDebatesService {
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
+    private readonly usersService: UsersService,
   ) {}
-  create(createPolticalDebateDto: CreatePolticalDebateDto) {
-    const poltical_debate_board = this.polticalDebateRepository.save({
+  async create(
+    userInfo: UserInfos,
+    createPolticalDebateDto: CreatePolticalDebateDto,
+  ) {
+    await this.usersService.findByUserId(userInfo.id);
+
+    const createPolticalDebate = this.polticalDebateRepository.save({
       ...createPolticalDebateDto,
     });
-    return poltical_debate_board;
+    return createPolticalDebate;
   }
 
   async findAll() {
-    const find_all_poltical_debate_board =
+    const findAllPolticalDebateBoard =
       await this.polticalDebateRepository.find();
 
-    return find_all_poltical_debate_board;
+    return findAllPolticalDebateBoard;
   }
 
-  // async MyfindAll(id: number) {
-  //   const my_poltical_debate_board = await this.polticalDebateRepository.find({
-  //     where: { userId },
-  //   });
-  //   return my_poltical_debate_board;
-  // }
+  async myfindAll(userInfo: UserInfos) {
+    const user = await this.usersService.findByUserId(userInfo.id);
+
+    const myPolticalDebateBoard = await this.polticalDebateRepository.find({
+      where: { user },
+    });
+    return myPolticalDebateBoard;
+  }
 
   async findOne(id: number) {
     const find_one_poltical_debate_board =
@@ -45,39 +58,55 @@ export class PolticalDebatesService {
     return find_one_poltical_debate_board;
   }
 
-  async myfindOne(userId: number, id: number) {
-    const my_find_one_poltical_debate_board =
-      await this.polticalDebateRepository.findOne({
-        where: { id, userId },
-      });
+  async myfindOne(userInfo: UserInfos, id: number) {
+    const user = await this.usersService.findByUserId(userInfo.id);
 
-    if (!my_find_one_poltical_debate_board) {
+    const myPolticalDebateBoard = await this.polticalDebateRepository.findOne({
+      where: { id, user: user },
+    });
+
+    if (!myPolticalDebateBoard) {
       throw new BadRequestException('존재하지 않는 정치 토론방입니다.');
     }
 
-    return my_find_one_poltical_debate_board;
+    return myPolticalDebateBoard;
   }
 
   async update(
-    userId: number,
+    userInfo: UserInfos,
     id: number,
     createPolticalDebateDto: CreatePolticalDebateDto,
   ) {
-    const update_poltical_debate = await this.polticalDebateRepository.findOne({
-      where: { id: userId },
+    const user = await this.usersService.findByUserId(userInfo.id);
+
+    const polticalDebateBoard = await this.polticalDebateRepository.findOne({
+      where: { id, user },
     });
 
-    if (!update_poltical_debate)
-      throw new BadRequestException('존재하지 않는 정치 토론방입니다.');
+    if (!polticalDebateBoard) {
+      throw new NotFoundException('해당하는 정치 토론방을 찾을 수 없습니다.');
+    }
 
-    const updateBoard = await this.polticalDebateRepository.update(
-      { id },
-      createPolticalDebateDto,
-    );
-    return updateBoard;
+    const updatedpolticalDebateBoard =
+      await this.polticalDebateRepository.update(
+        polticalDebateBoard.id,
+        createPolticalDebateDto,
+      );
+
+    return updatedpolticalDebateBoard;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} polticalDebate`;
+  async delete(userInfo: UserInfos, id: number) {
+    const user = await this.usersService.findByUserId(userInfo.id);
+
+    const existingPolticalDebate = await this.polticalDebateRepository.findOne({
+      where: { id, user: user },
+    });
+
+    if (!existingPolticalDebate) {
+      throw new BadRequestException('존재하지 않는 정치 토론방입니다.');
+    }
+
+    await this.polticalDebateRepository.remove(existingPolticalDebate);
   }
 }

@@ -14,6 +14,17 @@ export class UsersService {
     const user = await this.usersInfoRepository.findOne({ where: { email } });
     return user;
   }
+
+  async findByUserId(userId: number) {
+    const user = await this.usersInfoRepository.findOneBy({
+      id: userId,
+    });
+
+    if (!user) throw new NotFoundException('유저정보를 찾을 수 없습니다.');
+
+    return user;
+  }
+
   async userUpdate(id: number, nickName: string) {
     const user = await this.usersInfoRepository.findOneBy({ id });
     if (!user) {

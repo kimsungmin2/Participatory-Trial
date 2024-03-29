@@ -6,7 +6,7 @@ export class CreatePolticalDebateDto {
   title: string;
 
   @IsString()
-  constent: string;
+  content: string;
 
   @IsNumber()
   view: number;
