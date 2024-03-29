@@ -29,8 +29,8 @@ export class HumorBoards {
   @Column({ type: 'int', nullable: false, default: 1 })
   view: number;
 
-  // @Column({ type: 'int', nullable: false, default: 1 })
-  // like: number;
+  @Column({ type: 'int', nullable: false, default: 1 })
+  like: number;
 
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;

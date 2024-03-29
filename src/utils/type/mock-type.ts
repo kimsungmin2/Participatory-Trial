@@ -12,7 +12,7 @@ export function createMockRepository<T>(): MockRepository<T> {
         if (!target[prop]) {
           target[prop] = jest.fn();
         }
-        console.log('done ');
+        console.log('done');
         return target[prop];
       },
     },
