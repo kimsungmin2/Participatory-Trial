@@ -8,7 +8,7 @@ import { CreateHumorCommentDto } from './dto/create-humor-comment.dto';
 import { UpdateHumorCommentDto } from './dto/update-humor-comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HumorComments } from './entities/humor_comment.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { Users } from '../users/entities/user.entity';
 import { forbidden } from 'joi';
@@ -26,23 +26,25 @@ export class HumorCommentsService {
     createHumorCommentDto: CreateHumorCommentDto,
     boardId: number,
     user: Users,
-  ) {
-    const findHumorBoard = await this.humorBoardRepository.findOneBy({
-      id: boardId,
-    });
+  ): Promise<HumorComments> {
+    const findHumorBoard: HumorBoards =
+      await this.humorBoardRepository.findOneBy({
+        id: boardId,
+      });
     if (!findHumorBoard)
       throw new NotFoundException(`${boardId}번 게시물을 찾을 수 없습니다.`);
 
-    const createdComment = await this.humorCommentRepository.save({
-      humorBoardId: boardId,
-      userId: user.id,
-      ...createHumorCommentDto,
-    });
+    const createdComment: HumorComments =
+      await this.humorCommentRepository.save({
+        humorBoardId: boardId,
+        userId: user.id,
+        ...createHumorCommentDto,
+      });
 
     return createdComment;
   }
   //모든 댓글 조회
-  async findAllComment(boardId: number) {
+  async findAllComment(boardId: number): Promise<HumorComments[]> {
     const findHumorBoard = await this.humorBoardRepository.findOneBy({
       id: boardId,
     });
@@ -76,7 +78,7 @@ export class HumorCommentsService {
     commentId: number,
     updateHumorCommentDto: UpdateHumorCommentDto,
     user: Users,
-  ) {
+  ): Promise<HumorComments> {
     const userId = user.id;
     const findHumorBoard = await this.humorBoardRepository.findOneBy({
       id: boardId,
@@ -106,7 +108,11 @@ export class HumorCommentsService {
     return updatedComment;
   }
 
-  async deleteHumorComment(commentId: number, boardId: number, user: Users) {
+  async deleteHumorComment(
+    commentId: number,
+    boardId: number,
+    user: Users,
+  ): Promise<DeleteResult> {
     const userId = user.id;
     const findHumorBoard = await this.humorBoardRepository.findOneBy({
       id: boardId,

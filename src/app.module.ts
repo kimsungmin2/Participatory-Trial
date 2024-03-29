@@ -37,7 +37,7 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-console.log(Joi.object);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
