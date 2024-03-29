@@ -6,6 +6,7 @@ import {
   Req,
   ForbiddenException,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -27,7 +28,11 @@ export class UsersController {
       id,
       updateDto.nickName,
     );
-    return userUpdate;
+    return {
+      statusCode: HttpStatus.OK,
+      message: '닉네임 변경에 성공하였습니다.',
+      userUpdate,
+    };
   }
   @ApiOperation({ summary: '유저 삭제', description: '삭제' })
   @UseGuards(AuthGuard('jwt'))
@@ -39,6 +44,11 @@ export class UsersController {
         '입력한 비밀번호와 확인 비밀번호가 같지 않습니다.',
       );
     }
-    return await this.usersService.userDelete(id);
+    const data = await this.usersService.userDelete(id);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: '회원 탈퇴가 완료됐습니다.',
+      data,
+    };
   }
 }
