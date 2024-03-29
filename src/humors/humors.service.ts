@@ -25,17 +25,30 @@ export class HumorsService {
     user: Users,
   ) {
     console.log(user.id);
-    const createdBoard = await this.HumorBoardRepository.save({
-      userId: user.id,
-      ...createHumorBoardDto,
-    });
-    return createdBoard;
+    try {
+      const createdBoard = await this.HumorBoardRepository.save({
+        userId: user.id,
+        ...createHumorBoardDto,
+      });
+      return createdBoard;
+    } catch {
+      throw new InternalServerErrorException(
+        '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+      );
+    }
   }
 
   //모든 게시물 조회(페이지네이션)
 
   async getAllHumorBoards() {
-    return await this.HumorBoardRepository.find();
+    try {
+      const humorBoards = await this.HumorBoardRepository.find();
+      return humorBoards;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '게시물을 불러오는 도중 오류가 발생했습니다.',
+      );
+    }
   }
 
   //단건 게시물 조회
@@ -74,7 +87,7 @@ export class HumorsService {
 
   //게시물 삭제
 
-  async removeHumorBoard(id: number, user: Users) {
+  async deleteHumorBoard(id: number, user: Users) {
     const findHumorBoard = await this.findOneHumorBoard(id);
     if (findHumorBoard.userId !== user.id) {
       throw new ForbiddenException('해당 게시물을 삭제할 권한이 없습니다.');

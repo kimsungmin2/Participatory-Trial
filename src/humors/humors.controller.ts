@@ -133,7 +133,7 @@ export class HumorsController {
     @Param('id') id: number,
     @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
-    await this.humorsService.removeHumorBoard(id, user);
+    await this.humorsService.deleteHumorBoard(id, user);
 
     return {
       statusCode: HttpStatus.OK,

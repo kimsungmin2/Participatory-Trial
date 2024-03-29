@@ -34,9 +34,6 @@ const mockedUser = {
   polticalDebateComments: [new PolticalDebateComments()],
 };
 
-const mockRepo = {
-  findOneBy: jest.fn(),
-};
 describe('HumorCommentsService', () => {
   let humorCommentsService: HumorCommentsService;
   let humorCommentRepository: Repository<HumorComments>;
@@ -82,7 +79,7 @@ describe('HumorCommentsService', () => {
     humorBoardRepository = module.get<Repository<HumorBoards>>(
       getRepositoryToken(HumorBoards),
     );
-  }, 100000);
+  });
 
   it('should be defined', () => {
     expect(humorCommentsService).toBeDefined();
