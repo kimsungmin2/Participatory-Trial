@@ -6,12 +6,15 @@ import { Trials } from './entities/trial.entity';
 import { DataSource, Repository } from 'typeorm';
 import { firstValueFrom, map, retry } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { PanryeInfo } from './entities/panryedata.entity';
 
 @Injectable()
 export class TrialsService {
   constructor(
     @InjectRepository(Trials)
     private trialsRepository: Repository<Trials>,
+    @InjectRepository(PanryeInfo)
+    private panryeRepository: Repository<PanryeInfo>,
     private dataSource: DataSource,
     private httpService: HttpService
   ){}
@@ -175,6 +178,19 @@ async findByUserTrials(userId: number) {
     })
   }
 
+
+  // 모든 판례 조회
+  async getAllDetails(cursor: number, limit: number) {
+    const queryBuilder = this.panryeRepository.createQueryBuilder('panrye')
+      .orderBy('panrye.판례정보일련번호', 'ASC')
+      .limit(limit);
+
+      if(cursor){
+        queryBuilder.where('panrye.판례정보일련번호 > :cursor', { cursor })
+      }
+
+      return queryBuilder.getMany();
+  }
 
   // 판례 조회
   async getCaseDetails(caseId: string) {

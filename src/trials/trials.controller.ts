@@ -31,7 +31,25 @@ export class TrialsController {
     }
   }
 
+  // 모든 판례 조회 API 
+  @Get('cases')
+  async getAllDetails(
+    @Query('cursor') cursor: string,
+    @Query('limit') limit: string,
+    ){
+      let cursorNumber = parseInt(cursor)
+      let limitNumber = parseInt(limit)
+      console.log(cursorNumber)
+      console.log(limitNumber)
 
+      if(isNaN(cursorNumber) || isNaN(limitNumber))
+      {
+        cursorNumber = 0;
+        limitNumber = 10;
+      }
+      
+    return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
+  }
 
   // 내가 만든 재판 조회 API(유저)
   @Get('/myTrials')
@@ -108,11 +126,7 @@ export class TrialsController {
       }
   }
 
-  // 판례 조회 API
-  @Get('cases')
-  async getCaseDetails(@Query('caseId') caseId: string) {
-    return await this.trialsService.getCaseDetails(caseId);
-  }
+  
 
 
 
