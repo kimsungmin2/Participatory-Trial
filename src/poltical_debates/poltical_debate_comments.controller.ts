@@ -10,9 +10,11 @@ import {
   NotFoundException,
   HttpStatus,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreatePolticalDebateCommentDto } from 'src/poltical_debates/dto/create-poltical_debate_comment_dto';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
 
+@ApiTags('정치 토론 댓글')
 @Controller('poltical-debate/:polticalDebateId/comments')
 export class PolticalDebateCommentsController {
   constructor(
