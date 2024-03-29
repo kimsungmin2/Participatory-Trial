@@ -27,29 +27,39 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
   async register(@Body() signUpdto: SignUpDto) {
-    const user = await this.authService.signUp(signUpdto);
-    return user;
+    const user = await this.authService.signUp(
+      signUpdto.email,
+      signUpdto.password,
+      signUpdto.passwordConfirm,
+      signUpdto.nickName,
+      signUpdto.birth,
+    );
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: '회원 가입에 성공하였습니다',
+      user,
+    };
   }
 
   @ApiOperation({ summary: '회원가입 이메일 인증' })
   @Patch('signup/verifiCation')
   async verifiCationEmail(@Body() verifiCation: VerifiCation) {
     const user = await this.authService.verifiCationEmail(verifiCation);
-    return user;
-  }
-
-  @ApiOperation({ summary: '운영자 회원가입' })
-  @Post('admin/sign-up')
-  async adminSignUp(@Body() signUpdto: SignUpDto) {
-    const user = await this.authService.adminSignUp(signUpdto);
-    return user;
+    return {
+      statusCode: HttpStatus.OK,
+      message: '인증에 성공하였습니다.',
+      user,
+    };
   }
 
   @ApiOperation({ summary: '로그인' })
   @Post('login')
   @Render('sign-in')
   async login(@Body() loginDto: LoginDto, @Res() res) {
-    const user = await this.authService.login(loginDto);
+    const user = await this.authService.login(
+      loginDto.email,
+      loginDto.password,
+    );
 
     res.cookie('authorization', `Bearer ${user.accessToken}`);
     res.cookie('refreshToken', user.refreshToken);
