@@ -10,8 +10,8 @@ export class UsersService {
     private readonly usersInfoRepository: Repository<UserInfos>,
   ) {}
 
-  async findByEmail(email: string) {
-    const user = await this.usersInfoRepository.findOne({ where: { email } });
+  async findByEmail(email: string): Promise<UserInfos> {
+    const user = await this.usersInfoRepository.findOneBy({ email });
     return user;
   }
   async userUpdate(id: number, nickName: string) {

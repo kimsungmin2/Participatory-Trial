@@ -1,18 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Strategy, Profile } from 'passport-google-oauth20';
 import { PassportStrategy } from '@nestjs/passport';
-import { Profile, Strategy } from 'passport-kakao';
+import { Injectable } from '@nestjs/common';
 import { UsersService } from '../../users/users.service';
 import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
-export class KakaoStrategy extends PassportStrategy(Strategy) {
+export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UsersService,
+    private authService: AuthService,
+    private userService: UsersService,
   ) {
     super({
-      clientID: process.env.KAKAO_CLIENT_ID,
-      callbackURL: process.env.KAKAO_REDIRECT_URI,
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_REDIRECT_URI,
+      scope: ['email', 'profile'],
     });
   }
 
@@ -20,15 +22,14 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     accessToken: string,
     refreshToken: string,
     profile: Profile,
-    done: Function,
+    done: any,
   ) {
     try {
-      const email = profile._json && profile._json.kakao_account.email;
+      const email = profile.emails[0].value;
       const nickName = profile.displayName;
-      const provider = profile.provider;
-      console.log(provider);
+      const provider = 'google';
+
       let user = await this.userService.findByEmail(email);
-      console.log(user);
       if (!user) {
         user = await this.authService.createProviderUser(
           email,
@@ -38,10 +39,10 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       }
 
       const token = await this.authService.createToken(email);
-      const accessToken = token.accessToken;
-      const refreshToken = token.refreshToken;
-
-      done(null, { accessToken, refreshToken });
+      done(null, {
+        accessToken: token.accessToken,
+        refreshToken: token.refreshToken,
+      });
     } catch (error) {
       console.error('인증 처리 중 오류 발생:', error);
       done(error, false);
