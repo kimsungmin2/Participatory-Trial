@@ -60,70 +60,64 @@ export class AuthService {
     await queryRunner.startTransaction();
 
     try {
-      // const user = await queryRunner.manager.getRepository(Users).save({});
-      if (provider === 'kakao') {
-        const userInfo = await queryRunner.manager
-          .getRepository(UserInfos)
-          .save({
-            // id: user.id,
-            email,
-            nickName,
-            provider: 'kakao',
-            // user: user,
-          });
-        await queryRunner.commitTransaction();
-        return userInfo;
-      } else {
-        const userInfo = await queryRunner.manager
-          .getRepository(UserInfos)
-          .save({
-            // id: user.id,
-            email,
-            nickName,
-            provider: 'naver',
-            // user: user,
-          });
+      const user = await queryRunner.manager.getRepository(Users).save({});
 
-        await queryRunner.commitTransaction();
-        return userInfo;
-      }
+      const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
+        id: user.id,
+        email,
+        password: 'default',
+        nickName,
+        provider,
+        birth: 'default',
+        verifiCationCode: 0,
+        emailVerified: true,
+        user: user,
+      });
+
+      await queryRunner.commitTransaction();
+      return userInfo;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      throw new Error('Database Error');
     } finally {
       await queryRunner.release();
     }
   }
 
-  async signUp(signUpdto: SignUpDto) {
+  async signUp(
+    email: string,
+    password: string,
+    passwordConfirm: string,
+    nickName: string,
+    birth: string,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException(
+        '이미 해당 이메일로 가입된 사용자가 있습니다!',
+      );
+    }
+    if (password !== passwordConfirm) {
+      throw new UnauthorizedException(
+        '비밀번호가 체크비밀번호와 일치하지 않습니다.',
+      );
+    }
     try {
-      const existingUser = await this.usersService.findByEmail(signUpdto.email);
-      if (existingUser) {
-        throw new ConflictException(
-          '이미 해당 이메일로 가입된 사용자가 있습니다!',
-        );
-      }
-      if (signUpdto.password !== signUpdto.passwordConfirm) {
-        throw new UnauthorizedException(
-          '비밀번호가 체크비밀번호와 일치하지 않습니다.',
-        );
-      }
-
       const code = Math.floor(Math.random() * 900000) + 100000;
-      await this.emailService.sendVerificationToEmail(signUpdto.email, code);
-      const hashedPassword = await hash(signUpdto.password, 10);
+      await this.emailService.sendVerificationToEmail(email, code);
+      const hashedPassword = await hash(password, 10);
 
       const user = await queryRunner.manager.getRepository(Users).save({});
 
       await queryRunner.manager.getRepository(UserInfos).save({
         id: user.id,
-        email: signUpdto.email,
+        email: email,
         password: hashedPassword,
-        nickName: signUpdto.nickName,
-        birth: signUpdto.birth,
+        nickName: nickName,
+        birth: birth,
         verifiCationCode: code,
         user: user,
       });
@@ -132,7 +126,6 @@ export class AuthService {
       return user;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
     } finally {
       await queryRunner.release();
     }
@@ -148,36 +141,19 @@ export class AuthService {
     });
   }
 
-  async adminSignUp(signUpdto: SignUpDto) {
-    const existingUser = await this.usersService.findByEmail(signUpdto.email);
-    if (existingUser) {
-      throw new ConflictException(
-        '이미 해당 이메일로 가입된 사용자가 있습니다!',
-      );
-    }
-
-    const hashedPassword = await hash(signUpdto.password, 10);
-    await this.usersInfoRepository.save({
-      email: signUpdto.email,
-      password: hashedPassword,
-      nickName: signUpdto.nickName,
-      role: Role.Admin,
-    });
-  }
-
-  async login(loginDto: LoginDto) {
+  async login(email: string, password: string) {
     const user = await this.usersInfoRepository.findOne({
       select: ['id', 'email', 'password', 'emailVerified'],
-      where: { email: loginDto.email },
+      where: { email: email },
     });
-    if (user.emailVerified === false) {
-      throw new UnauthorizedException('아직 인증이 되지 않은 회원입니다.');
-    }
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');
     }
+    if (user.emailVerified === false) {
+      throw new UnauthorizedException('아직 인증이 되지 않은 회원입니다.');
+    }
 
-    if (!(await compare(loginDto.password, user.password))) {
+    if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
 
