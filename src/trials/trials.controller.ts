@@ -208,9 +208,29 @@ export class TrialsController {
 // -------------------------------------------------------------------------------------------------------------------------------------------------------------//
 // ----------------------------------------------------------------------- 명예의 전당 ------------------------------------------------------------------------------ //
 
-  // 명예의 전당 올리기 API
+  // 명예의 전당 올리기 API(수동으로 업뎃함)
+  @Post('HallofFame/update')
+  async updateHallofFame(){
+    await this.trialsService.updateHallOfFame();
+    return  {
+      statusCode: HttpStatus.OK,
+      message: "명예의 전당이 성공적으로 갱신되었습니다..",
+    }
+  }
 
-  
+  // 명예의 전당 조회하기 API
+  @Get('HallofFame')
+  async getRecentHallOfFame() {
+    const recentHallofFame = await this.trialsService.getRecentHallOfFame();
+    if(!recentHallofFame){
+      return  {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: "명예의 전당 정보가 없습니다.",
+      }
+    }
+
+    return recentHallofFame
+  }
 
 
 

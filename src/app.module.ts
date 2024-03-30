@@ -24,6 +24,8 @@ import { PolticalDebateComments } from './poltical_debates/entities/poltical_deb
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheConfigService } from './cache/cache.config';
 
 
 export const typeOrmModuleOptions = {
@@ -56,6 +58,10 @@ console.log(Joi.object);
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
       }),
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService
     }),
     BullModule.forRoot({
       redis: {
