@@ -8,20 +8,32 @@ import {
   Delete,
   HttpStatus,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
 import { UpdateHumorDto } from './dto/update-humor.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Users } from '../users/entities/user.entity';
 import { HumorBoards } from './entities/humor-board.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
   constructor(private readonly humorsService: HumorsService) {}
 
+  @UseInterceptors(FilesInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '유머 게시판 게시물 생성' })
   @ApiBody({
     description: '유머 게시물 생성',
@@ -30,6 +42,13 @@ export class HumorsController {
       properties: {
         title: { type: 'string' },
         content: { type: 'string' },
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
       },
     },
   })
@@ -38,10 +57,12 @@ export class HumorsController {
   async createHumorBoard(
     @Body() createHumorBoardDto: CreateHumorBoardDto,
     @UserInfo() user: Users,
+    @UploadedFiles() files: Express.Multer.File[],
   ): Promise<HumorBoardReturnValue> {
     const createdBoard = await this.humorsService.createHumorBoard(
       createHumorBoardDto,
       user,
+      files,
     );
 
     return {

@@ -33,6 +33,9 @@ export class HumorBoards {
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
+  imageUrl: string;
+
+  @Column({ type: 'varchar', nullable: true })
   top_comments: string;
 
   @CreateDateColumn({ type: 'timestamp' })

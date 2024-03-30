@@ -10,12 +10,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { HumorBoards } from './entities/humor-board.entity';
 import { Repository } from 'typeorm';
 import { Users } from '../users/entities/user.entity';
+import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class HumorsService {
   constructor(
     @InjectRepository(HumorBoards)
     private HumorBoardRepository: Repository<HumorBoards>,
+    private s3Service: S3Service,
   ) {}
 
   //게시물 생성
@@ -23,8 +25,12 @@ export class HumorsService {
   async createHumorBoard(
     createHumorBoardDto: CreateHumorBoardDto,
     user: Users,
+    files: Express.Multer.File[],
   ) {
-    console.log(user.id);
+    let uploadResult: string[];
+    if (files.length !== 0) {
+      const uploadResult = await this.s3Service.saveImages(files);
+    }
     try {
       const createdBoard = await this.HumorBoardRepository.save({
         userId: user.id,
