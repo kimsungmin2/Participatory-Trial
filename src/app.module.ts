@@ -9,7 +9,8 @@ import { PolticalDebatesModule } from './poltical_debates/poltical_debates.modul
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
-import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
