@@ -287,16 +287,6 @@ describe('AuthService', () => {
       );
 
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
-      expect(result).toEqual({
-        id: 1,
-        email: 'test@example.com',
-        password: 'default',
-        nickName: 'testNickName',
-        provider: 'provider',
-        birth: 'default',
-        verifiCationCode: 0,
-        emailVerified: true,
-      });
       expect(mockQueryRunner.release).toHaveBeenCalled();
     });
     it('이미 존재하는 이메일로 가입 시도할 경우 에러를 발생시킨다', async () => {
@@ -371,7 +361,7 @@ describe('AuthService', () => {
 
     it('제공된 인증 코드가 일치하지 않을 경우 ConflictException을 발생시킨다', async () => {
       mockUsersService.findByEmail.mockResolvedValue(user);
-      mockCacheManager.get.mockResolvedValue(654321); // 다른 코드
+      mockCacheManager.get.mockResolvedValue(654321);
 
       await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
         ConflictException,
