@@ -36,7 +36,10 @@ export class Trials {
 
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
-
+  
+  @Column({ type: 'boolean', nullable: false, default: true})
+  is_time_over: boolean;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

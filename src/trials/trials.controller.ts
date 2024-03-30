@@ -51,6 +51,22 @@ export class TrialsController {
     return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
   }
 
+  // 특정 판례 조회 API(Like 구문)
+  @Get('cases/some')
+  async findKeyWordDetails(
+    @Query('name') name: string,
+  ){
+    return await this.trialsService.findKeyWordDetails(name)
+  }
+
+  // 판결 유형으로 조회 API(일반 인덱싱 구문)
+  @Get('cases/panguelcase')
+  async findBypanguelcaseDetails(
+    @Query('name') name: string,
+  ){
+    return await this.trialsService.findBypanguelcaseDetails(name)
+  }
+
   // 내가 만든 재판 조회 API(유저)
   @Get('/myTrials')
   async findByUserTrials(

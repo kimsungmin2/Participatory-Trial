@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsInt, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateTrialDto {
 
@@ -20,4 +20,12 @@ export class CreateTrialDto {
     @IsString({ message: '토론 내용은 문자열로 입력 해주세요.'})
     @IsNotEmpty({ message: '토론 내용을 입력 해주세요.'})
     content: string;
+
+    // 토론 내용
+    @ApiProperty({
+        example: "30000",
+        description:"토론시간을 정해주세요"
+    })
+    @IsNotEmpty({ message: '토론 시간을 입력해 주세요.'})
+    trialTime : number;
 }

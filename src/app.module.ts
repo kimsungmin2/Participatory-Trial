@@ -21,6 +21,8 @@ import { HumorComments } from './humors/entities/humor_comment.entity';
 import { HumorBoards } from './humors/entities/humor.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
+import { BullModule } from '@nestjs/bull';
+import { VoteModule } from './vote/vote.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -53,12 +55,19 @@ console.log(Joi.object);
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    VoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

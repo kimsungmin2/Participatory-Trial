@@ -3,10 +3,12 @@ import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trials } from './entities/trial.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { firstValueFrom, map, retry } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { PanryeInfo } from './entities/panryedata.entity';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class TrialsService {
@@ -16,23 +18,26 @@ export class TrialsService {
     @InjectRepository(PanryeInfo)
     private panryeRepository: Repository<PanryeInfo>,
     private dataSource: DataSource,
-    private httpService: HttpService
+    private httpService: HttpService,
+    @InjectQueue('trial-queue') private trialQueue: Queue
   ){}
 
+  // 재판 생성
   async createTrial(userId: number, createTrialDto: CreateTrialDto) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
-    await queryRunner.startTransaction('READ COMMITTED');
+    await queryRunner.startTransaction();
     try{
       // 1. Dto에서 title, content 뽑아내기
-      const { title, content } = createTrialDto;
+      const { title, content, trialTime } = createTrialDto;
 
       // 2. 객체에 넣기
       const data = {
         title,
         content,
-        userId
+        userId,
+        is_time_over: false,
       }
 
       // 3. 재판 생성
@@ -41,11 +46,16 @@ export class TrialsService {
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial)
 
-      // 5. 트랜 잭션 종료
+      // 5. 불 큐로 지연시간 후 찍어줌
+      const delay = trialTime - Date.now();
+
+      // 6. 제한 시간끝나면 불큐로 비동기 처리
+      await this.trialQueue.add('updateTimeDone', { trialId: savedTrial.id }, { delay });
+
+      // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
       
-      return savedTrial
-
+      return savedTrial;
   } catch(error){
 
     await queryRunner.rollbackTransaction();
@@ -94,12 +104,12 @@ async findByUserTrials(userId: number) {
     return OneTrials;
   }
 
-
+  // 내 재판 업데이트
   async updateTrials(userId: number, trialsId: number, updateTrialDto: UpdateTrialDto) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
-    await queryRunner.startTransaction('READ COMMITTED');
+    await queryRunner.startTransaction();
     try{
       // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
       const existTrial = await this.findOneByTrialsId(trialsId)
@@ -136,11 +146,12 @@ async findByUserTrials(userId: number) {
     }
   }
 
+  // 내 재판 삭제
   async deleteTrials(id: number) {
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction('READ COMMITTED')
+    await queryRunner.startTransaction()
     try{
       // 1. 삭제하려는 재판이 존재하는지 검사
       const trials = await this.findOneByTrialsId(+id);
@@ -148,7 +159,7 @@ async findByUserTrials(userId: number) {
       // 2. 재판 삭제
       await queryRunner.manager.remove(trials);
 
-      // 5. 트랜잭션 종료
+      // 3. 트랜잭션 종료
       await queryRunner.commitTransaction();
     } catch(error){
 
@@ -166,7 +177,7 @@ async findByUserTrials(userId: number) {
     }   
   }
 
-
+  // 내 재판인지 찾기
   async isMyTrials(userId: number, trialsId: number) {
     return await this.trialsRepository.findOne({
       where : {
@@ -193,7 +204,27 @@ async findByUserTrials(userId: number) {
   }
 
   // 판례 조회
-  async getCaseDetails(caseId: string) {
-    
+  async findKeyWordDetails(name: string) {
+    return this.panryeRepository.find({
+      where: {
+        판결유형: Like(`%${name}%`),
+      }
+    })
   }
+
+  // 판결 유형으로 조회
+  async findBypanguelcaseDetails(name: string) {
+    return this.panryeRepository.find({
+      where: {
+        판결유형: name,
+      }
+    })
+  }
+
+  // 타임아웃되면 업데이트
+  async updateTimeDone(trialId: number) {
+    await this.trialsRepository.update(trialId, { is_time_over: true })
+  }
+
+  // 
 }
