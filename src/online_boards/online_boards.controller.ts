@@ -14,8 +14,8 @@ import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
-import { UserInfos } from 'src/users/entities/user-info.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { UserInfos } from '../users/entities/user-info.entity';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('online-boards')

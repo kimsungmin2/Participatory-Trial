@@ -13,8 +13,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { OnlineBoardCommentService } from './online_board_comment.service';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
-import { UserInfos } from 'src/users/entities/user-info.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { UserInfos } from '../users/entities/user-info.entity';
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 
 @UseGuards(AuthGuard('jwt'))

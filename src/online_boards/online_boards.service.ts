@@ -9,15 +9,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OnlineBoards } from './entities/online_board.entity';
 import { Like, Repository } from 'typeorm';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
-import { UserInfos } from 'src/users/entities/user-info.entity';
-import { UsersService } from 'src/users/users.service';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OnlineBoardsService {
   constructor(
     @InjectRepository(OnlineBoards)
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
-    @InjectRepository(UserInfos)
     private readonly usersService: UsersService,
   ) {}
 
@@ -28,7 +27,7 @@ export class OnlineBoardsService {
   ) {
     const { title, content } = createOnlineBoardDto;
 
-    const foundUser = this.usersService.findByUserId(userInfo.id);
+    const foundUser = await this.usersService.findByUserId(userInfo.id);
 
     return await this.onlineBoardsRepository.save({
       userId: foundUser.id,
@@ -39,13 +38,21 @@ export class OnlineBoardsService {
   // 게시판 모두/키워드만 조회
   async findAllBoard(findAllOnlineBoardDto: FindAllOnlineBoardDto) {
     const { keyword } = findAllOnlineBoardDto;
-    const shows = await this.onlineBoardsRepository.find({
+    const boards = await this.onlineBoardsRepository.find({
       where: {
         ...(keyword && { title: Like(`%${keyword}%`) }),
       },
+      select: {
+        id: true,
+        userId: true,
+        title: true,
+        view: true,
+        like: true,
+        createdAt: true,
+      },
     });
 
-    return shows;
+    return boards;
   }
 
   // 자유게시판 단건 조회
@@ -63,7 +70,7 @@ export class OnlineBoardsService {
     updateOnlineBoardDto: UpdateOnlineBoardDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = this.usersService.findByUserId(userInfo.id);
+    const foundUser = await this.usersService.findByUserId(userInfo.id);
     const foundBoard = await this.findBoardId(id);
 
     if (foundBoard.id !== foundUser.id) {
@@ -81,7 +88,7 @@ export class OnlineBoardsService {
 
   // 자유게시판 삭제
   async removeBoard(id: number, userInfo: UserInfos) {
-    const foundUser = this.usersService.findByUserId(userInfo.id);
+    const foundUser = await this.usersService.findByUserId(userInfo.id);
     const foundBoard = await this.findBoardId(id);
 
     if (foundBoard.id !== foundUser.id) {

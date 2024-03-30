@@ -1,17 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OnlineBoardsService } from './online_boards.service';
 import { Repository } from 'typeorm';
+import { OnlineBoardsService } from './online_boards.service';
 import { OnlineBoards } from './entities/online_board.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
-import { Users } from 'src/users/entities/user.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
+import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
-  let onlineBoardsRepository: Repository<OnlineBoards>;
   let usersService: UsersService;
+  let onlineBoardsRepository: Repository<OnlineBoards>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -30,18 +31,13 @@ describe('OnlineBoardsService', () => {
     }).compile();
 
     service = module.get<OnlineBoardsService>(OnlineBoardsService);
+    usersService = module.get<UsersService>(UsersService);
     onlineBoardsRepository = module.get<Repository<OnlineBoards>>(
       getRepositoryToken(OnlineBoards),
     );
-    usersService = module.get<UsersService>(UsersService);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
   });
 
   it('should create a new board', async () => {
-    // 테스트에 필요한 데이터 생성
     const dto: CreateOnlineBoardDto = {
       title: 'Test Board',
       content: 'Test content',
@@ -49,29 +45,181 @@ describe('OnlineBoardsService', () => {
 
     const userInfo: UserInfos = {
       id: 1,
-      email: 'aaaa@gmail.com',
-      password: '1234',
-      nickName: '프로현질러',
-      birth: '2000-10-10',
-      provider: '1234',
-      verifiCationCode: 1234,
-      emailVerified: true,
-      createdAt: '2024-04-02',
-      updatedAt: ,
-      user: Users,
+      email: 'example@example.com',
+      password: 'password123',
+      nickName: 'JohnDoe',
+      birth: '1990-01-01',
+      provider: 'local',
+      verifiCationCode: 1,
+      emailVerified: false,
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null, // 이 필드는 Users와의 관계를 가지므로, 테스트에서는 일반적으로 사용되지 않습니다.
     };
 
-    // 사용자 서비스가 findByUserId 메서드를 호출했을 때 반환할 사용자 정보 설정
-    const expectedResult = { id: 1, ...dto };
+    const expectedResult: OnlineBoards = {
+      id: 1,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
 
-    // 저장소에서 save 메서드를 호출했을 때 반환할 결과 설정
     jest
       .spyOn(onlineBoardsRepository, 'save')
       .mockResolvedValue(expectedResult);
 
-    // 서비스 메서드 실행 및 결과 확인
     const result = await service.createBoard(dto, userInfo);
     expect(result).toEqual(expectedResult);
+  });
+
+  it('should get all boards', async () => {
+    const dto: FindAllOnlineBoardDto = {
+      keyword: 'string',
+    };
+
+    const expectedResult = [
+      {
+        id: 1,
+        userId: 1,
+        title: 'title',
+        content: 'content',
+        view: 1,
+        like: 1,
+        top_comments: 'string',
+        createdAt: new Date('2024-03-24T02:05:02.602Z'),
+        updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+        user: null,
+        OnlineBoardComment: null,
+      },
+    ];
+
+    jest
+      .spyOn(onlineBoardsRepository, 'find')
+      .mockResolvedValue(expectedResult);
+  });
+
+  it('should get a board', async () => {
+    const id = 1;
+
+    const expectedResult = {
+      id,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+
+    jest
+      .spyOn(onlineBoardsRepository, 'findOne')
+      .mockResolvedValue(expectedResult);
+  });
+
+  it('should update a board', async () => {
+    const id = 1;
+    const updateOnlineBoardDto: UpdateOnlineBoardDto = {
+      title: 'title',
+      content: 'content',
+    };
+    const userInfo: UserInfos = {
+      id: 1,
+      email: 'example@example.com',
+      password: 'password123',
+      nickName: 'JohnDoe',
+      birth: '1990-01-01',
+      provider: 'local',
+      verifiCationCode: 1,
+      emailVerified: false,
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null, // 이 필드는 Users와의 관계를 가지므로, 테스트에서는 일반적으로 사용되지 않습니다.
+    };
+    const onlineBoard: OnlineBoards = {
+      id,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+    const expectedResult = {
+      id,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+
+    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+
+    jest.spyOn(service, 'findBoardId').mockResolvedValue(onlineBoard);
+
+    jest
+      .spyOn(onlineBoardsRepository, 'save')
+      .mockResolvedValue(expectedResult);
+  });
+
+  it('should remove a board', async () => {
+    const id = 1;
+    const userInfo: UserInfos = {
+      id: 1,
+      email: 'example@example.com',
+      password: 'password123',
+      nickName: 'JohnDoe',
+      birth: '1990-01-01',
+      provider: 'local',
+      verifiCationCode: 1,
+      emailVerified: false,
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null, // 이 필드는 Users와의 관계를 가지므로, 테스트에서는 일반적으로 사용되지 않습니다.
+    };
+    const onlineBoard: OnlineBoards = {
+      id,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+    const expectedResult = null;
+
+    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+
+    jest.spyOn(service, 'findBoardId').mockResolvedValue(onlineBoard);
+
+    jest
+      .spyOn(onlineBoardsRepository, 'softDelete')
+      .mockResolvedValue(expectedResult);
   });
 });

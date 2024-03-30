@@ -7,9 +7,9 @@ import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.d
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OnlineBoardComments } from './entities/online_board_comment.entity';
-import { OnlineBoardsService } from 'src/online_boards/online_boards.service';
-import { UsersService } from 'src/users/users.service';
-import { UserInfos } from 'src/users/entities/user-info.entity';
+import { OnlineBoardsService } from '../online_boards/online_boards.service';
+import { UsersService } from '../users/users.service';
+import { UserInfos } from '../users/entities/user-info.entity';
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 import { Repository } from 'typeorm';
 
@@ -29,14 +29,17 @@ export class OnlineBoardCommentService {
     userInfo: UserInfos,
   ) {
     const foundUser = await this.usersService.findByUserId(userInfo.id);
+
     const { content } = createOnlineBoardCommentDto;
     const foundBoard =
       await this.onlineBoardsService.findBoardId(onlineBoardId);
+
     const board = await this.onlineBoardCommentRepository.save({
       onlineBoardId: foundBoard.id,
       userId: foundUser.id,
       content,
     });
+
     return board;
   }
 
@@ -73,6 +76,7 @@ export class OnlineBoardCommentService {
         content,
       },
     );
+
     return comment;
   }
 

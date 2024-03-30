@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoardComments } from 'src/online_board_comment/entities/online_board_comment.entity';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 
 @Entity()
 export class OnlineBoards {
