@@ -11,6 +11,7 @@ import { HumorBoards } from './entities/humor-board.entity';
 import { Repository } from 'typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Service } from '../s3/s3.service';
+import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 
 @Injectable()
 export class HumorsService {
@@ -52,9 +53,19 @@ export class HumorsService {
 
   //모든 게시물 조회(페이지네이션)
 
-  async getAllHumorBoards() {
+  async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     try {
-      const humorBoards = await this.HumorBoardRepository.find();
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+
+      const humorBoards = await this.HumorBoardRepository.find({
+        skip,
+        take: limit,
+      });
+      if (humorBoards.length === 0) {
+        throw new NotFoundException('더이상 게시물이 없습니다!');
+      }
+
       return humorBoards;
     } catch (err) {
       throw new InternalServerErrorException(
@@ -64,6 +75,7 @@ export class HumorsService {
   }
 
   //단건 게시물 조회
+  //조회수 기능 추가
 
   async findOneHumorBoard(id: number) {
     const findHumorBoard = await this.HumorBoardRepository.findOneBy({ id });

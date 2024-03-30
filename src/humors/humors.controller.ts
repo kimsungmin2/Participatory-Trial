@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UploadedFile,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -20,6 +21,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { Users } from '../users/entities/user.entity';
@@ -27,6 +29,7 @@ import { HumorBoards } from './entities/humor-board.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -73,10 +76,26 @@ export class HumorsController {
   }
 
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get()
-  async getAllHumorBoards(): Promise<HumorBoardReturnValue> {
+  async getAllHumorBoards(
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ): Promise<HumorBoardReturnValue> {
     const HumorBoards: HumorBoards[] =
-      await this.humorsService.getAllHumorBoards();
+      await this.humorsService.getAllHumorBoards(paginationQueryDto);
 
     return {
       statusCode: HttpStatus.OK,

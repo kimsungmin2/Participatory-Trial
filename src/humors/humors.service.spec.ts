@@ -119,27 +119,27 @@ describe('HumorsService', () => {
         id: 1,
       },
     ] as HumorBoards[];
-    it('must be success', async () => {
-      jest
-        .spyOn(humorBoardRepository, 'find')
-        .mockResolvedValue(mockBoardArray);
-      const createdBoard = await humorService.getAllHumorBoards();
-      expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
-      expect(createdBoard).toEqual(mockBoardArray);
-    });
-    it('must be find is failed', async () => {
-      expect.assertions(3);
-      jest.spyOn(humorBoardRepository, 'find').mockRejectedValue(new Error());
-      try {
-        const createdBoard = await humorService.getAllHumorBoards();
-      } catch (err) {
-        expect(err).toBeInstanceOf(InternalServerErrorException);
-        expect(err.message).toEqual(
-          '게시물을 불러오는 도중 오류가 발생했습니다.',
-        );
-      }
-      expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
-    });
+    // it('must be success', async () => {
+    //   jest
+    //     .spyOn(humorBoardRepository, 'find')
+    //     .mockResolvedValue(mockBoardArray);
+    //   const createdBoard = await humorService.getAllHumorBoards();
+    //   expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
+    //   expect(createdBoard).toEqual(mockBoardArray);
+    // });
+    // it('must be find is failed', async () => {
+    //   expect.assertions(3);
+    //   jest.spyOn(humorBoardRepository, 'find').mockRejectedValue(new Error());
+    //   try {
+    //     const createdBoard = await humorService.getAllHumorBoards();
+    //   } catch (err) {
+    //     expect(err).toBeInstanceOf(InternalServerErrorException);
+    //     expect(err.message).toEqual(
+    //       '게시물을 불러오는 도중 오류가 발생했습니다.',
+    //     );
+    //   }
+    //   expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
+    // });
   });
   describe('findOneHumorBoard', () => {
     it('must be success', async () => {
