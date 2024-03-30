@@ -52,6 +52,6 @@ export class Trials {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
-  @OneToMany(() => Votes, (vote) => vote.trial, { cascade: true })
-  vote: Votes[];
+  @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
+  vote: Votes;
 }

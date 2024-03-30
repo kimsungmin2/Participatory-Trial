@@ -33,9 +33,6 @@ export class Votes {
   @Column({ type: 'int', nullable: false, default: 0 })
   voteCount2: number;
 
-  @Column({ type: 'int', nullable: false})
-  userCode: number
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
@@ -45,7 +42,7 @@ export class Votes {
   @OneToMany(() => EachVote, (eachVote) => eachVote.vote, { cascade: true })
   eachVote: EachVote[];
   
-  @ManyToOne(() => Trials, (trial) => trial.vote)
+  @OneToOne(() => Trials, (trial) => trial.vote)
   @JoinColumn({ name: 'trialId', referencedColumnName: 'id' })
   trial: Trials;
 }

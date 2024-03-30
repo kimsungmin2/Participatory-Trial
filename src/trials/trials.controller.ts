@@ -7,6 +7,10 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { userInfo } from 'os';
 import { MyTrialsGuard } from './guards/myTrials.guard';
+import { VoteDto } from './vote/dto/voteDto';
+import { number } from 'joi';
+import { IsActiveGuard } from './guards/isActive.guard';
+import { UpdateVoteDto } from './vote/dto/updateDto';
 
 @ApiTags("Trials")
 @Controller('trials')
@@ -14,6 +18,8 @@ export class TrialsController {
   constructor(private readonly trialsService: TrialsService) {}
   // 모든 API는 비동기 처리
 
+
+// -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
   // 어쓰 가드 필요
   // 재판 생성 API
   @Post()
@@ -142,14 +148,69 @@ export class TrialsController {
       }
   }
 
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// -------------------------------------------------------------------------- 재판 vs API ----------------------------------------------------------------------//
   
 
 
 
 
+  // 투표 vs 생성 API
+  @UseGuards(MyTrialsGuard)
+  @UseGuards(IsActiveGuard)
+  @Post(':trialId')
+  async voteOfSubject(
+    @Param('trialId') trialId: number,
+    @Body() voteDto: VoteDto
+){
+  const data = await this.trialsService.createSubject(+trialId, voteDto)
+      return  {
+        statusCode: HttpStatus.OK,
+        message: "재판 토론 vs 대결 주제를 생성 성공하였습니다.",
+        data
+      }
+}
+
+  // 투표 vs 수정 API
+  @UseGuards(MyTrialsGuard)
+  @UseGuards(IsActiveGuard)
+  @Patch(':trialId/vote/:voteId')
+  async patchOfVote(
+    @Param('trialId') trialId: number,
+    @Param('voteId') voteId: number,
+    @Body() updateVoteDto: UpdateVoteDto
+  ) {
+    const data = await this.trialsService.updateSubject(voteId, updateVoteDto)
+      return  {
+        statusCode: HttpStatus.OK,
+        message: "재판 vs 주제를 수정하였습니다.",
+        data
+      }
+
+  }
+
+  // 투표 vs 삭제 API
+  @UseGuards(MyTrialsGuard)
+  @UseGuards(IsActiveGuard)
+  @Delete(':trialId/vote/:voteId')
+  async deleteVote(
+    @Param('trialsId') id: string,
+    @Param('voteId') voteId: number,
+    ) {
+      await this.trialsService.deleteVote(+voteId)
+      return  {
+        statusCode: HttpStatus.OK,
+        message: "재판 vs 삭제에 성공하였습니다.",
+      }
+  }
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// ----------------------------------------------------------------------- 명예의 전당 ------------------------------------------------------------------------------ //
 
   // 명예의 전당 올리기 API
 
+  
 
 
 

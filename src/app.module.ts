@@ -22,7 +22,9 @@ import { HumorBoards } from './humors/entities/humor.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { BullModule } from '@nestjs/bull';
-import { VoteModule } from './vote/vote.module';
+import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -61,6 +63,7 @@ console.log(Joi.object);
         port: 6379,
       },
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,

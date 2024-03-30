@@ -3,12 +3,17 @@ import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trials } from './entities/trial.entity';
-import { DataSource, Like, Repository } from 'typeorm';
+import { Between, DataSource, Like, Repository, getRepository } from 'typeorm';
 import { firstValueFrom, map, retry } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { PanryeInfo } from './entities/panryedata.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { Votes } from './entities/vote.entity';
+import { VoteDto } from './vote/dto/voteDto';
+import { UpdateVoteDto } from './vote/dto/updateDto';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 
 @Injectable()
 export class TrialsService {
@@ -17,11 +22,83 @@ export class TrialsService {
     private trialsRepository: Repository<Trials>,
     @InjectRepository(PanryeInfo)
     private panryeRepository: Repository<PanryeInfo>,
+    @InjectRepository(Votes)
+    private votesRepository: Repository<Votes>,
+    @InjectRepository(TrialHallOfFames)
+    private trialHallOfFamesRepository: Repository<TrialHallOfFames>,
     private dataSource: DataSource,
     private httpService: HttpService,
     @InjectQueue('trial-queue') private trialQueue: Queue
   ){}
 
+  // 명예의 전당
+  @Cron(CronExpression.EVERY_WEEK)
+  async updateHallOfFame() {
+    const lastWeekStart = new Date();
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7 - lastWeekStart.getDay())
+    lastWeekStart.setHours(0, 0, 0, 0);
+
+    const lastWeekEnd = new Date(lastWeekStart);
+    lastWeekEnd.setDate(lastWeekEnd.getDate() + 6)
+    lastWeekEnd.setHours(23, 59, 59, 999);
+
+    // 지난주에 진행된 투표 데이터를 조회
+    const lastWeekVotes = await this.votesRepository.find({
+      where: {
+        createdAt: Between(lastWeekStart, lastWeekEnd),
+      },
+    });
+
+    // 투표 기반으로 명예의 전당 집계
+    const hallOfFameData = this.aggVotesForHallOfFame(lastWeekVotes)
+
+    await this.updateHallOfFameDatabase(hallOfFameData);
+  }
+
+  // 날짜 추상화 매서드
+  private getThisMonthRange(){
+    const start = new Date();
+    start.setDate(1); // 이번달 첫쨰날
+    start.setHours(0, 0, 0, 0) // 자정
+
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+    end.setHours(23, 59, 59, 999) // 하루의 마지막 시간
+
+    return { start, end }
+  }
+  // 투표 데이터 집계 매서드
+  private async aggVotesForHallOfFame(votes: Votes[]){
+    const { start, end } = this.getThisMonthRange();
+
+    const candidates = await this.votesRepository
+    .createQueryBuilder("vote")
+    .select(['vote.id', 'vote.title1', 'vote.title2'])
+    .addSelect("vote.voteCount1 + vote.voteCount2", "totalVotes")
+    .where('vote.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
+    .having("totalVotes >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
+    .groupBy("vote.id")
+    .getRawMany();
+
+    return candidates
+  }
+
+  // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장)
+  private async updateHallOfFameDatabase(hallOfFameData: any){
+    // 한번에 저장
+    const newHallOfFameEntries = hallOfFameData.map(data => {
+      const newHallOfFameEntry = new TrialHallOfFames();
+      newHallOfFameEntry.id = data.id // vote table의 id임다
+      newHallOfFameEntry.userId = data.trial.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
+      newHallOfFameEntry.title = data.title1 + 'Vs' + data.title2
+      newHallOfFameEntry.content = data.trial.content // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
+      newHallOfFameEntry.createdAt = new Date();
+      newHallOfFameEntry.updatedAt = new Date();
+      return newHallOfFameEntry;
+    });
+      // DB에 새로운 명전 저장
+      await this.trialHallOfFamesRepository.save(newHallOfFameEntries)
+
+    }
   // 재판 생성
   async createTrial(userId: number, createTrialDto: CreateTrialDto) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -226,5 +303,63 @@ async findByUserTrials(userId: number) {
     await this.trialsRepository.update(trialId, { is_time_over: true })
   }
 
-  // 
+
+  // 투표 주제 만들기 함수
+  async createSubject(trialId: number, voteDto: VoteDto){
+    const { title1, title2 } = voteDto
+    const vote = {
+      title1,
+      title2,
+      trialId
+    }
+
+    const voteSubject = this.votesRepository.create(vote)
+
+    await this.votesRepository.save(voteSubject)
+
+    return vote
+  }
+
+  // 활성화된 투표가 맞는지 검사는 함수
+  async checkIsActiveGuard(trialId: number) {
+    const trial = await this.trialsRepository.findOne({
+      where: {
+        id: trialId,
+      }
+    })
+
+    if(!trial || trial.is_time_over == true) {
+      throw new Error("타임 아웃된 투표입니다.")
+    }
+
+    return trial
+  }
+
+  // 투표 기획 수정 함수
+  async updateSubject(voteId: number, updateVoteDto: UpdateVoteDto)
+  {
+    const vote = await this.votesRepository.findOne({
+      where: {
+        id: voteId,
+      }
+    })
+
+    Object.assign(vote, updateVoteDto)
+
+    await this.votesRepository.save(vote)
+
+    return vote
+  }
+
+  // 투표 vs 삭제 함수
+  async deleteVote(voteId: number)
+  {
+    const vote = await this.votesRepository.findOne({
+      where: {
+        id: voteId,
+      }
+    })
+    // 2. 재판 삭제
+    await this.votesRepository.remove(vote);
+  }
 }

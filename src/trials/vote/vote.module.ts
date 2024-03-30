@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { VoteService } from './vote.service';
-import { VoteController } from './vote.controller';
+import { VotesController } from './vote.controller';
+import { VotesService } from './vote.service';
+
 
 @Module({
-  controllers: [VoteController],
-  providers: [VoteService],
+  controllers: [VotesController],
+  providers: [VotesService],
 })
 export class VoteModule {}

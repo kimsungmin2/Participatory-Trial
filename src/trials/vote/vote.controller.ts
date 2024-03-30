@@ -11,6 +11,8 @@ import { Request } from 'express';
 export class VotesController {
   constructor(private readonly votesService: VotesService) {}
 
+
+  // 투표하기 API
   @Post(':voteId')
   async vote(
     @Param('voteId') voteId: number, 
