@@ -26,15 +26,21 @@ export class HumorsService {
     createHumorBoardDto: CreateHumorBoardDto,
     user: Users,
     files: Express.Multer.File[],
-  ) {
-    let uploadResult: string[];
+  ): Promise<HumorBoards> {
+    let uploadResult: string[] = [];
     if (files.length !== 0) {
-      const uploadResult = await this.s3Service.saveImages(files);
+      const uploadResults = await this.s3Service.saveImages(files);
+      for (let i = 0; i < uploadResults.length; i++) {
+        uploadResult.push(uploadResults[i].imageUrl);
+      }
     }
+    const imageUrl =
+      uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
     try {
       const createdBoard = await this.HumorBoardRepository.save({
         userId: user.id,
         ...createHumorBoardDto,
+        imageUrl,
       });
       return createdBoard;
     } catch {

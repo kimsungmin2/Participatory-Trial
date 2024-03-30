@@ -32,7 +32,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 export class HumorsController {
   constructor(private readonly humorsService: HumorsService) {}
 
-  @UseInterceptors(FilesInterceptor('file'))
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '유머 게시판 게시물 생성' })
   @ApiBody({
