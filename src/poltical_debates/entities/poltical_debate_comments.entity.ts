@@ -1,11 +1,11 @@
 import {
+  Entity,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
   UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { PolticalDebateBoards } from './poltical_debate.entity';
@@ -16,12 +16,9 @@ export class PolticalDebateComments {
   id: number;
 
   @Column({ type: 'int' })
-  polticalDebateId: number;
-
-  @Column({ type: 'int' })
   userId: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'text', nullable: false })
   content: string;
 
   @CreateDateColumn({ type: 'timestamp' })
@@ -30,14 +27,14 @@ export class PolticalDebateComments {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
+  @ManyToOne(() => Users, (user) => user.polticalDebateComments)
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  user: Users;
+
   @ManyToOne(
     () => PolticalDebateBoards,
     (polticalDebateBoard) => polticalDebateBoard.polticalDebateComments,
   )
-  @JoinColumn({ name: 'poltical_debate_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'polticalDebateId', referencedColumnName: 'id' })
   polticalDebateBoard: PolticalDebateBoards;
-
-  @ManyToOne(() => Users, (user) => user.polticalDebateComments)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
-  user: Users;
 }

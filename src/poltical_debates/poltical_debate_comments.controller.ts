@@ -1,88 +1,103 @@
-// poltical_debate_comments.controller.ts
 import {
-  Controller,
-  Get,
-  Post,
-  Param,
   Body,
-  Patch,
+  Controller,
   Delete,
-  NotFoundException,
+  Get,
   HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePolticalDebateCommentDto } from 'src/poltical_debates/dto/create-poltical_debate_comment_dto';
+import { UserInfos } from 'src/users/entities/user-info.entity';
+import { Users } from 'src/users/entities/user.entity';
+import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
 
 @ApiTags('정치 토론 댓글')
-@Controller('poltical-debate/:polticalDebateId/comments')
+@Controller('polticalDebates/:polticalDebateId/comments')
 export class PolticalDebateCommentsController {
   constructor(
     private readonly polticalDebateCommentsService: PolticalDebateCommentsService,
   ) {}
 
+  @ApiOperation({ summary: '정치 토론 댓글 생성', description: '생성' })
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(
-    @Param('polticalDebateId') polticalDebateId: string,
+  async createComment(
+    @UserInfo() user: Users,
+    @Param('polticalDebateId') polticalDebateId: number,
     @Body() createPolticalDebateCommentDto: CreatePolticalDebateCommentDto,
   ) {
-    try {
-      const data = this.polticalDebateCommentsService.create(
-        +polticalDebateId,
-        createPolticalDebateCommentDto,
-      );
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: '댓글생성에 성공했습니다.',
-        data,
-      };
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
-
-  @Get()
-  async findAll(@Param('polticalDebateId') polticalDebateId: string) {
-    try {
-      const data =
-        this.polticalDebateCommentsService.findAll(+polticalDebateId);
-      return {
-        statusCode: HttpStatus.OK,
-        message: '댓글조회에 성공했습니다.',
-        data,
-      };
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
-
-  @Patch(':commentId')
-  update(
-    @Param('commentId') commentId: string,
-    @Body() createPolticalDebateCommentDto: CreatePolticalDebateCommentDto,
-  ) {
-    const data = this.polticalDebateCommentsService.update(
-      +commentId,
+    const data = await this.polticalDebateCommentsService.createComment(
+      user,
+      polticalDebateId,
       createPolticalDebateCommentDto,
     );
+
     return {
-      statusCode: HttpStatus.OK,
-      message: '댓글수정에 성공했습니다.',
+      statusCode: HttpStatus.CREATED,
+      message: '댓글 생성에 성공했습니다.',
       data,
     };
   }
 
-  @Delete(':commentId')
-  async remove(@Param('commentId') commentId: string) {
-    try {
-      const data = await this.polticalDebateCommentsService.remove(+commentId);
-      return {
-        statusCode: HttpStatus.OK,
-        message: '댓글삭제에 성공했습니다.',
-        data,
-      };
-    } catch (error) {
-      throw new NotFoundException(error.message);
+  @ApiOperation({ summary: '정치 토론 댓글 조회', description: '조회' })
+  @Get()
+  async getAllComments(@Param('polticalDebateId') polticalDebateId: number) {
+    return await this.polticalDebateCommentsService.getAllComments(
+      polticalDebateId,
+    );
+  }
+
+  @ApiOperation({
+    summary: '정치 토론 댓글 상세 조회',
+    description: '상세 조회',
+  })
+  @Get(':commentId')
+  async getCommentById(
+    @Param('polticalDebateId') polticalDebateId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    const comment = await this.polticalDebateCommentsService.getCommentById(
+      polticalDebateId,
+      commentId,
+    );
+    if (!comment) {
+      throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
+    return comment;
+  }
+
+  @ApiOperation({ summary: '정치 토론 댓글 수정', description: '수정' })
+  @UseGuards(AuthGuard('jwt'))
+  @Put(':commentId')
+  async updateComment(
+    @Param('polticalDebateId') polticalDebateId: number,
+    @Param('commentId') commentId: number,
+    @Body() updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto,
+  ) {
+    return await this.polticalDebateCommentsService.updateComment(
+      polticalDebateId,
+      commentId,
+      updatePolticalDebateCommentDto,
+    );
+  }
+
+  @ApiOperation({ summary: '정치 토론 댓글 삭제', description: '삭제' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':commentId')
+  async deleteComment(
+    @Param('polticalDebateId') polticalDebateId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    return await this.polticalDebateCommentsService.deleteComment(
+      polticalDebateId,
+      commentId,
+    );
   }
 }

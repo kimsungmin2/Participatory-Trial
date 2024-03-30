@@ -40,7 +40,7 @@ export class PolticalDebateBoards {
 
   @OneToMany(
     () => PolticalDebateComments,
-    (polticalDebateComments) => polticalDebateComments.polticalDebateBoard,
+    (polticalDebateComment) => polticalDebateComment.polticalDebateBoard,
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];

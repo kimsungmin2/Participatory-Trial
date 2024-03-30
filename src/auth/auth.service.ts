@@ -170,7 +170,7 @@ export class AuthService {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
 
-    const payload = { sub: user.id };
+    const payload = { email: user.email, sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,

@@ -46,7 +46,6 @@ export class AuthController {
 
   @ApiOperation({ summary: '로그인' })
   @Post('login')
-  @Render('sign-in')
   async login(@Body() loginDto: LoginDto, @Res() res) {
     const user = await this.authService.login(loginDto);
 
