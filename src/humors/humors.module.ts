@@ -6,11 +6,13 @@ import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Module } from '../s3/s3.module';
+import { LikeModule } from '../like/like.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([HumorBoards, HumorComments, Users]),
     S3Module,
+    LikeModule,
   ],
   controllers: [HumorsController],
   providers: [HumorsService],

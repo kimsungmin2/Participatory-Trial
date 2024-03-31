@@ -9,9 +9,6 @@ import {
 import { BoardType } from '../../s3/board-type';
 
 export class LikeInputDto {
-  @IsNumber()
-  boardId: number;
-
   @IsEnum(BoardType)
   boardType: BoardType;
 }

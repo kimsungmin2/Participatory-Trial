@@ -30,14 +30,21 @@ export class LikeService {
     @InjectRepository(OnlineBoardLike)
     private onlineLikeRepository: Repository<OnlineBoardLike>,
   ) {}
-  async create(likeInputDto: LikeInputDto, user: Users): Promise<string> {
-    const { boardId, boardType } = likeInputDto;
+  async like(
+    likeInputDto: LikeInputDto,
+    user: Users,
+    boardId: number,
+  ): Promise<string> {
+    //boardId 아이디
+    //boardType 어떤 게시판
+    const { boardType } = likeInputDto;
     const { id } = user;
 
     let boardRepository;
     let likeRepository;
     let entityKey: 'humorBoardId' | 'onlineBoardId';
 
+    //타입 별 의존성 주입
     switch (boardType) {
       case BoardType.Humor:
         boardRepository = this.humorBoardRepository;
@@ -57,12 +64,13 @@ export class LikeService {
       throw new NotFoundException('게시물을 찾을 수 없습니다.');
     }
 
-    const isLikeExist = await likeRepository.findOne({
-      where: {
-        [entityKey]: boardId,
-        userId: id,
-      },
-    });
+    const isLikeExist: HumorLike | OnlineBoardLike =
+      await likeRepository.findOne({
+        where: {
+          [entityKey]: boardId,
+          userId: id,
+        },
+      });
 
     if (!isLikeExist) {
       const like = {

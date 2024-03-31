@@ -33,9 +33,9 @@ export class HumorLike {
 
   @Column({ type: 'timestamp' })
   @CreateDateColumn()
-  createAt: Date;
+  createdAt: Date;
 
   @Column({ type: 'timestamp' })
   @UpdateDateColumn()
-  updateAt: Date;
+  updatedAt: Date;
 }
