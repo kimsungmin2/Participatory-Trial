@@ -27,6 +27,9 @@ export class TrialHallOfFames {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
+  @Column({ type: 'varchar'})
+  totalVotes: number;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
