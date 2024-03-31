@@ -16,6 +16,7 @@ export class TrialsProcessor {
         this.trialQueue.process(async (job) => {
             const { trialId } = job.data;
             await this.trialsService.updateTimeDone(trialId)
+            console.log(`${trialId}번 재판 게시물이 비활성화 되었습니다.`)
         })
     }
 }
