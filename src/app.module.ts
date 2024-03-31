@@ -14,6 +14,7 @@ import { EmailModule } from './email/email.module';
 
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
+import { LikeModule } from './like/like.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -56,6 +57,7 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     S3Module,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { BoardType } from './board-type';
 
 @Injectable()
 export class S3Service {
@@ -17,18 +18,20 @@ export class S3Service {
     });
   }
 
-  async saveImages(files: Express.Multer.File[]) {
-    const uploadPromises = files.map((file) => this.imageUpload(file));
+  async saveImages(files: Express.Multer.File[], boardType: BoardType) {
+    const uploadPromises = files.map((file) =>
+      this.imageUpload(file, boardType),
+    );
     return await Promise.all(uploadPromises);
   }
 
-  async imageUpload(file: Express.Multer.File) {
+  async imageUpload(file: Express.Multer.File, boardType: BoardType) {
     const imageName = uuidv4();
 
     const ext = file.originalname.split('.').pop();
 
     const imageUrl = await this.imageUploadToS3(
-      `${imageName}.${ext}`,
+      `${boardType}/${imageName}.${ext}`,
       file,
       ext,
     );

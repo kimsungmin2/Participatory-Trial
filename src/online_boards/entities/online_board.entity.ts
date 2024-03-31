@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { OnlineBoardComments } from './online_board_comment.entity';
+import { OnlineBoardLike } from './online_board_like.entity';
 
 @Entity()
 export class OnlineBoards {
@@ -51,4 +52,13 @@ export class OnlineBoards {
     { cascade: true },
   )
   OnlineBoardComment: OnlineBoardComments[];
+
+  @OneToMany(
+    () => OnlineBoardLike,
+    (onlineBoardLike) => onlineBoardLike.onlineBoard,
+    {
+      cascade: true,
+    },
+  )
+  onlineBoardLike: OnlineBoardLike[];
 }

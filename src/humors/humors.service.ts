@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Service } from '../s3/s3.service';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
+import { BoardType } from '../s3/board-type';
 
 @Injectable()
 export class HumorsService {
@@ -30,7 +31,10 @@ export class HumorsService {
   ): Promise<HumorBoards> {
     let uploadResult: string[] = [];
     if (files.length !== 0) {
-      const uploadResults = await this.s3Service.saveImages(files);
+      const uploadResults = await this.s3Service.saveImages(
+        files,
+        BoardType.Humor,
+      );
       for (let i = 0; i < uploadResults.length; i++) {
         uploadResult.push(uploadResults[i].imageUrl);
       }

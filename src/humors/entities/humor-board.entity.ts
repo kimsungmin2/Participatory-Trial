@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
+import { HumorLike } from './humor_like.entity';
 
 @Entity()
 export class HumorBoards {
@@ -52,4 +53,9 @@ export class HumorBoards {
     cascade: true,
   })
   humorComment: HumorComments[];
+
+  @OneToMany(() => HumorLike, (humorLike) => humorLike.humorBoard, {
+    cascade: true,
+  })
+  humorLike: HumorLike[];
 }
