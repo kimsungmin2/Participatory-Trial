@@ -73,7 +73,7 @@ export class OnlineBoardsService {
     const foundUser = await this.usersService.findByUserId(userInfo.id);
     const foundBoard = await this.findBoardId(id);
 
-    if (foundBoard.id !== foundUser.id) {
+    if (foundBoard.userId !== foundUser.id) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
@@ -91,11 +91,12 @@ export class OnlineBoardsService {
     const foundUser = await this.usersService.findByUserId(userInfo.id);
     const foundBoard = await this.findBoardId(id);
 
-    if (foundBoard.id !== foundUser.id) {
+    if (foundBoard.userId !== foundUser.id) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
     await this.onlineBoardsRepository.softDelete({ id });
+
     return `This action removes a #${id} onlineBoard`;
   }
 
