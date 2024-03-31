@@ -61,7 +61,6 @@ export class HumorsService {
     try {
       const { page, limit } = paginationQueryDto;
       const skip = (page - 1) * limit;
-
       const humorBoards = await this.HumorBoardRepository.find({
         skip,
         take: limit,
@@ -69,7 +68,6 @@ export class HumorsService {
       if (humorBoards.length === 0) {
         throw new NotFoundException('더이상 게시물이 없습니다!');
       }
-
       return humorBoards;
     } catch (err) {
       throw new InternalServerErrorException(

@@ -39,8 +39,9 @@ export class LikeController {
   async create(
     @Body() likeInputDto: LikeInputDto,
     @UserInfo() user: Users,
+    boardId: number,
   ): Promise<HumorBoardReturnValue> {
-    const result = await this.likeService.create(likeInputDto, user);
+    const result = await this.likeService.like(likeInputDto, user, boardId);
 
     return {
       statusCode: HttpStatus.OK,

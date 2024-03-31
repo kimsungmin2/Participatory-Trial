@@ -20,5 +20,6 @@ import { OnlineBoards } from '../online_boards/entities/online_board.entity';
   ],
   controllers: [LikeController],
   providers: [LikeService],
+  exports: [LikeService],
 })
 export class LikeModule {}

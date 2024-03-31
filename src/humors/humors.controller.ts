@@ -30,10 +30,16 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
+import { BoardType } from '../s3/board-type';
+import { LikeService } from '../like/like.service';
+import { LikeInputDto } from '../like/dto/create-like.dto';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
-  constructor(private readonly humorsService: HumorsService) {}
+  constructor(
+    private readonly humorsService: HumorsService,
+    private readonly likeService: LikeService,
+  ) {}
 
   @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')
@@ -106,7 +112,7 @@ export class HumorsController {
 
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
   @UseGuards(AuthGuard('jwt'))
-  @Get(':id')
+  @Get('humor-board-id/:id')
   @ApiParam({
     name: 'id',
     required: true,
@@ -126,7 +132,7 @@ export class HumorsController {
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':id')
+  @Patch('humor-board-id/:humorBoardId')
   @ApiBody({
     description: '유머 게시물 수정',
     schema: {
@@ -138,46 +144,81 @@ export class HumorsController {
     },
   })
   @ApiParam({
-    name: 'id',
+    name: 'humorBoardId',
     required: true,
     description: '유머 게시물 ID',
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
   async updateHumorBoard(
-    @Param('id') id: number,
+    @Param('humorBoardId') humorBoardId: number,
     @Body() updateHumorDto: UpdateHumorDto,
     @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
     const updatedHumorBoard = await this.humorsService.updateHumorBoard(
-      id,
+      humorBoardId,
       updateHumorDto,
       user,
     );
     return {
       statusCode: HttpStatus.OK,
-      message: `${id}번 게시물 업데이트 성공`,
+      message: `${humorBoardId}번 게시물 업데이트 성공`,
       data: updatedHumorBoard,
     };
   }
   @ApiOperation({ summary: '유머 게시물 삭제' })
-  @Delete(':id')
+  @Delete('humor-board-id/:humorBoardId')
   @ApiParam({
-    name: 'id',
+    name: 'humorBoardId',
     required: true,
     description: '유머 게시물 ID',
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
   async removeHumorBoard(
-    @Param('id') id: number,
+    @Param('humorBoardId') humorBoardId: number,
     @UserInfo() user: Users,
   ): Promise<HumorBoardReturnValue> {
-    await this.humorsService.deleteHumorBoard(id, user);
+    await this.humorsService.deleteHumorBoard(humorBoardId, user);
 
     return {
       statusCode: HttpStatus.OK,
-      message: `${id}번 게시물 삭제 성공`,
+      message: `${humorBoardId}번 게시물 삭제 성공`,
+    };
+  }
+  //humors/25/like
+  @ApiOperation({ summary: '유머 게시판 좋아요/좋아요 취소' })
+  @ApiBody({
+    description: '좋아요/좋아요 취소',
+    schema: {
+      type: 'object',
+      properties: {
+        boardType: { type: 'string' },
+      },
+    },
+  })
+  @ApiParam({
+    name: 'humorBoardId',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/humor-board-id/:humorBoardId/like')
+  async like(
+    @Param('humorBoardId') humorBoardId: number,
+    @UserInfo() user: Users,
+    @Body() likeInputDto: LikeInputDto,
+  ): Promise<HumorBoardReturnValue> {
+    const result = await this.likeService.like(
+      likeInputDto,
+      user,
+      humorBoardId,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: result,
     };
   }
 }

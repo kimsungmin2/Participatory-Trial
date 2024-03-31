@@ -18,6 +18,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Users } from '../users/entities/user.entity';
 
 const mockedUser = {
   id: 1,
@@ -32,7 +33,7 @@ const mockedUser = {
   humorComment: [new HumorComments()],
   polticalDebateBoards: [new PolticalDebateBoards()],
   polticalDebateComments: [new PolticalDebateComments()],
-};
+} as Users;
 
 describe('HumorCommentsService', () => {
   let humorCommentsService: HumorCommentsService;
@@ -56,7 +57,6 @@ describe('HumorCommentsService', () => {
             delete: jest.fn(),
           },
         },
-
         {
           provide: getRepositoryToken(HumorComments),
           useValue: {
