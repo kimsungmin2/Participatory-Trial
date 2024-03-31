@@ -4,13 +4,19 @@ import { BoardType } from '../s3/board-type';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { deflate } from 'zlib';
 import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
 
 type boardTypes = HumorBoards | OnlineBoards;
+
+interface LikeEntity {
+  humorBoardId?: number;
+  onlineBoardId?: number;
+  userId: number;
+}
 
 @Injectable()
 export class LikeService {
@@ -30,7 +36,7 @@ export class LikeService {
 
     let boardRepository;
     let likeRepository;
-    let entityKey;
+    let entityKey: 'humorBoardId' | 'onlineBoardId';
 
     switch (boardType) {
       case BoardType.Humor:
@@ -46,7 +52,7 @@ export class LikeService {
       default:
         throw new NotFoundException(`${boardType}은 현재 지원되지 않습니다.`);
     }
-    const findBoard = await boardRepository.findOne({ id: boardId });
+    const findBoard = await boardRepository.findOneBy({ id: boardId });
     if (!findBoard) {
       throw new NotFoundException('게시물을 찾을 수 없습니다.');
     }
@@ -59,10 +65,12 @@ export class LikeService {
     });
 
     if (!isLikeExist) {
-      await likeRepository.save({
+      const like = {
         [entityKey]: boardId,
         userId: id,
-      });
+      } as DeepPartial<LikeEntity>;
+
+      await likeRepository.save(like);
       await boardRepository.increment({ id: boardId }, 'like', 1);
       return '좋아요 성공';
     } else {
@@ -70,17 +78,5 @@ export class LikeService {
       await boardRepository.decrement({ id: boardId }, 'like', 1);
       return '좋아요 취소 성공';
     }
-  }
-
-  findAll() {
-    return `This action returns all like`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} like`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} like`;
   }
 }

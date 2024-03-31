@@ -16,12 +16,25 @@ import { LikeInputDto } from './dto/create-like.dto';
 import { userInfo } from 'os';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { Users } from '../users/entities/user.entity';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('좋아요 기능')
 @UseGuards(AuthGuard('jwt'))
 @Controller('like')
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
+  @ApiOperation({ summary: '게시판 별 좋아요/좋아요 취소' })
+  @ApiBody({
+    description: '좋아요/좋아요 취소',
+    schema: {
+      type: 'object',
+      properties: {
+        boardId: { type: 'number' },
+        boardType: { type: 'string' },
+      },
+    },
+  })
   @Post()
   async create(
     @Body() likeInputDto: LikeInputDto,
@@ -33,20 +46,5 @@ export class LikeController {
       statusCode: HttpStatus.OK,
       message: result,
     };
-  }
-
-  @Get()
-  findAll() {
-    return this.likeService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.likeService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.likeService.remove(+id);
   }
 }
