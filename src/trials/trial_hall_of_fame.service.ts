@@ -27,29 +27,19 @@ export class TrialHallOfFameService {
 
 
 // 명예의 전당 매서드 일주일마다 업데이트
-@Cron(CronExpression.EVERY_WEEK)
+@Cron('0 2 * * 1')
 async updateHallOfFame() {
-  const lastWeekStart = new Date();
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7 - lastWeekStart.getDay())
-  lastWeekStart.setHours(0, 0, 0, 0);
-
-  const lastWeekEnd = new Date(lastWeekStart);
-  lastWeekEnd.setDate(lastWeekEnd.getDate() + 6)
-  lastWeekEnd.setHours(23, 59, 59, 999);
-
-  // 지난주에 진행된 투표 데이터를 조회
+  const { start, end } = this.getLastWeekRange();
   const lastWeekVotes = await this.votesRepository.find({
     where: {
-      createdAt: Between(lastWeekStart, lastWeekEnd),
+      createdAt : Between(start, end)
     },
   });
-
-  // 지난주에 진행된 재판 데이터를 조회
-  const lastWeekTrials= await this.trialsRepository.find({
-    where: {
-      createdAt: Between(lastWeekStart, lastWeekEnd)
-    },
-  });
+  const lastWeekTrials = await this.trialsRepository.find({
+    where : {
+      createdAt: Between(start, end)
+    }
+  })
 
   // 투표 기반으로 명예의 전당 집계
   // 투표 수 데이터 가공
@@ -71,11 +61,31 @@ async updateHallOfFame() {
 }
 
 
+private getLastWeekRange() {
+  // 1. 현재 날짜와 시간 laskWeekStart에 할당
+  const lastWeekStart = new Date(); // 현재 날짜와 시간 laskWeekStart에 할당
+  // 2. lastWeekStart의 날짜를 지난 주의 첫번째 날로 설정
+  // 2-1. lastWeekStart.getDate() -7 - lastWeekStart.getDay() : 현재 날짜(일) -7 에서 현재 요일을 뺸다. 즉 현재 날짜에서 7일빼고 지금 요일을 빼면 저번주 일요일이 나옴(일요일이 0이고 토요일이 6)
+  lastWeekStart.setDate(lastWeekStart.getDate() -7 - lastWeekStart.getDay()); 
+  // 2-2. lastWeekStart의 시간을 00:00:00.000으로 설정한다.
+
+  // 즉 2번 과정은 lastWeekStart를 저번주 일요일의 시작시간으로 만든다.
+  lastWeekStart.setHours(0, 0, 0, 0);
+  // 3. lastWeekEnd변수에 할당
+  const lastWeekEnd = new Date(lastWeekStart);
+  // 4. lastWeekEnd의 날짜를 6일뒤로 설정
+  lastWeekEnd.setDate(lastWeekEnd.getDate() + 6);
+  // 5. 토요일의 마지막 시간으로 설정함
+  lastWeekEnd.setHours(23, 59, 59, 999);
+
+  return { start: lastWeekStart, end: lastWeekEnd }
+}
 
 
-// 날짜 추상화 매서드
+// 날짜 추상화 매서드(getThisMonthRange 메서드는 이번 달의 시작과 끝을 정확히 나타내는 날짜 범위를 제공)
 private getThisMonthRange(){
   const start = new Date();
+  // start의 날짜를 이번 달의 첫 번째 날로 설정한다. 이는 Date 객체의 setDate 메서드를 사용하여 달의 날짜를 1로 설정함으로써 달의 시작을 나타낸다.
   start.setDate(1); // 이번달 첫쨰날
   start.setHours(0, 0, 0, 0) // 자정
 
@@ -150,7 +160,7 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
     const newHallOfFameEntry = new TrialHallOfFames();
     newHallOfFameEntry.id = data.id // vote table의 id임다
     newHallOfFameEntry.userId = data.trial.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
-    newHallOfFameEntry.title = data.title1 + 'Vs' + data.title2
+    newHallOfFameEntry.title = `${data.title1} Vs ${data.title2}`
     newHallOfFameEntry.content = data.trial.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
     newHallOfFameEntry.totalVotes = data.voteCount1 + data.voteCount2;
     newHallOfFameEntry.createdAt = new Date();
