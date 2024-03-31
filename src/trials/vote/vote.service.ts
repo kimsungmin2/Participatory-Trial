@@ -1,5 +1,5 @@
 // votes.service.ts
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Votes } from '../entities/vote.entity';
@@ -110,4 +110,32 @@ export class VotesService {
     }
     return { VoteOk: true}
 }
+
+  // 투표 삭제 매서드
+  async canselEachVote(uservoteId: number)
+  {
+     // 1. 재판 삭제(일반적으로 remove보다 delete가 더 빠르다.)
+     const deleteResult = await this.eachVoteRepository.delete({id: uservoteId});
+
+     // 2. 없으면 404
+     if(deleteResult.affected === 0)
+     {
+       throw new NotFoundException('찾는 재판이 없습니다. 또는 이미 삭제되었습니다.')
+     }
+
+     return deleteResult;
+  }
+
+
+
+  // 투표 했는지 검사 (isvoteGuard에서 사용함)
+  async checkIsUserVoteGuard(userVoteId: number, userId: number) {
+    return await this.eachVoteRepository.findOne({
+      where: {
+        id: userVoteId,
+        userId: userId,
+      }
+    })
+  }
 }
+
