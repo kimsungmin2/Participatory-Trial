@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
@@ -14,7 +25,7 @@ import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
 
-@ApiTags("Trials")
+@ApiTags('Trials')
 @Controller('trials')
 export class TrialsController {
   constructor(
@@ -45,15 +56,19 @@ export class TrialsController {
   async create(
     @UserInfo() userInfo: UserInfos,
     @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
-    ) { // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
+  ) {
+    // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
 
-    const data = await this.trialsService.createTrial(userInfo.id, createTrialDto)
+    const data = await this.trialsService.createTrial(
+      userInfo.id,
+      createTrialDto,
+    );
 
-    return  {
+    return {
       statusCode: HttpStatus.CREATED,
-      message: "재판 생성에 성공하였습니다.",
-      data
-    }
+      message: '재판 생성에 성공하였습니다.',
+      data,
+    };
   }
 
   // 모든 판례 조회 API 
@@ -76,6 +91,7 @@ export class TrialsController {
   async getAllDetails(
     @Query('cursor') cursor: string,
     @Query('limit') limit: string,
+
     ){
       let cursorNumber = parseInt(cursor)
       let limitNumber = parseInt(limit)
@@ -107,6 +123,8 @@ export class TrialsController {
     return await this.trialsService.findKeyWordDetails(name)
   }
 
+    return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
+  }
 
   // 판결 유형으로 조회 API(일반 인덱싱 구문)
   @ApiOperation({ summary: " 판례 유형 조회 API" })
@@ -129,20 +147,17 @@ export class TrialsController {
   @ApiBearerAuth("access-token")
   @UseGuards(AuthGuard('jwt'))
   @Get('/myTrials')
-  async findByUserTrials(
-    @UserInfo() userInfo :UserInfos,
-  ) { // 유저 아이디만 필요함
+  async findByUserTrials(@UserInfo() userInfo: UserInfos) {
+    // 유저 아이디만 필요함
 
-    const data = await this.trialsService.findByUserTrials(userInfo.id)
+    const data = await this.trialsService.findByUserTrials(userInfo.id);
 
-    return  {
+    return {
       statusCode: HttpStatus.CREATED,
-      message: "내 재판 조회에 성공하였습니다.",
-      data
-    }
+      message: '내 재판 조회에 성공하였습니다.',
+      data,
+    };
   }
-
-
 
   // 모든 재판 조회 API(회원/비회원 구분 없음)
   @ApiOperation({ summary: " 모든 게시판 조회 재판 게시물 API" })
@@ -150,13 +165,12 @@ export class TrialsController {
   async findAllTrials() {
     const data = await this.trialsService.findAllTrials();
 
-    return  {
+    return {
       statusCode: HttpStatus.OK,
-      message: "모든 조회에 성공하였습니다.",
-      data
-    }
+      message: '모든 조회에 성공하였습니다.',
+      data,
+    };
   }
-
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
   @ApiOperation({ summary: " 특정 재판 조회 API (회원/비회원 구분 X)" })
@@ -167,18 +181,15 @@ export class TrialsController {
     type: Number
   })
   @Get(':trialsId')
-  async findOneByTrialsId(
-    @Param('trialsId') id: number,
-  ) {
+  async findOneByTrialsId(@Param('trialsId') id: number) {
     const data = await this.trialsService.findOneByTrialsId(+id);
 
-    return  {
+    return {
       statusCode: HttpStatus.OK,
-      message: "재판 검색에 성공하였습니다.",
-      data
-    }
+      message: '재판 검색에 성공하였습니다.',
+      data,
+    };
   }
-
 
   // 특정 재판 수정 API(내 재판 수정)
   @ApiOperation({ summary: " 특정 재판 수정 API(내 재판 수정)" })
@@ -204,17 +215,21 @@ export class TrialsController {
   @UseGuards(MyTrialsGuard)
   @Patch(':trialsId')
   async update(
-   @Param('trialsId') id: string,
-   @Body() updateTrialDto: UpdateTrialDto,
-   @UserInfo() userInfo :UserInfos,
-   ) {
-    const data = await this.trialsService.updateTrials(userInfo.id, +id, updateTrialDto);
+    @Param('trialsId') id: string,
+    @Body() updateTrialDto: UpdateTrialDto,
+    @UserInfo() userInfo: UserInfos,
+  ) {
+    const data = await this.trialsService.updateTrials(
+      userInfo.id,
+      +id,
+      updateTrialDto,
+    );
 
-    return  {
+    return {
       statusCode: HttpStatus.OK,
-      message: "재판 수정에 성공하였습니다.",
-      data
-    }
+      message: '재판 수정에 성공하였습니다.',
+      data,
+    };
   }
 
   // 내 재판 삭제 API

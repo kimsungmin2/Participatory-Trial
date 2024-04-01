@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -37,6 +42,7 @@ export class TrialsService {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
+    
     await queryRunner.startTransaction();
     try{
       // 1. Dto에서 title, content 뽑아내기
@@ -51,10 +57,10 @@ export class TrialsService {
       }
 
       // 3. 재판 생성
-      const newTrial = queryRunner.manager.create(Trials, data)
+      const newTrial = queryRunner.manager.create(Trials, data);
 
       // 4. 재판 저장
-      const savedTrial = await queryRunner.manager.save(Trials, newTrial)
+      const savedTrial = await queryRunner.manager.save(Trials, newTrial);
 
       // 5. 불 큐로 지연시간 후 찍어줌
       const delay = trialTime - Date.now();
@@ -72,15 +78,19 @@ export class TrialsService {
 
     console.log("재판 생성 에러:", error)
 
-    throw new InternalServerErrorException(
-      "재판 생성 중 오류가 발생했습니다."
-    )
-  } finally {
+      return savedTrial;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
 
-    await queryRunner.release()
+      console.log('재판 생성 에러:', error);
 
+      throw new InternalServerErrorException(
+        '재판 생성 중 오류가 발생했습니다.',
+      );
+    } finally {
+      await queryRunner.release();
+    }
   }
-}
 
 // 유저Id로 모든 재판 찾기 매서드(유저 내 재판 조회)
 async findByUserTrials(userId: number) {
@@ -135,43 +145,40 @@ async findByUserTrials(userId: number) {
     await queryRunner.startTransaction();
     try{
       // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
-      const existTrial = await this.findOneByTrialsId(trialsId)
-      
+      const existTrial = await this.findOneByTrialsId(trialsId);
+
       // 2. 내 재판이 맞는지 유효성 검사
-      if(existTrial.userId !== userId) {
-        throw new NotAcceptableException('수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.')
+      if (existTrial.userId !== userId) {
+        throw new NotAcceptableException(
+          '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
+        );
       }
 
       // 3. 객체의 속성 업데이트
-      Object.assign(existTrial, updateTrialDto)
+      Object.assign(existTrial, updateTrialDto);
 
       // 4. 수정한거 저장
-      await queryRunner.manager.save(Trials, existTrial)
-      
+      await queryRunner.manager.save(Trials, existTrial);
+
       // 5. 트랜잭션 종료
       await queryRunner.commitTransaction();
 
-      return existTrial
-
-    } catch(error){
-
+      return existTrial;
+    } catch (error) {
       await queryRunner.rollbackTransaction();
-  
-      console.log("재판 수정 에러:", error)
-  
+
+      console.log('재판 수정 에러:', error);
+
       throw new InternalServerErrorException(
-        "재판 수정 중 오류가 발생했습니다."
-      )
+        '재판 수정 중 오류가 발생했습니다.',
+      );
     } finally {
-  
-      await queryRunner.release()
-  
+      await queryRunner.release();
     }
   }
 
   // 내 재판 삭제
   async deleteTrials(id: number) {
-
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction()
@@ -186,35 +193,39 @@ async findByUserTrials(userId: number) {
 
       // 3. 트랜잭션 종료
       await queryRunner.commitTransaction();
-    } catch(error){
-
+    } catch (error) {
       await queryRunner.rollbackTransaction();
-  
-      console.log("재판 삭제 에러:", error)
-  
+
+      console.log('재판 삭제 에러:', error);
+
       throw new InternalServerErrorException(
-        "재판 삭제 중 오류가 발생했습니다."
-      )
+        '재판 삭제 중 오류가 발생했습니다.',
+      );
     } finally {
-  
-      await queryRunner.release()
-  
-    }   
+      await queryRunner.release();
+    }
   }
 
   // 내 재판인지 찾기 매서드
   async isMyTrials(userId: number, trialsId: number) {
     return await this.trialsRepository.findOne({
-      where : {
+      where: {
         id: trialsId,
         user: {
           id: userId,
         },
-      }
-    })
+      },
+    });
   }
 
-
+  // 모든 판례 조회
+  async getAllDetails(cursor: number, limit: number) {
+    const queryBuilder = this.panryeRepository
+      .createQueryBuilder('panrye')
+      .cache('panrye')
+      .orderBy('panrye.판례정보일련번호', 'ASC')
+      .limit(limit);
+    
   // 모든 판례 조회 매서드
   async getAllDetails(cursor: number, limit: number) {
     const queryBuilder = this.panryeRepository.createQueryBuilder('panrye')
@@ -389,4 +400,7 @@ async findByUserTrials(userId: number) {
 
     return trial
   }
+
+  // 판례 조회
+  async getCaseDetails(caseId: string) {}
 }

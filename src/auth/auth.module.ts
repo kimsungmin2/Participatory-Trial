@@ -12,6 +12,9 @@ import { JwtStrategy } from '../utils/strategy/jwt.strategy';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
+import { GoogleStrategy } from '../utils/strategy/google.strategy';
+import { EmailModule } from '../email/email.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -21,8 +24,12 @@ import { EmailService } from '../email/email.service';
       }),
       inject: [ConfigService],
     }),
+    BullModule.registerQueue({
+      name: 'email',
+    }),
     TypeOrmModule.forFeature([Users, UserInfos]),
     UsersModule,
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -32,6 +39,7 @@ import { EmailService } from '../email/email.service';
     JwtStrategy,
     UsersService,
     EmailService,
+    GoogleStrategy,
   ],
 })
 export class AuthModule {}

@@ -19,7 +19,7 @@ import { Role } from '../types/userRole.type';
 import { EachVote } from 'src/trials/entities/Uservote.entity';
 
 @Entity({
-  name: "users"
+  name: 'users',
 })
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
@@ -47,7 +47,7 @@ export class Users {
   onlineBoardComment: OnlineBoardComments[];
 
   @OneToMany(() => Trials, (trial) => trial.user, {
-    eager: true
+    eager: true,
   })
   trial: Trials[];
 

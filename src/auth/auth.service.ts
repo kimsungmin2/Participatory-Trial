@@ -1,6 +1,8 @@
 import {
   ConflictException,
+  Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { compare, hash } from 'bcrypt';
@@ -11,11 +13,9 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { DataSource, Repository } from 'typeorm';
 import { EmailService } from '../email/email.service';
 import * as _ from 'lodash';
-import { Role } from '../users/types/userRole.type';
 import { Users } from '../users/entities/user.entity';
-import { SignUpDto } from './dto/sign.dto';
 import { VerifiCation } from './dto/verification.dto';
-import { LoginDto } from './dto/login.dto';
+import { CACHE_MANAGER, Cache, CacheKey } from '@nestjs/cache-manager';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +26,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly dataSource: DataSource,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async validateUser(email: string) {
@@ -36,22 +37,29 @@ export class AuthService {
     return user;
   }
 
-  async createToken(id: string) {
-    const userEmail = await this.usersService.findByEmail(id);
+  async createToken(email: string) {
+    const userEmail = await this.usersService.findByEmail(email);
 
-    const payload = { userEmail };
+    const refreshTokenCacheKey = `loginId:${userEmail.id}`;
+    const payload = { sub: userEmail.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: '12h',
+      expiresIn: 1000 * 60 * 60 * 12,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.REFRESH_SECRET,
-      expiresIn: '7d',
+      expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
 
-    return { accessToken, refreshToken };
+    await this.cacheManager.set(
+      refreshTokenCacheKey,
+      refreshToken,
+      1000 * 60 * 60 * 24 * 7,
+    );
+
+    return { accessToken };
   }
 
   async createProviderUser(email: string, nickName: string, provider: string) {
@@ -61,7 +69,7 @@ export class AuthService {
 
     try {
       const user = await queryRunner.manager.getRepository(Users).save({});
-      console.log(user);
+
       const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
         id: user.id,
         email,
@@ -69,7 +77,6 @@ export class AuthService {
         nickName,
         provider,
         birth: 'default',
-        verifiCationCode: 0,
         emailVerified: true,
         user: user,
       });
@@ -83,104 +90,144 @@ export class AuthService {
     }
   }
 
-  async signUp(signUpdto: SignUpDto) {
+  async AuthenticationNumberCache(email: string) {
+    const code = Math.floor(Math.random() * 900000) + 100000;
+
+    await this.cacheManager.set(email, code, 1000 * 60 * 60 * 3);
+
+    await this.emailService.queueVerificationEmail(email, code);
+  }
+
+  async signUp(
+    email: string,
+    password: string,
+    passwordConfirm: string,
+    nickName: string,
+    birth: string,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException(
+        '이미 해당 이메일로 가입된 사용자가 있습니다!',
+      );
+    }
+    if (password !== passwordConfirm) {
+      throw new UnauthorizedException(
+        '비밀번호가 체크비밀번호와 일치하지 않습니다.',
+      );
+    }
 
     try {
-      const existingUser = await this.usersService.findByEmail(signUpdto.email);
-      if (existingUser) {
-        throw new ConflictException(
-          '이미 해당 이메일로 가입된 사용자가 있습니다!',
-        );
-      }
-      if (signUpdto.password !== signUpdto.passwordConfirm) {
-        throw new UnauthorizedException(
-          '비밀번호가 체크비밀번호와 일치하지 않습니다.',
-        );
-      }
-
-      const code = Math.floor(Math.random() * 900000) + 100000;
-      await this.emailService.sendVerificationToEmail(signUpdto.email, code);
-      const hashedPassword = await hash(signUpdto.password, 10);
+      const hashedPassword = await hash(password, 10);
 
       const user = await queryRunner.manager.getRepository(Users).save({});
 
-      await queryRunner.manager.getRepository(UserInfos).save({
+      const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
         id: user.id,
-        email: signUpdto.email,
+        email: email,
         password: hashedPassword,
-        nickName: signUpdto.nickName,
-        birth: signUpdto.birth,
-        verifiCationCode: code,
+        nickName: nickName,
+        birth: birth,
         user: user,
       });
 
       await queryRunner.commitTransaction();
-      return user;
+
+      await this.AuthenticationNumberCache(email);
+
+      return userInfo;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
   async verifiCationEmail(verifiCation: VerifiCation) {
-    const user = await this.usersService.findByEmail(verifiCation.email);
-    if (user.verifiCationCode !== verifiCation.code) {
-      throw new ConflictException('인증 코드가 일치하지 않습니다.');
-    }
-    await this.usersInfoRepository.update(user.id, {
-      emailVerified: true,
-    });
-  }
+    const code = await this.cacheManager.get<number>(verifiCation.email);
 
-  async adminSignUp(signUpdto: SignUpDto) {
-    const existingUser = await this.usersService.findByEmail(signUpdto.email);
-    if (existingUser) {
-      throw new ConflictException(
-        '이미 해당 이메일로 가입된 사용자가 있습니다!',
+    const user = await this.usersService.findByEmail(verifiCation.email);
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
+
+    if (!code) {
+      throw new NotFoundException(
+        '인증 코드가 만료되었거나 존재하지 않습니다.',
       );
     }
 
-    const hashedPassword = await hash(signUpdto.password, 10);
-    await this.usersInfoRepository.save({
-      email: signUpdto.email,
-      password: hashedPassword,
-      nickName: signUpdto.nickName,
-      role: Role.Admin,
-    });
+    if (code !== verifiCation.code) {
+      throw new ConflictException('인증 코드가 일치하지 않습니다.');
+    }
+
+    await this.usersInfoRepository.update(user.id, { emailVerified: true });
+
+    await this.cacheManager.del(verifiCation.email);
   }
 
-  async login(loginDto: LoginDto) {
+  async login(email: string, password: string) {
     const user = await this.usersInfoRepository.findOne({
       select: ['id', 'email', 'password', 'emailVerified'],
-      where: { email: loginDto.email },
+      where: { email: email },
     });
-    if (user.emailVerified === false) {
-      throw new UnauthorizedException('아직 인증이 되지 않은 회원입니다.');
-    }
+
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');
     }
-
-    if (!(await compare(loginDto.password, user.password))) {
-      throw new UnauthorizedException('비밀번호를 확인해주세요.');
+    if (user.emailVerified === false) {
+      throw new UnauthorizedException('아직 인증이 되지 않은 회원입니다.');
     }
 
-    const payload = { sub: user.id };
+    if (!(await compare(password, user.password))) {
+      throw new UnauthorizedException('비밀번호를 확인해주세요.');
+    }
+    const payload = { email, sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: '12h',
+      expiresIn: 1000 * 60 * 60 * 12,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: process.env.REFRESH_SECRET,
-      expiresIn: '7d',
+      expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
+    const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
+
+    await this.cacheManager.set(
+      refreshTokenCacheKey,
+      refreshToken,
+      1000 * 60 * 60 * 24 * 7,
+    );
+    return { accessToken };
+  }
+
+  async refreshToken(oldRefreshToken: string) {
+    const userId = await this.cacheManager.get(
+      `refresh_token:${oldRefreshToken}`,
+    );
+    if (!userId) throw new UnauthorizedException('리프레시 토큰이 없음니다');
+
+    const accessToken = this.jwtService.sign(
+      { userId },
+      { expiresIn: 1000 * 60 * 60 * 24 },
+    );
+    const refreshToken = this.jwtService.sign(
+      { userId },
+      { expiresIn: 1000 * 60 * 60 * 24 * 7 },
+    );
+
+    await this.cacheManager.del(`refresh_token:${oldRefreshToken}`);
+    await this.cacheManager.set(
+      `refresh_token:${refreshToken}`,
+      refreshToken,
+      1000 * 60 * 60 * 24 * 7,
+    );
+
     return { accessToken, refreshToken };
   }
 }
