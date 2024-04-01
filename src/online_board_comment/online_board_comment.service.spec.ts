@@ -46,7 +46,7 @@ describe('OnlineBoardCommentService', () => {
     );
   });
 
-  it('should create board comment', () => {
+  it('should create board comment', async () => {
     const onlineBoardId: number = 1;
 
     const createOnlineBoardCommentDto: CreateOnlineBoardCommentDto = {
@@ -99,6 +99,14 @@ describe('OnlineBoardCommentService', () => {
       .mockResolvedValue(onlineBoard);
 
     jest.spyOn(repository, 'save').mockResolvedValue(expectedValue);
+
+    const result = await service.createComment(
+      onlineBoardId,
+      createOnlineBoardCommentDto,
+      userInfo,
+    );
+
+    expect(result).toEqual(expectedValue);
   });
 
   it('should find all board comments', async () => {
@@ -136,6 +144,10 @@ describe('OnlineBoardCommentService', () => {
       .mockResolvedValue(onlineBoard);
 
     jest.spyOn(repository, 'findBy').mockResolvedValue(expectedValue);
+
+    const result = await service.findAllComments(onlineBoardId);
+
+    expect(result).toEqual(expectedValue);
   });
 
   it('should update a board comment', async () => {
@@ -146,20 +158,6 @@ describe('OnlineBoardCommentService', () => {
 
     const updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto = {
       content: 'content',
-    };
-
-    const onlineBoard: OnlineBoards = {
-      id: paramOnlineBoardComment.onlineBoardId,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
-      top_comments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-      OnlineBoardComment: null,
     };
 
     const userInfo: UserInfos = {
@@ -176,7 +174,35 @@ describe('OnlineBoardCommentService', () => {
       user: null,
     };
 
-    const onlineBoardComment: OnlineBoardComments = {
+    const foundBoard: OnlineBoards = {
+      id: paramOnlineBoardComment.onlineBoardId,
+      userId: 1,
+      title: 'title',
+      content: 'content',
+      view: 1,
+      like: 1,
+      top_comments: 'string',
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      OnlineBoardComment: null,
+    };
+
+    const foundUser: UserInfos = {
+      id: userInfo.id,
+      email: 'example@example.com',
+      password: 'password123',
+      nickName: 'JohnDoe',
+      birth: '1990-01-01',
+      provider: 'local',
+      verifiCationCode: 1,
+      emailVerified: false,
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+    };
+
+    const foundComment: OnlineBoardComments = {
       id: paramOnlineBoardComment.commentId,
       onlineBoardId: paramOnlineBoardComment.onlineBoardId,
       content: 'content',
@@ -187,34 +213,26 @@ describe('OnlineBoardCommentService', () => {
       onlineBoard: null,
     };
 
-    // const expectedValue: OnlineBoardComments = {
-    //   id: paramOnlineBoardComment.commentId,
-    //   onlineBoardId: paramOnlineBoardComment.onlineBoardId,
-    //   content: updateOnlineBoardCommentDto.content,
-    //   userId: 1,
-    //   createdAt: new Date(),
-    //   updatedAt: new Date(),
-    //   user: null,
-    //   onlineBoard: null,
-    // };
-
-    const expectedValue: UpdateResult = {
-      raw: {}, // 테스트에서 사용하지 않는 객체라서 빈 객체로 설정
-      affected: 1, // 영향을 받은 row의 수
-      generatedMaps: [], // 테스트에서 사용하지 않는 배열이라서 빈 배열로 설정
+    const expectedResult: UpdateResult = {
+      raw: {},
+      generatedMaps: [],
+      affected: 1,
     };
 
     jest
       .spyOn(onlineBoardsService, 'findBoardId')
-      .mockResolvedValue(onlineBoard);
+      .mockResolvedValue(foundBoard);
+    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
+    jest.spyOn(service, 'findCommentById').mockResolvedValue(foundComment);
+    jest.spyOn(repository, 'update').mockResolvedValue(expectedResult);
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+    const result = await service.updateComment(
+      paramOnlineBoardComment,
+      updateOnlineBoardCommentDto,
+      userInfo,
+    );
 
-    jest
-      .spyOn(service, 'findCommentById')
-      .mockResolvedValue(onlineBoardComment);
-
-    jest.spyOn(repository, 'update').mockResolvedValue(expectedValue);
+    expect(result.affected).toBe(1);
   });
 
   it('should remove a board comment', async () => {
