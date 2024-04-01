@@ -11,9 +11,22 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { Users } from './users/entities/user.entity';
+import { UserInfos } from './users/entities/user-info.entity';
+import { Trials } from './trials/entities/trial.entity';
+import { Votes } from './trials/entities/vote.entity';
+import { OnlineBoardComments } from './online_boards/entities/online_board_comment.entity';
+import { OnlineBoards } from './online_boards/entities/online_board.entity';
+import { HumorComments } from './humors/entities/humor_comment.entity';
+import { HumorBoards } from './humors/entities/humor.entity';
+import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
+import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { BullModule } from '@nestjs/bull';
-import { CacheConfigService } from './cache/config';
+import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
+import { CacheConfigService } from './cache/cache.config';
+
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -47,7 +60,7 @@ export const typeOrmModuleOptions = {
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useClass: CacheConfigService,
+      useClass: CacheConfigService
     }),
     BullModule.forRoot({
       redis: {
@@ -55,6 +68,7 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -63,6 +77,7 @@ export const typeOrmModuleOptions = {
     PolticalDebatesModule,
     AuthModule,
     EmailModule,
+    VoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

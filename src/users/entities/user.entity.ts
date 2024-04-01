@@ -16,6 +16,7 @@ import { HumorComments } from '../../humors/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';
+import { EachVote } from 'src/trials/entities/Uservote.entity';
 
 @Entity({
   name: 'users',
@@ -69,4 +70,11 @@ export class Users {
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];
+
+  @OneToMany(
+    () => EachVote,
+    (eachVote) => eachVote.user,
+    { cascade: true },
+  )
+  eachVote: EachVote[];
 }
