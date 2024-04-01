@@ -2,17 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from './user.entity';
-import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from '../../online_boards/entities/online_board_comment.entity';
-import { Trials } from '../../trials/entities/trial.entity';
-import { HumorBoards } from '../../humors/entities/humor.entity';
 
-@Entity()
+@Entity({ name: 'report' })
 export class Reports {
   @PrimaryGeneratedColumn()
   id: number;
@@ -21,19 +14,19 @@ export class Reports {
   content: string;
 
   @Column()
-  user_id: number;
+  userId: number;
 
   @Column()
-  onlineBoard_id: number;
+  onlineBoardId: number;
 
   @Column()
-  onlineBoardComment_id: number;
+  onlineBoardCommentId: number;
 
   @Column()
-  trial_id: number;
+  trialId: number;
 
   @Column()
-  humorBoard_id: number;
+  humorBoardId: number;
 
   @CreateDateColumn()
   createdAt: Date;
