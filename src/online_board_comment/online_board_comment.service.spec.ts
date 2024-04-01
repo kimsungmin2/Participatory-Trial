@@ -8,7 +8,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
-import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 
 describe('OnlineBoardCommentService', () => {
@@ -74,7 +73,7 @@ describe('OnlineBoardCommentService', () => {
       content: createOnlineBoardCommentDto.content,
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -120,11 +119,12 @@ describe('OnlineBoardCommentService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     const expectedValue = [
@@ -152,60 +152,15 @@ describe('OnlineBoardCommentService', () => {
   });
 
   it('should update a board comment', async () => {
-    const paramOnlineBoardComment: ParamOnlineBoardComment = {
-      onlineBoardId: 1,
-      commentId: 1,
-    };
+    const commentId = 1;
 
     const updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto = {
       content: 'content',
     };
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
-    const foundBoard: OnlineBoards = {
-      id: paramOnlineBoardComment.onlineBoardId,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
-      top_comments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-      OnlineBoardComment: null,
-    };
-
-    const foundUser: UserInfos = {
-      id: userInfo.id,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
     const foundComment: OnlineBoardComments = {
-      id: paramOnlineBoardComment.commentId,
-      onlineBoardId: paramOnlineBoardComment.onlineBoardId,
+      id: commentId,
+      onlineBoardId: 1,
       content: 'content',
       userId: 1,
       createdAt: new Date(),
@@ -220,59 +175,23 @@ describe('OnlineBoardCommentService', () => {
       affected: 1,
     };
 
-    jest
-      .spyOn(onlineBoardsService, 'findBoardId')
-      .mockResolvedValue(foundBoard);
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
     jest.spyOn(service, 'findCommentById').mockResolvedValue(foundComment);
     jest.spyOn(repository, 'update').mockResolvedValue(expectedResult);
 
     const result = await service.updateComment(
-      paramOnlineBoardComment,
+      commentId,
       updateOnlineBoardCommentDto,
-      userInfo,
     );
 
     expect(result.affected).toBe(1);
   });
 
   it('should remove a board comment', async () => {
-    const paramOnlineBoardComment: ParamOnlineBoardComment = {
-      onlineBoardId: 1,
-      commentId: 1,
-    };
-
-    const onlineBoard: OnlineBoards = {
-      id: paramOnlineBoardComment.onlineBoardId,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
-      top_comments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-      OnlineBoardComment: null,
-    };
-
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
+    const commentId = 1;
 
     const onlineBoardComment: OnlineBoardComments = {
-      id: paramOnlineBoardComment.commentId,
-      onlineBoardId: paramOnlineBoardComment.onlineBoardId,
+      id: commentId,
+      onlineBoardId: 1,
       content: 'content',
       userId: 1,
       createdAt: new Date(),
@@ -282,20 +201,17 @@ describe('OnlineBoardCommentService', () => {
     };
 
     jest
-      .spyOn(onlineBoardsService, 'findBoardId')
-      .mockResolvedValue(onlineBoard);
-
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
-
-    jest
       .spyOn(service, 'findCommentById')
       .mockResolvedValue(onlineBoardComment);
 
-    jest.spyOn(repository, 'softDelete').mockResolvedValue(null);
+    jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
+    const result = await service.removeComment(commentId);
+
+    expect(result).toEqual(`This action removes a #${commentId} onlineBoard`);
   });
 
   it('should find comment by Id', async () => {
-    const commentId: number = 1;
+    const commentId = 1;
 
     const expectedValue: OnlineBoardComments = {
       id: commentId,
@@ -309,5 +225,9 @@ describe('OnlineBoardCommentService', () => {
     };
 
     jest.spyOn(repository, 'findOneBy').mockResolvedValue(expectedValue);
+
+    const result = await service.findCommentById(commentId);
+
+    expect(result).toEqual(expectedValue);
   });
 });

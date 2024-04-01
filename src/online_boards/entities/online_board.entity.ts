@@ -33,7 +33,7 @@ export class OnlineBoards {
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

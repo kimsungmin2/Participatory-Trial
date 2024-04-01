@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -72,11 +76,11 @@ export class OnlineBoardCommentService {
   async removeComment(commentId: number) {
     const foundComment = await this.findCommentById(commentId);
 
-    const removeComment = await this.onlineBoardCommentRepository.softDelete({
+    await this.onlineBoardCommentRepository.softDelete({
       id: foundComment.id,
     });
 
-    return removeComment;
+    return `This action removes a #${commentId} onlineBoard`;
   }
 
   // 댓글의 유저 조회
@@ -90,5 +94,15 @@ export class OnlineBoardCommentService {
     }
 
     return foundComment;
+  }
+
+  async verifyCommentOwner(userId: number, commentId: number) {
+    const foundCommentOwner = await this.onlineBoardCommentRepository.findOne({
+      where: { userId, id: commentId },
+    });
+
+    if (!foundCommentOwner) {
+      throw new ForbiddenException('접근 권한이 없습니다.');
+    }
   }
 }

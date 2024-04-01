@@ -35,7 +35,7 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-
+console.log(typeOrmModuleOptions);
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -72,10 +72,6 @@ export const typeOrmModuleOptions = {
     S3Module,
     LikeModule,
     OnlineBoardCommentModule,
-    AuthModule,
-    EmailModule,
-    AuthModule,
-    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
