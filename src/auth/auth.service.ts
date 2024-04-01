@@ -52,6 +52,7 @@ export class AuthService {
       secret: process.env.REFRESH_SECRET,
       expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
+
     await this.cacheManager.set(
       refreshTokenCacheKey,
       refreshToken,
@@ -76,7 +77,6 @@ export class AuthService {
         nickName,
         provider,
         birth: 'default',
-        verifiCationCode: 0,
         emailVerified: true,
         user: user,
       });
@@ -125,13 +125,12 @@ export class AuthService {
 
       const user = await queryRunner.manager.getRepository(Users).save({});
 
-      await queryRunner.manager.getRepository(UserInfos).save({
+      const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
         id: user.id,
         email: email,
         password: hashedPassword,
         nickName: nickName,
         birth: birth,
-        verifiCationCode: 0,
         user: user,
       });
 
@@ -139,7 +138,7 @@ export class AuthService {
 
       await this.AuthenticationNumberCache(email);
 
-      return user;
+      return userInfo;
     } catch (error) {
       await queryRunner.rollbackTransaction();
     } finally {
@@ -186,7 +185,6 @@ export class AuthService {
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
-    const refreshTokenCacheKey = `loginId:${user.id}`;
     const payload = { email, sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -198,6 +196,7 @@ export class AuthService {
       secret: process.env.REFRESH_SECRET,
       expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
+    const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
 
     await this.cacheManager.set(
       refreshTokenCacheKey,
@@ -205,5 +204,30 @@ export class AuthService {
       1000 * 60 * 60 * 24 * 7,
     );
     return { accessToken };
+  }
+
+  async refreshToken(oldRefreshToken: string) {
+    const userId = await this.cacheManager.get(
+      `refresh_token:${oldRefreshToken}`,
+    );
+    if (!userId) throw new UnauthorizedException('리프레시 토큰이 없음니다');
+
+    const accessToken = this.jwtService.sign(
+      { userId },
+      { expiresIn: 1000 * 60 * 60 * 24 },
+    );
+    const refreshToken = this.jwtService.sign(
+      { userId },
+      { expiresIn: 1000 * 60 * 60 * 24 * 7 },
+    );
+
+    await this.cacheManager.del(`refresh_token:${oldRefreshToken}`);
+    await this.cacheManager.set(
+      `refresh_token:${refreshToken}`,
+      refreshToken,
+      1000 * 60 * 60 * 24 * 7,
+    );
+
+    return { accessToken, refreshToken };
   }
 }

@@ -18,7 +18,7 @@ import { PolticalDebateComments } from '../../poltical_debates/entities/poltical
 import { Role } from '../types/userRole.type';
 
 @Entity({
-  name: "users"
+  name: 'users',
 })
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
@@ -46,7 +46,7 @@ export class Users {
   onlineBoardComment: OnlineBoardComments[];
 
   @OneToMany(() => Trials, (trial) => trial.user, {
-    eager: true
+    eager: true,
   })
   trial: Trials[];
 

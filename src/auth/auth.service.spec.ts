@@ -31,7 +31,6 @@ describe('AuthService', () => {
   let userService: UsersService;
 
   const signUpdto = {
-    id: 1,
     email: 'test@example.com',
     password: 'Password123',
     passwordConfirm: 'Password123',
@@ -221,8 +220,6 @@ describe('AuthService', () => {
         mockUserInfoRepository.findOne.mockResolvedValue(user.email);
         // bcrypt.compare(user.password, password);
         mockJwtService.sign.mockReturnValue('token');
-        console.log(password);
-        console.log(user.password);
         const result = await service.login(user.email, password);
 
         expect(result).toHaveProperty('accessToken');
@@ -274,7 +271,7 @@ describe('AuthService', () => {
         password: signUpdto.password,
       });
 
-      const result = await service.signUp(
+      await service.signUp(
         signUpdto.email,
         signUpdto.password,
         signUpdto.passwordConfirm,
@@ -367,5 +364,34 @@ describe('AuthService', () => {
         ConflictException,
       );
     });
+  });
+  describe('성공 케이스', () => {
+    it('새로운 토큰을 생성하고, 이전 리프레시 토큰을 캐시에서 삭제한 후 새 리프레시 토큰을 캐시에 저장해야 한다', async () => {
+      const oldRefreshToken = 'oldRefreshToken';
+      const userId = '1';
+      mockCacheManager.get.mockResolvedValue(userId);
+
+      const result = await service.refreshToken(oldRefreshToken);
+
+      expect(mockCacheManager.get).toHaveBeenCalledWith(
+        `refresh_token:${oldRefreshToken}`,
+      );
+      expect(mockJwtService.sign).toHaveBeenCalledTimes(6);
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        `refresh_token:${oldRefreshToken}`,
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+    });
+  });
+
+  it('리프레시 토큰이 캐시에 없는 경우 UnauthorizedException을 발생시켜야 한다', async () => {
+    const oldRefreshToken = 'nonExistingRefreshToken';
+    mockCacheManager.get.mockResolvedValue(null);
+
+    await expect(service.refreshToken(oldRefreshToken)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 });
