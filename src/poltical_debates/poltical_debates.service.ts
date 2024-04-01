@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePolticalDebateDto } from 'src/poltical_debates/dto/update-poltical_debate.dto';
@@ -59,25 +60,29 @@ export class PolticalDebatesService {
       });
 
     if (!findOnePolticalDebateBoard) {
-      throw new BadRequestException('존재하지 않는 정치 토론방입니다.');
+      throw new BadRequestException('정치 토론 게시판을 찾을 수 없습니다.');
     }
 
     return findOnePolticalDebateBoard;
   }
 
   async update(
-    userInfo: UserInfos,
+    userInfo: Users,
     id: number,
     updatePolticalDebateDto: UpdatePolticalDebateDto,
   ) {
     const userId = userInfo.id;
 
     const polticalDebateBoard = await this.polticalDebateRepository.findOne({
-      where: { id, userId },
+      where: { id },
     });
 
     if (!polticalDebateBoard) {
-      throw new NotFoundException('해당하는 정치 토론방을 찾을 수 없습니다.');
+      throw new NotFoundException('정치 토론 게시판을 찾을 수 없습니다.');
+    }
+
+    if (polticalDebateBoard.userId !== userId) {
+      throw new UnauthorizedException('게사판을 수정할 권한이 없습니다.');
     }
 
     const existingViewCount = polticalDebateBoard.view;
@@ -89,17 +94,24 @@ export class PolticalDebatesService {
 
     return updateBoard;
   }
-
-  async delete(userInfo: UserInfos, id: number) {
+  async delete(userInfo: Users, id: number) {
     const userId = userInfo.id;
-    const existingPolticalDebate = await this.polticalDebateRepository.findOne({
-      where: { id, userId },
+
+    const politicalDebateBoard = await this.polticalDebateRepository.findOne({
+      where: { id },
     });
 
-    if (!existingPolticalDebate) {
-      throw new BadRequestException('존재하지 않는 정치 토론방입니다.');
+    if (!politicalDebateBoard) {
+      throw new NotFoundException('존재하지 않는 정치 토론 게시판입니다.');
     }
 
-    await this.polticalDebateRepository.remove(existingPolticalDebate);
+    if (politicalDebateBoard.userId !== userId) {
+      throw new UnauthorizedException('게시판를 삭제할 권한이 없습니다.');
+    }
+
+    const deleteBoard =
+      await this.polticalDebateRepository.delete(politicalDebateBoard);
+
+    return deleteBoard;
   }
 }

@@ -14,13 +14,11 @@ import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { UpdatePolticalDebateDto } from 'src/poltical_debates/dto/update-poltical_debate.dto';
 import { Users } from 'src/users/entities/user.entity';
 import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 
 @ApiTags('정치 토론')
-@UseGuards(AuthGuard('jwt'))
 @Controller('polticalDebates')
 export class PolticalDebatesController {
   constructor(
@@ -28,6 +26,7 @@ export class PolticalDebatesController {
   ) {}
 
   @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @UserInfo() userInfo: Users,
@@ -63,8 +62,9 @@ export class PolticalDebatesController {
 
   //내 게시판 조회
   @ApiOperation({ summary: '유저의 정치 토론방 조회', description: '조회' })
+  @UseGuards(AuthGuard('jwt'))
   @Get('my')
-  async findMyBoards(@UserInfo() userInfo: UserInfos) {
+  async findMyBoards(@UserInfo() userInfo: Users) {
     try {
       const userId = userInfo.id;
       const boards = await this.polticalDebatesService.findMyBoards(userId);
@@ -101,17 +101,15 @@ export class PolticalDebatesController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':polticalDebateId')
   async update(
-    @UserInfo() userInfo: UserInfos,
+    @UserInfo() userInfo: Users,
     @Param('polticalDebateId') id: string,
     @Body() updatePolticalDebateDto: UpdatePolticalDebateDto,
   ) {
-    await this.polticalDebatesService.update(
+    const updatedBoard = await this.polticalDebatesService.update(
       userInfo,
       +id,
       updatePolticalDebateDto,
     );
-
-    const updatedBoard = await this.polticalDebatesService.findOne(+id);
 
     return {
       statusCode: HttpStatus.OK,
@@ -125,15 +123,15 @@ export class PolticalDebatesController {
   @UseGuards(AuthGuard('jwt'))
   @Delete(':polticalDebateId')
   async delete(
-    @UserInfo() userInfo: UserInfos,
+    @UserInfo() userInfo: Users,
     @Param('polticalDebateId') id: string,
   ) {
-    const data = this.polticalDebatesService.delete(userInfo, +id);
+    const deleteBoard = await this.polticalDebatesService.delete(userInfo, +id);
 
     return {
       statusCode: HttpStatus.OK,
       message: '정치 토론방이 삭제되었습니다.',
-      data,
+      data: deleteBoard,
     };
   }
 }

@@ -18,6 +18,9 @@ export class PolticalDebateComments {
   @Column({ type: 'int' })
   userId: number;
 
+  @Column({ type: 'int' })
+  polticalDebateId: number;
+
   @Column({ type: 'text', nullable: false })
   content: string;
 

@@ -6,7 +6,6 @@ import { PolticalDebateBoards } from 'src/poltical_debates/entities/poltical_deb
 import { PolticalDebateCommentsService } from 'src/poltical_debates/poltical_debate_comments.service';
 import { PolticalDebateComments } from 'src/poltical_debates/entities/poltical_debate_comments.entity';
 import { PolticalDebateCommentsController } from 'src/poltical_debates/poltical_debate_comments.controller';
-import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [

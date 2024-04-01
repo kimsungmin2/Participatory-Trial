@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
@@ -32,8 +36,8 @@ export class PolticalDebateCommentsService {
       );
 
     const createdComment = await this.polticalDebateCommentsRepository.save({
-      polticalDebateBoard: findPolticalDebateBoard,
       userId: user.id,
+      polticalDebateId,
       ...createPolticalDebateCommentDto,
     });
 
@@ -54,6 +58,7 @@ export class PolticalDebateCommentsService {
   }
 
   async updateComment(
+    user: Users,
     polticalDebateId: number,
     commentId: number,
     updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto,
@@ -62,6 +67,11 @@ export class PolticalDebateCommentsService {
     if (!comment) {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
+
+    if (comment.userId !== user.id) {
+      throw new UnauthorizedException('댓글을 수정할 권한이 없습니다.');
+    }
+
     const updatedComment = await this.polticalDebateCommentsRepository.merge(
       comment,
       updatePolticalDebateCommentDto,
@@ -69,11 +79,20 @@ export class PolticalDebateCommentsService {
     return await this.polticalDebateCommentsRepository.save(updatedComment);
   }
 
-  async deleteComment(polticalDebateId: number, commentId: number) {
+  async deleteComment(
+    user: Users,
+    polticalDebateId: number,
+    commentId: number,
+  ) {
     const comment = await this.getCommentById(polticalDebateId, commentId);
     if (!comment) {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
+
+    if (comment.userId !== user.id) {
+      throw new UnauthorizedException('댓글을 삭제할 권한이 없습니다.');
+    }
+
     await this.polticalDebateCommentsRepository.delete(commentId);
     return { message: '댓글이 삭제되었습니다.' };
   }

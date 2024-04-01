@@ -13,7 +13,6 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePolticalDebateCommentDto } from 'src/poltical_debates/dto/create-poltical_debate_comment_dto';
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { Users } from 'src/users/entities/user.entity';
 import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
@@ -77,11 +76,13 @@ export class PolticalDebateCommentsController {
   @UseGuards(AuthGuard('jwt'))
   @Put(':commentId')
   async updateComment(
+    @UserInfo() userInfo: Users,
     @Param('polticalDebateId') polticalDebateId: number,
     @Param('commentId') commentId: number,
     @Body() updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto,
   ) {
     return await this.polticalDebateCommentsService.updateComment(
+      userInfo,
       polticalDebateId,
       commentId,
       updatePolticalDebateCommentDto,
@@ -92,10 +93,12 @@ export class PolticalDebateCommentsController {
   @UseGuards(AuthGuard('jwt'))
   @Delete(':commentId')
   async deleteComment(
+    @UserInfo() userInfo: Users,
     @Param('polticalDebateId') polticalDebateId: number,
     @Param('commentId') commentId: number,
   ) {
     return await this.polticalDebateCommentsService.deleteComment(
+      userInfo,
       polticalDebateId,
       commentId,
     );
