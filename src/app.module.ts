@@ -13,6 +13,10 @@ import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 
+import { HumorCommentsModule } from './humor-comments/humor-comments.module';
+import { S3Module } from './s3/s3.module';
+import { LikeModule } from './like/like.module';
+
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -29,7 +33,7 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-console.log(Joi.object);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -50,6 +54,11 @@ console.log(Joi.object);
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    HumorCommentsModule,
+    AuthModule,
+    EmailModule,
+    S3Module,
+    LikeModule,
     OnlineBoardCommentModule,
     AuthModule,
     EmailModule,

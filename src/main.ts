@@ -4,6 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 
 import { setupSwagger } from './utils/swagger';
+import { LoggingInterceptor } from './utils/logging.interceptor';
 
 async function bootstrap() {
   const logger = new Logger();
@@ -17,7 +18,7 @@ async function bootstrap() {
       },
     }),
   );
-
+  app.useGlobalInterceptors(new LoggingInterceptor());
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);
