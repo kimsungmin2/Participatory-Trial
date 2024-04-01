@@ -26,9 +26,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       const email = profile._json && profile._json.kakao_account.email;
       const nickName = profile.displayName;
       const provider = profile.provider;
-      console.log(provider);
+
       let user = await this.userService.findByEmail(email);
-      console.log(user);
+
       if (!user) {
         user = await this.authService.createProviderUser(
           email,
@@ -39,9 +39,8 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
 
       const token = await this.authService.createToken(email);
       const accessToken = token.accessToken;
-      const refreshToken = token.refreshToken;
 
-      done(null, { accessToken, refreshToken });
+      done(null, { accessToken });
     } catch (error) {
       console.error('인증 처리 중 오류 발생:', error);
       done(error, false);

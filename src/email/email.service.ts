@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { Transporter } from 'nodemailer';
 
 interface EmailOptions {
   from: string;
@@ -10,9 +13,9 @@ interface EmailOptions {
 
 @Injectable()
 export class EmailService {
-  private transporter;
+  private readonly transporter: Transporter;
 
-  constructor() {
+  constructor(@InjectQueue('email') private readonly emailQueue: Queue) {
     this.transporter = nodemailer.createTransport({
       service: process.env.email_service,
       auth: {
@@ -21,6 +24,21 @@ export class EmailService {
       },
     });
   }
+
+  async queueVerificationEmail(email: string, code: number) {
+    await this.emailQueue.add(
+      'sendVerificationEmail',
+      { email, code },
+      {
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
+      },
+    );
+  }
+
   async sendVerificationToEmail(email: string, code: number) {
     const emailOptions: EmailOptions = {
       from: process.env.user,

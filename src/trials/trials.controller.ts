@@ -10,6 +10,18 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
@@ -17,6 +29,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { MyTrialsGuard } from './guards/myTrials.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Trials')
 @Controller('trials')
@@ -26,6 +39,7 @@ export class TrialsController {
 
   // 어쓰 가드 필요
   // 재판 생성 API
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @UserInfo() userInfo: UserInfos,
@@ -43,6 +57,25 @@ export class TrialsController {
       message: '재판 생성에 성공하였습니다.',
       data,
     };
+  }
+
+  // 모든 판례 조회 API
+  @Get('cases')
+  async getAllDetails(
+    @Query('cursor') cursor: string,
+    @Query('limit') limit: string,
+  ) {
+    let cursorNumber = parseInt(cursor);
+    let limitNumber = parseInt(limit);
+    console.log(cursorNumber);
+    console.log(limitNumber);
+
+    if (isNaN(cursorNumber) || isNaN(limitNumber)) {
+      cursorNumber = 0;
+      limitNumber = 10;
+    }
+
+    return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
   }
 
   // 내가 만든 재판 조회 API(유저)
@@ -123,5 +156,6 @@ export class TrialsController {
 
   // 명예의 전당 올리기 API
 
+  //
   //
 }

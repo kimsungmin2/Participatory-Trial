@@ -16,6 +16,9 @@ import { EmailModule } from './email/email.module';
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
+import { BullModule } from '@nestjs/bull';
+import { CacheConfigService } from './cache/config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -26,7 +29,6 @@ export const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
@@ -48,6 +50,16 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService,
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -60,6 +72,8 @@ export const typeOrmModuleOptions = {
     S3Module,
     LikeModule,
     OnlineBoardCommentModule,
+    AuthModule,
+    EmailModule,
     AuthModule,
     EmailModule,
   ],
