@@ -37,7 +37,7 @@ export class HumorBoards {
   imageUrl: string;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -46,7 +46,7 @@ export class HumorBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.humorBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(() => HumorComments, (humorComment) => humorComment.humorBoard, {

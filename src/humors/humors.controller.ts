@@ -111,7 +111,6 @@ export class HumorsController {
   }
 
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
-  @UseGuards(AuthGuard('jwt'))
   @Get('humor-board-id/:id')
   @ApiParam({
     name: 'id',
@@ -123,7 +122,7 @@ export class HumorsController {
     @Param('id') id: number,
   ): Promise<HumorBoardReturnValue> {
     const findHumorBoard: HumorBoards =
-      await this.humorsService.findOneHumorBoard(id);
+      await this.humorsService.findOneHumorBoardWithIncreaseView(id);
     return {
       statusCode: HttpStatus.OK,
       message: `${id}번 게시물 조회 성공`,
