@@ -16,6 +16,7 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { BoardOwnerGuard } from './guards/online_boards.guard';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('online-boards')
@@ -63,16 +64,15 @@ export class OnlineBoardsController {
     };
   }
 
+  @UseGuards(BoardOwnerGuard)
   @Patch(':id')
   async update(
     @Param('id') id: number,
     @Body() updateOnlineBoardDto: UpdateOnlineBoardDto,
-    @UserInfo() userInfo: UserInfos,
   ) {
     const board = await this.onlineBoardsService.updateBoard(
       id,
       updateOnlineBoardDto,
-      userInfo,
     );
 
     return {
@@ -82,9 +82,10 @@ export class OnlineBoardsController {
     };
   }
 
+  @UseGuards(BoardOwnerGuard)
   @Delete(':id')
-  async remove(@Param('id') id: number, @UserInfo() userInfo: UserInfos) {
-    const board = await this.onlineBoardsService.removeBoard(id, userInfo);
+  async remove(@Param('id') id: number) {
+    const board = await this.onlineBoardsService.removeBoard(id);
 
     return {
       statusCode: HttpStatus.OK,

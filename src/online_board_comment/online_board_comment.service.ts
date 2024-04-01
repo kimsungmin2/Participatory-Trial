@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,7 +6,6 @@ import { OnlineBoardComments } from './entities/online_board_comment.entity';
 import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { UsersService } from '../users/users.service';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -57,21 +52,14 @@ export class OnlineBoardCommentService {
 
   // 자유게시판 수정
   async updateComment(
-    paramOnlineBoardComment: ParamOnlineBoardComment,
+    commentId: number,
     updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
-    userInfo: UserInfos,
   ) {
-    const { onlineBoardId, commentId } = paramOnlineBoardComment;
-    await this.onlineBoardsService.findBoardId(onlineBoardId);
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
     const foundComment = await this.findCommentById(commentId);
-    if (foundUser.id !== foundComment.userId) {
-      throw new ForbiddenException('수정 권한이 없습니다.');
-    }
 
     const { content } = updateOnlineBoardCommentDto;
     const comment = await this.onlineBoardCommentRepository.update(
-      { id: commentId },
+      { id: foundComment.id },
       {
         content,
       },
@@ -81,20 +69,11 @@ export class OnlineBoardCommentService {
   }
 
   // 자유게시판 삭제
-  async removeComment(
-    paramOnlineBoardComment: ParamOnlineBoardComment,
-    userInfo: UserInfos,
-  ) {
-    const { onlineBoardId, commentId } = paramOnlineBoardComment;
-    await this.onlineBoardsService.findBoardId(onlineBoardId);
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
+  async removeComment(commentId: number) {
     const foundComment = await this.findCommentById(commentId);
-    if (foundUser.id !== foundComment.userId) {
-      throw new ForbiddenException('수정 권한이 없습니다.');
-    }
 
     const removeComment = await this.onlineBoardCommentRepository.softDelete({
-      id: commentId,
+      id: foundComment.id,
     });
 
     return removeComment;

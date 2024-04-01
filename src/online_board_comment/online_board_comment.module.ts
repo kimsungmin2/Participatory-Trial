@@ -6,6 +6,7 @@ import { OnlineBoards } from 'src/online_boards/entities/online_board.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OnlineBoardsModule } from 'src/online_boards/online_boards.module';
 import { UsersModule } from 'src/users/users.module';
+import { OnlineBoardsService } from '../online_boards/online_boards.service';
 
 @Module({
   imports: [
@@ -14,6 +15,6 @@ import { UsersModule } from 'src/users/users.module';
     UsersModule,
   ],
   controllers: [OnlineBoardCommentController],
-  providers: [OnlineBoardCommentService],
+  providers: [OnlineBoardCommentService, OnlineBoardsService],
 })
 export class OnlineBoardCommentModule {}

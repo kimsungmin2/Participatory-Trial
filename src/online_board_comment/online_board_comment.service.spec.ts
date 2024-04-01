@@ -79,6 +79,7 @@ describe('OnlineBoardCommentService', () => {
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     const expectedValue: OnlineBoardComments = {
