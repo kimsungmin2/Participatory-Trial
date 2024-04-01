@@ -15,6 +15,9 @@ import { EmailModule } from './email/email.module';
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -47,6 +50,13 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: 'single',
+        url: process.env.REDIS_URL,
+      }),
+    }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -58,6 +68,7 @@ export const typeOrmModuleOptions = {
     EmailModule,
     S3Module,
     LikeModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
