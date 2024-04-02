@@ -72,13 +72,6 @@ export class TrialsService {
       await queryRunner.commitTransaction();
       
       return savedTrial;
-  } catch(error){
-
-    await queryRunner.rollbackTransaction();
-
-    console.log("재판 생성 에러:", error)
-
-      return savedTrial;
     } catch (error) {
       await queryRunner.rollbackTransaction();
 
@@ -218,13 +211,6 @@ async findByUserTrials(userId: number) {
     });
   }
 
-  // 모든 판례 조회
-  async getAllDetails(cursor: number, limit: number) {
-    const queryBuilder = this.panryeRepository
-      .createQueryBuilder('panrye')
-      .cache('panrye')
-      .orderBy('panrye.판례정보일련번호', 'ASC')
-      .limit(limit);
     
   // 모든 판례 조회 매서드
   async getAllDetails(cursor: number, limit: number) {

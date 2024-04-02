@@ -123,9 +123,6 @@ export class TrialsController {
     return await this.trialsService.findKeyWordDetails(name)
   }
 
-    return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
-  }
-
   // 판결 유형으로 조회 API(일반 인덱싱 구문)
   @ApiOperation({ summary: " 판례 유형 조회 API" })
   @ApiQuery({
