@@ -24,17 +24,6 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @ApiOperation({ summary: '게시판 별 좋아요/좋아요 취소' })
-  @ApiBody({
-    description: '좋아요/좋아요 취소',
-    schema: {
-      type: 'object',
-      properties: {
-        boardId: { type: 'number' },
-        boardType: { type: 'string' },
-      },
-    },
-  })
   @Post()
   async create(
     @Body() likeInputDto: LikeInputDto,

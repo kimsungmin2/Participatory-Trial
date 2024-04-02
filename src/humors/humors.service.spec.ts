@@ -21,6 +21,7 @@ import { UpdateHumorDto } from './dto/update-humor.dto';
 import { forbidden } from 'joi';
 import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
+import { Redis } from 'ioredis';
 
 const mockedUser: Users = {
   id: 1,
@@ -73,6 +74,13 @@ describe('HumorsService', () => {
             merge: jest.fn(),
             delete: jest.fn(),
             find: jest.fn(),
+          },
+        },
+        {
+          provide: 'default_IORedisModuleConnectionToken',
+          useValue: {
+            set: jest.fn(),
+            get: jest.fn(),
           },
         },
       ],

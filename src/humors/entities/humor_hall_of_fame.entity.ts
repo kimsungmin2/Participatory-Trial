@@ -10,7 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from '../../users/entities/user.entity';
 
 @Entity()
 export class HumorHallOfFames {
