@@ -28,6 +28,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { CacheConfigService } from './cache/cache.config';
 
 
+
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -77,6 +78,7 @@ console.log(Joi.object);
     HumorsModule,
     PolticalDebatesModule,
     VoteModule,
+    FilteringBadWordsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
