@@ -4,6 +4,7 @@ import {
   createParamDecorator,
 } from '@nestjs/common';
 import { UserInfos } from 'src/users/entities/user-info.entity';
+import { Users } from '../../users/entities/user.entity';
 
 export const UserInfo = createParamDecorator(
   (data: keyof UserInfos | undefined, context: ExecutionContext) => {
@@ -20,7 +21,7 @@ export const UserInfo = createParamDecorator(
     if (data) {
       return userInfo[data];
     }
-
+    console.log(userInfo);
     return userInfo;
   },
 );
