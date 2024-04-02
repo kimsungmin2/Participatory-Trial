@@ -27,15 +27,9 @@ export class TrialHallOfFames {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
-  view: number;
-
-  @Column({ type: 'int', nullable: false })
-  like: number;
-
-  @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
-
+  @Column({ type: 'varchar'})
+  totalVotes: number;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

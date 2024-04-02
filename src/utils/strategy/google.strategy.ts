@@ -41,7 +41,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       const token = await this.authService.createToken(email);
       done(null, {
         accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
       });
     } catch (error) {
       console.error('인증 처리 중 오류 발생:', error);

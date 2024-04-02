@@ -1,6 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users/users.service';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserInfos } from '../users/entities/user-info.entity';
@@ -9,6 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { EmailService } from '../email/email.service';
 import { DataSource } from 'typeorm';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn().mockResolvedValue('hashedPassword'),
@@ -26,7 +31,6 @@ describe('AuthService', () => {
   let userService: UsersService;
 
   const signUpdto = {
-    id: 1,
     email: 'test@example.com',
     password: 'Password123',
     passwordConfirm: 'Password123',
@@ -106,6 +110,7 @@ describe('AuthService', () => {
     passwordConfirm: 'hashedPassword',
     birth: '1996-05-24',
   };
+  const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -126,6 +131,7 @@ describe('AuthService', () => {
         { provide: EmailService, useValue: { sendEmail: jest.fn() } },
         { provide: JwtService, useValue: mockJwtService },
         { provide: DataSource, useValue: mockDataSource },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
@@ -172,7 +178,6 @@ describe('AuthService', () => {
     expect(mockJwtService.sign).toHaveBeenCalledTimes(2);
     expect(tokens).toEqual({
       accessToken: expectedAccessToken,
-      refreshToken: expectedRefreshToken,
     });
   });
 
@@ -203,41 +208,6 @@ describe('AuthService', () => {
       expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
     });
 
-    describe('이메일 인증 테스트', () => {
-      const verifiCation = { email: 'test@example.com', code: 12345 };
-      const user = {
-        id: 1,
-        email: 'test@example.com',
-        verifiCationCode: 12345,
-        emailVerified: false,
-      };
-      it('인증 코드가 일치하는 경우 이메일을 성공적으로 인증한다', async () => {
-        mockUsersService.findByEmail.mockResolvedValue(user);
-        mockUserInfoRepository.update.mockResolvedValue({ affected: 1 });
-
-        await service.verifiCationEmail(verifiCation);
-
-        expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
-          verifiCation.email,
-        );
-        expect(mockUserInfoRepository.update).toHaveBeenCalledWith(user.id, {
-          emailVerified: true,
-        });
-      });
-
-      it('인증 코드가 일치하지 않는 경우 ConflictException을 발생시킨다', async () => {
-        const testVerifiCation = { email: 'test@example.com', code: 12312345 };
-        mockUsersService.findByEmail.mockResolvedValue(user);
-
-        await expect(
-          service.verifiCationEmail(testVerifiCation),
-        ).rejects.toThrow(ConflictException);
-
-        expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
-          verifiCation.email,
-        );
-      });
-    });
     describe('login', () => {
       const user = {
         email: 'test@email.com',
@@ -250,12 +220,9 @@ describe('AuthService', () => {
         mockUserInfoRepository.findOne.mockResolvedValue(user.email);
         // bcrypt.compare(user.password, password);
         mockJwtService.sign.mockReturnValue('token');
-        console.log(password);
-        console.log(user.password);
         const result = await service.login(user.email, password);
 
         expect(result).toHaveProperty('accessToken');
-        expect(result).toHaveProperty('refreshToken');
         expect(mockJwtService.sign).toHaveBeenCalledTimes(4);
       });
       it('이메일 인증이 완료되지 않았다면 에러를 발생시킨다', async () => {
@@ -289,7 +256,36 @@ describe('AuthService', () => {
       });
     });
   });
+
   describe('회원가입(signUp) 테스트', () => {
+    it('모든 조건이 충족되면 회원가입을 성공적으로 완료한다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
+      mockEmailService.sendVerificationToEmail.mockResolvedValue(undefined);
+      // expect(bcrypt.hash).toHaveBeenCalledWith(signUpdto.password, 10);
+      mockQueryRunner.manager
+        .getRepository(Users)
+        .save.mockResolvedValue({ id: 1 });
+      mockQueryRunner.manager.getRepository(UserInfos).save.mockResolvedValue({
+        id: 1,
+        ...signUpdto,
+        password: signUpdto.password,
+      });
+
+      await service.signUp(
+        signUpdto.email,
+        signUpdto.password,
+        signUpdto.passwordConfirm,
+        signUpdto.nickName,
+        signUpdto.birth,
+      );
+
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        signUpdto.email,
+      );
+
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
     it('이미 존재하는 이메일로 가입 시도할 경우 에러를 발생시킨다', async () => {
       mockUsersService.findByEmail.mockResolvedValue({
         email: 'test@email.com',
@@ -311,40 +307,91 @@ describe('AuthService', () => {
       mockUsersService.findByEmail.mockResolvedValue(null);
       await expect(
         service.signUp(
-          user.email,
-          user.password,
-          user.nickName,
-          user.birth,
+          signUpdto.email,
+          signUpdto.password,
+          signUpdto.nickName,
+          signUpdto.birth,
           'asdf',
         ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
+  describe('이메일 인증', () => {
+    const verifiCationDto = {
+      email: 'test@example.com',
+      code: 123456,
+    };
 
-  it('모든 조건이 충족되면 회원가입을 성공적으로 완료한다', async () => {
-    mockUsersService.findByEmail.mockResolvedValue(null);
-    mockEmailService.sendVerificationToEmail.mockResolvedValue(undefined);
-    // expect(bcrypt.hash).toHaveBeenCalledWith(signUpdto.password, 10);
-    mockQueryRunner.manager
-      .getRepository(Users)
-      .save.mockResolvedValue({ id: 1 });
-    mockQueryRunner.manager.getRepository(UserInfos).save.mockResolvedValue({
-      id: 1,
-      ...signUpdto,
-      password: signUpdto.password,
+    it('성공적으로 이메일 인증을 완료한다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(user);
+      mockCacheManager.get.mockResolvedValue(verifiCationDto.code);
+      mockUserInfoRepository.update.mockResolvedValue(undefined);
+
+      await service.verifiCationEmail(verifiCationDto);
+
+      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+        verifiCationDto.email,
+      );
+      expect(mockCacheManager.get).toHaveBeenCalledWith(verifiCationDto.email);
+      expect(mockUserInfoRepository.update).toHaveBeenCalledWith(user.id, {
+        emailVerified: true,
+      });
+      expect(mockCacheManager.del).toHaveBeenCalledWith(verifiCationDto.email);
     });
 
-    const result = await service.signUp(
-      signUpdto.email,
-      signUpdto.password,
-      signUpdto.passwordConfirm,
-      signUpdto.nickName,
-      signUpdto.birth,
+    it('사용자를 찾을 수 없을 경우 NotFoundException을 발생시킨다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
+
+      await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('인증 코드가 만료되었거나 존재하지 않을 경우 NotFoundException을 발생시킨다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(user);
+      mockCacheManager.get.mockResolvedValue(null);
+
+      await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('제공된 인증 코드가 일치하지 않을 경우 ConflictException을 발생시킨다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(user);
+      mockCacheManager.get.mockResolvedValue(654321);
+
+      await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
+        ConflictException,
+      );
+    });
+  });
+  describe('성공 케이스', () => {
+    it('새로운 토큰을 생성하고, 이전 리프레시 토큰을 캐시에서 삭제한 후 새 리프레시 토큰을 캐시에 저장해야 한다', async () => {
+      const oldRefreshToken = 'oldRefreshToken';
+      const userId = '1';
+      mockCacheManager.get.mockResolvedValue(userId);
+
+      const result = await service.refreshToken(oldRefreshToken);
+
+      expect(mockCacheManager.get).toHaveBeenCalledWith(
+        `refresh_token:${oldRefreshToken}`,
+      );
+      expect(mockJwtService.sign).toHaveBeenCalledTimes(6);
+      expect(mockCacheManager.del).toHaveBeenCalledWith(
+        `refresh_token:${oldRefreshToken}`,
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).toHaveProperty('refreshToken');
+    });
+  });
+
+  it('리프레시 토큰이 캐시에 없는 경우 UnauthorizedException을 발생시켜야 한다', async () => {
+    const oldRefreshToken = 'nonExistingRefreshToken';
+    mockCacheManager.get.mockResolvedValue(null);
+
+    await expect(service.refreshToken(oldRefreshToken)).rejects.toThrow(
+      UnauthorizedException,
     );
-
-    expect(mockUsersService.findByEmail).toHaveBeenCalledWith(signUpdto.email);
-
-    expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
-    expect(mockQueryRunner.release).toHaveBeenCalled();
   });
 });

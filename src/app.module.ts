@@ -8,6 +8,7 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
@@ -15,11 +16,16 @@ import { EmailModule } from './email/email.module';
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
+
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BullModule } from '@nestjs/bull';
+import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheConfigService } from './cache/cache.config';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -61,6 +67,16 @@ export const typeOrmModuleOptions = {
       }),
     }),
     ScheduleModule.forRoot(),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService,
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -73,6 +89,10 @@ export const typeOrmModuleOptions = {
     S3Module,
     LikeModule,
     SchedulerModule,
+    AuthModule,
+    EmailModule,
+    VoteModule,
+    OnlineBoardCommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

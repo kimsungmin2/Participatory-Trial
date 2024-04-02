@@ -7,7 +7,7 @@ import { MockRepository, createMockRepository } from '../utils/type/mock-type';
 import { Role } from '../users/types/userRole.type';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
+
 import { Trials } from '../trials/entities/trial.entity';
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
@@ -19,6 +19,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Users } from '../users/entities/user.entity';
+import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
 
 const mockedUser = {
   id: 1,
