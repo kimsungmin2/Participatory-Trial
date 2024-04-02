@@ -19,12 +19,14 @@ import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
 export class PolticalDebatesController {
   constructor(
     private readonly polticalDebatesService: PolticalDebatesService,
+    private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
   ) {}
 
   @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
@@ -135,6 +137,45 @@ export class PolticalDebatesController {
       statusCode: HttpStatus.OK,
       message: '정치 토론방이 삭제되었습니다.',
       data: deleteBoard,
+    };
+  }
+
+   // 정치 게시판 명예의 전당 조회하기 API(투표 수)
+   @ApiOperation({ summary: ' 정치 게시판 명예의 전당 조회하기 API(투표 수)' })
+   @Get('HallofFame/votes')
+   async getRecentHallOfFame() {
+     const recentHallofFame =
+       await this.polticalDabateHallOfFameService.getRecentHallOfFame();
+     if (!recentHallofFame) {
+       return {
+         statusCode: HttpStatus.NOT_FOUND,
+         message: '정치 게시판 명예의 전당 정보가 없습니다.',
+       };
+     }
+ 
+     return {
+       statusCode: HttpStatus.OK,
+       message: '정치 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
+       recentHallofFame,
+     };
+   }
+
+   // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
+  @ApiOperation({ summary: '정치 게시판 명예의 전당 조회하기 API(조회수 수)' })
+  @Get('HallofFame/views')
+  async getRecentViewHallOfFame() {
+    const recentHallofFame =
+      await this.polticalDabateHallOfFameService.getViewRecentHallOfFame();
+    if (!recentHallofFame) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '정치 게시판 명예의 전당 정보가 없습니다.',
+      };
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: '정치 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
+      recentHallofFame,
     };
   }
 }

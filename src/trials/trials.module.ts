@@ -13,6 +13,8 @@ import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
+import { LikeModule } from 'src/like/like.module';
+import { TrialsProcessor } from './trialQueue/trialQueue';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Trials, PanryeInfo, EachVote, Votes,TrialHallOfFames, TrialLikeHallOfFames, TrialViewHallOfFames]),
@@ -20,8 +22,9 @@ import { TrialHallOfFameService } from './trial_hall_of_fame.service';
   BullModule.registerQueue({
     name: 'trial-queue'
   }),
-  VoteModule,],
+  VoteModule,
+  LikeModule],
   controllers: [TrialsController],
-  providers: [TrialsService, TrialHallOfFameService],
+  providers: [TrialsService, TrialHallOfFameService, TrialsProcessor],
 })
 export class TrialsModule {}

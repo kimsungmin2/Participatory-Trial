@@ -61,9 +61,9 @@ export class TrialsService {
 
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial);
-
+      const trialDate = new Date(trialTime)
       // 5. 불 큐로 지연시간 후 찍어줌
-      const delay = trialTime - Date.now();
+      const delay = trialDate.getTime() - Date.now();
       console.log(delay);
       // 6. 제한 시간끝나면 불큐로 비동기 처리
       await this.trialQueue.add(

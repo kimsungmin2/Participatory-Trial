@@ -22,9 +22,9 @@ export class CreateTrialDto {
 
   // 토론 내용
   @ApiProperty({
-    example: 30000,
+    example: '2024-05-01T15:00:00Z',
     description: '토론시간을 정해주세요',
   })
   @IsNotEmpty({ message: '토론 시간을 입력해 주세요.' })
-  trialTime: number;
+  trialTime: Date;
 }

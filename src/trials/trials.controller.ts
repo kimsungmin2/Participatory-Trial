@@ -12,7 +12,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
-import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import {
   ApiBearerAuth,
@@ -32,6 +31,10 @@ import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
+import { LikeInputDto } from 'src/like/dto/create-like.dto';
+import { LikeService } from 'src/like/like.service';
+import { Users } from 'src/users/entities/user.entity';
+import { CreateTrialDto } from './dto/create-trial.dto';
 
 @ApiTags('Trials')
 @ApiTags('Trials')
@@ -40,6 +43,7 @@ export class TrialsController {
   constructor(
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
+    private readonly likeServise: LikeService
   ) {}
   // 모든 API는 비동기 처리
 
@@ -254,6 +258,42 @@ export class TrialsController {
     };
   }
 
+
+  // 재판 게시물 좋아요 API
+  @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
+  @ApiBody({
+    description: '좋아요/좋아요 취소',
+    schema: {
+      type: 'object',
+      properties: {
+        boardType: { type: 'string' },
+      },
+    },
+  })
+  @ApiParam({
+    name: 'trialId',
+    required: true,
+    description: '재판 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/:trialId/like')
+  async like(
+    @Param('trialId') trialId: number,
+    @UserInfo() user: Users,
+    @Body() likeInputDto: LikeInputDto,
+  ): Promise<HumorBoardReturnValue> {
+    const result = await this.likeServise.like(
+      likeInputDto,
+      user,
+      trialId,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: result,
+    };
+  }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   // -------------------------------------------------------------------------- 재판 vs API ----------------------------------------------------------------------//
 

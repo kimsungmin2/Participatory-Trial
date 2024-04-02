@@ -17,9 +17,9 @@ export class TrialHallOfFameService {
     private votesRepository: Repository<Votes>,
     @InjectRepository(TrialHallOfFames)
     private trialHallOfFamesRepository: Repository<TrialHallOfFames>,
-    @InjectRepository(TrialHallOfFames)
+    @InjectRepository(TrialLikeHallOfFames)
     private trialHallOfLikeFamesRepository: Repository<TrialLikeHallOfFames>,
-    @InjectRepository(TrialHallOfFames)
+    @InjectRepository(TrialViewHallOfFames)
     private trialHallOfViewFamesRepository: Repository<TrialViewHallOfFames>,
     private dataSource: DataSource,
   ){}
