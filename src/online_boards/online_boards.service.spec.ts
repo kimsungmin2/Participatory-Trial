@@ -65,7 +65,7 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -86,7 +86,7 @@ describe('OnlineBoardsService', () => {
       keyword: 'string',
     };
 
-    const expectedResult = [
+    const expectedResult: OnlineBoards[] = [
       {
         id: 1,
         userId: 1,
@@ -94,7 +94,7 @@ describe('OnlineBoardsService', () => {
         content: 'content',
         view: 1,
         like: 1,
-        top_comments: 'string',
+        topComments: 'string',
         createdAt: new Date('2024-03-24T02:05:02.602Z'),
         updatedAt: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
@@ -112,14 +112,14 @@ describe('OnlineBoardsService', () => {
   it('should get a board', async () => {
     const id: number = 1;
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -162,7 +162,7 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -170,14 +170,14 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -221,7 +221,7 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -248,7 +248,7 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
