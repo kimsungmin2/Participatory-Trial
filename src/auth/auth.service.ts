@@ -41,7 +41,7 @@ export class AuthService {
     const userEmail = await this.usersService.findByEmail(email);
 
     const refreshTokenCacheKey = `loginId:${userEmail.id}`;
-    const payload = { sub: userEmail.id };
+    const payload = { email, sub: userEmail.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
