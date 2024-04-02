@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
+
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { MyTrialsGuard } from './guards/myTrials.guard';
 import { VoteDto } from './vote/dto/voteDto';
@@ -146,14 +147,18 @@ export class TrialsController {
   async findByUserTrials(@UserInfo() userInfo: UserInfos) {
     // 유저 아이디만 필요함
 
+
+
     const data = await this.trialsService.findByUserTrials(userInfo.id);
+
 
     return {
       statusCode: HttpStatus.CREATED,
       message: '내 재판 조회에 성공하였습니다.',
       data,
     };
-  }
+
+    };
 
   // 모든 재판 조회 API(회원/비회원 구분 없음)
   @ApiOperation({ summary: ' 모든 게시판 조회 재판 게시물 API' })
@@ -180,6 +185,7 @@ export class TrialsController {
   @Get(':trialsId')
   async findOneByTrialsId(@Param('trialsId') id: number) {
     const data = await this.trialsService.findOneByTrialsId(+id);
+
 
     return {
       statusCode: HttpStatus.OK,
