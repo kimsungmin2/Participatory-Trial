@@ -31,12 +31,8 @@ export class CommentOwnerGuard extends AuthGuard('jwt') {
     const userId = req.user.id;
     const commentId = req.params.commentId; // Convert boardId to number
 
-    const foundCommentdOwner =
-      await this.onlineBoardCommentService.verifyCommentOwner(
-        userId,
-        commentId,
-      );
+    await this.onlineBoardCommentService.verifyCommentOwner(userId, commentId);
 
-    return !!foundCommentdOwner;
+    return true;
   }
 }

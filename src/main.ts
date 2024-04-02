@@ -2,13 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-
 import { setupSwagger } from './utils/swagger';
 import { LoggingInterceptor } from './utils/logging.interceptor';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const logger = new Logger();
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -18,6 +19,12 @@ async function bootstrap() {
       },
     }),
   );
+  // app.useStaticAssets(join(__dirname, '..', 'src', 'public'));
+  // app.setBaseViewsDir(join(__dirname, '..', 'src', 'views'));
+  // app.setViewEngine('ejs');
+  app.engine('ejs', require('ejs').__express);
+  app.set('view engine', 'ejs');
+  app.set('views', join(__dirname, '..', 'views'));
   app.useGlobalInterceptors(new LoggingInterceptor());
   setupSwagger(app);
   const port = 3000;

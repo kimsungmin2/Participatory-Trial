@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./my-page.css">
+  <script src=""></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/nav.css" />
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+  />
+  <title>My Page</title>
+</head>
+<body>
+  <h1>User Profile</h1>
+  <div class="info">
+    <p><span class="label">Name:</span> <%= data.name %></p>
+    <p><span class="label">Email:</span> <%= data.email %></p>
+    <p><span class="label">Phone:</span> <%= data.phone %></p>
+    <!-- 추가적인 개인정보 항목을 여기에 추가할 수 있습니다 -->
+  </div>
+</body>
+</html>

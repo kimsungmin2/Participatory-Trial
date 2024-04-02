@@ -6,7 +6,6 @@ import {
   Req,
   HttpStatus,
   Post,
-  Render,
   Body,
   Patch,
 } from '@nestjs/common';
