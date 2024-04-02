@@ -22,7 +22,6 @@ async function bootstrap() {
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
   app.set('views', join(__dirname, '..', 'views'));
-  // app.useStaticAssets(join(__dirname, '..', 'views'));
   app.useGlobalInterceptors(new LoggingInterceptor());
   setupSwagger(app);
   const port = 3000;

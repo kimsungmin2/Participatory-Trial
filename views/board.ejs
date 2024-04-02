@@ -35,18 +35,18 @@
           <ul class="navbar-nav mx-auto">
             <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
             <li class="nav-item">
-              <a class="nav-link" href="http://localhost:3000/online-boards"
+              <a class="nav-link" href="/online-boards"
                 >자유게시판</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">재판</a>
+              <a class="nav-link" href="/trials">재판</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="http://localhost:3000/humors">유머</a>
+              <a class="nav-link" href="/humors">유머</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">정치 토론</a>
+              <a class="nav-link" href="/poltical-debates">정치 토론</a>
             </li>
           </ul>
           <ul class="navbar-nav ms-auto">
@@ -63,11 +63,11 @@
       <div class="board_title">
         <% if (boardType === 'humor') { %>
           <span>유머 게시판</span>
-        <% } else if (boardType === 'online') { %>
+        <% } else if (boardType === 'onlineBoard') { %>
           <span>자유 게시판</span>
-        <% } else if (boardType === '정치토론') { %>
+        <% } else if (boardType === 'polticalDebate') { %>
           <span>정치토론 게시판</span>
-        <% } else if (boardType === '재판') { %>
+        <% } else if (boardType === 'trial') { %>
           <span>재판 게시판</span>
         <% } %>
       </div>
@@ -76,32 +76,52 @@
       <div class="cards-container">
         <% for (let i = 0; i < data.length; i++) {  %>
         <div class="card">
-          <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% if (boardType === 'humor') { %>
+            <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'onlineBoard') { %>
+            <div class="card-header" ><a href="http://localhost:3000/online-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'polticalDebate') { %>
+            <div class="card-header" ><a href="http://localhost:3000/poltical-debates/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'trial') { %>
+            <div class="card-header" ><a href="http://localhost:3000/trials/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } %>
+        
+          
           <div class="card-stats">
             <div>조회 : <%= data[i].view %></div>
+            <% if (boardType !== 'poltical-debates') { %>
             <div>좋아요 : <%= data[i].like %></div>
+            <% } %>
           </div>
         </div>
         <% } %>
       </div>
       <div class="pagination">
-        
         <% for(let i =  1; i <= pageCount; i++) {%>
           <% if (i === currentPage) {%>
             <span class="current-page-number"><%= i %></span>
             <% } else { %>
-              <a href="/humors?page=<%= i %>"><%= i  %></a>
+              <% if (boardType === 'humor') { %>
+                <a href="/humors?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'onlineBoard') { %>
+                <a href="/online-boards?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'polticalDebate') { %>
+                <a href="/poltical-debates?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'trial') { %>
+                <a href="/trials?page=<%= i %>"><%= i  %></a>
+              <% } %>
+              
               <% } %>
         <% } %>
       </div>
       <% if (boardType === 'humor') { %>
         <a class="submit-button" href="/humors/create">글쓰기</a>
-      <% } else if (boardType === 'online') { %>
-        <a class="submit-button" href="/online-board/create">글쓰기</a>
-      <% } else if (boardType === '정치토론') { %>
-        <a class="submit-button" href="/poltical-debate/create">글쓰기</a>
-      <% } else if (boardType === '재판') { %>
-        <a class="submit-button" href="/trial/create">글쓰기</a>
+      <% } else if (boardType === 'onlineBoard') { %>
+        <a class="submit-button" href="/online-boards/create">글쓰기</a>
+      <% } else if (boardType === 'polticalDebate') { %>
+        <a class="submit-button" href="/poltical-debates/create">글쓰기</a>
+      <% } else if (boardType === 'trial') { %>
+        <a class="submit-button" href="/trials/create">글쓰기</a>
       <% } %>
      
       <div class="search-container">

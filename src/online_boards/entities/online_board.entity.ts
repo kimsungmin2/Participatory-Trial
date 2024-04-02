@@ -20,17 +20,20 @@ export class OnlineBoards {
   @Column({ type: 'int' })
   userId: number;
 
-  @Column({ type: 'varchar', unique: true, nullable: false })
+  @Column({ type: 'varchar', unique: false, nullable: false })
   title: string;
 
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
+
+  @Column({ type: 'varchar', nullable: true })
+  imageUrl: string;
 
   @Column({ type: 'varchar', nullable: true })
   topComments: string;

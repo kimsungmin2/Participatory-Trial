@@ -25,6 +25,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import { CacheConfigService } from './cache/config';
 import { CacheModule } from '@nestjs/cache-manager';
 
+console.log(1, process.env.DB_NAME);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -91,10 +92,6 @@ console.log(typeOrmModuleOptions);
     EmailModule,
     VoteModule,
     OnlineBoardCommentModule,
-    OnlineBoardCommentModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],

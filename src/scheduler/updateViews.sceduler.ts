@@ -74,13 +74,54 @@ export class UpdateViewsScheduler {
             .set({ view: () => `view + ${viewCount}` })
             .where('id = :id', { id: Number(id) })
             .execute();
-          console.log(`유머게시판 ${id}번째 게시물 조회수 업데이트 완료!`);
+          console.log(`자유게시판 ${id}번째 게시물 조회수 업데이트 완료!`);
+          await this.redis.del(key);
         }
       });
     } else {
       console.log('자유 게시판에 조회수를 업데이트 할 게시물이 없습니다!');
     }
     console.log('=======자유 게시판 조회수 업데이트 완료!=======');
+  }
+
+  @Cron('0 * * * * *', { name: 'polticalDebatesView' })
+  async polticalDebatesView() {
+    let cursor = '0';
+    let keysBatch = [];
+    do {
+      const reply = await this.redis.scan(
+        cursor,
+        'MATCH',
+        'polticalDebate:*:view',
+      );
+      cursor = reply[0];
+      const keys = reply[1];
+      keysBatch = keysBatch.concat(keys);
+    } while (cursor !== '0');
+
+    if (keysBatch.length > 0) {
+      const values = await this.redis.mget(...keysBatch); // 여러 키에 대한 값을 한 번에 조회
+      keysBatch.forEach(async (key, index) => {
+        const viewCount = values[index]; // mget 결과에서 해당 키의 값을 가져옴
+        const match = key.match(/online:(.*):view/);
+        if (match && viewCount) {
+          const id = match[1];
+          await this.onlineBoardRepository
+            .createQueryBuilder()
+            .update(OnlineBoards)
+            .set({ view: () => `view + ${viewCount}` })
+            .where('id = :id', { id: Number(id) })
+            .execute();
+          console.log(
+            `정치 토론 게시판 ${id}번째 게시물 조회수 업데이트 완료!`,
+          );
+          await this.redis.del(key);
+        }
+      });
+    } else {
+      console.log('정치 토론 게시판에 조회수를 업데이트 할 게시물이 없습니다!');
+    }
+    console.log('=======정치 토론 게시판 조회수 업데이트 완료!=======');
   }
 }
 
