@@ -8,16 +8,30 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
-import { LikeModule } from './like/like.module';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { ScheduleModule } from '@nestjs/schedule';
+import { LikeModule } from './like/like.module';;
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { Users } from './users/entities/user.entity';
+import { UserInfos } from './users/entities/user-info.entity';
+import { Trials } from './trials/entities/trial.entity';
+import { Votes } from './trials/entities/vote.entity';
+import { OnlineBoards } from './online_boards/entities/online_board.entity';
+import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
+import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
+import { BullModule } from '@nestjs/bull';
+import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheConfigService } from './cache/cache.config';
+import { RedisModule } from '@nestjs-modules/ioredis';
+
+
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -28,13 +42,13 @@ export const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
   }),
   inject: [ConfigService],
 };
+
 
 @Module({
   imports: [
@@ -57,6 +71,16 @@ export const typeOrmModuleOptions = {
       }),
     }),
     ScheduleModule.forRoot(),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -69,6 +93,10 @@ export const typeOrmModuleOptions = {
     S3Module,
     LikeModule,
     SchedulerModule,
+    AuthModule,
+    EmailModule,
+    VoteModule,
+    OnlineBoardCommentModule
   ],
   controllers: [AppController],
   providers: [AppService],

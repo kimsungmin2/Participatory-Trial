@@ -36,7 +36,10 @@ export class Trials {
 
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
-
+  
+  @Column({ type: 'boolean', nullable: false, default: true})
+  is_time_over: boolean;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
@@ -49,6 +52,6 @@ export class Trials {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
-  @OneToMany(() => Votes, (vote) => vote.trial, { cascade: true })
-  vote: Votes[];
+  @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
+  vote: Votes;
 }

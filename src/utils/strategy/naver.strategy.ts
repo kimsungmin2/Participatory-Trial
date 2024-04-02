@@ -26,7 +26,6 @@ export class NaverStrategy extends PassportStrategy(Strategy) {
   ) {
     try {
       const email = profile._json.email;
-      console.log(email);
       const nickName = profile._json.nickname;
       const provider = 'naver';
 
@@ -41,9 +40,8 @@ export class NaverStrategy extends PassportStrategy(Strategy) {
 
       const token = await this.authService.createToken(email);
       const accessToken = token.accessToken;
-      const refreshToken = token.refreshToken;
 
-      done(null, { accessToken, refreshToken });
+      done(null, { accessToken });
     } catch (error) {
       console.error('인증 처리 중 오류 발생:', error);
       done(error, false);

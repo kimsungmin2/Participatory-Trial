@@ -25,6 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   private static extractJWT(req: RequestType): string | null {
     const { authorization } = req.cookies;
+
     if (authorization) {
       const [tokenType, token] = authorization.split(' ');
       if (tokenType !== 'Bearer')
@@ -41,7 +42,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (_.isNil(user)) {
       throw new NotFoundException('해당하는 사용자를 찾을 수 없습니다.');
     }
-
     return user;
   }
 }

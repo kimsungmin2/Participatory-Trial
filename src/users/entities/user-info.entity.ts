@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from './user.entity';
-@Entity()
+@Entity({ name: 'userInfos' })
 export class UserInfos {
   @PrimaryColumn({ type: 'int' })
   id: number;
@@ -18,7 +18,7 @@ export class UserInfos {
 
   @Column({ type: 'varchar', select: false, nullable: false })
   password: string;
-
+  @Column({ type: 'varchar', nullable: false })
   @Column({ type: 'varchar', nullable: false })
   nickName: string;
 
