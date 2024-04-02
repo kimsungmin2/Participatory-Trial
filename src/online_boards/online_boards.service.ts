@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -65,45 +61,33 @@ export class OnlineBoardsService {
   }
 
   // 자유게시판 수정
-  async updateBoard(
-    id: number,
-    updateOnlineBoardDto: UpdateOnlineBoardDto,
-    userInfo: UserInfos,
-  ) {
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
+  async updateBoard(id: number, updateOnlineBoardDto: UpdateOnlineBoardDto) {
     const foundBoard = await this.findBoardId(id);
-
-    if (foundBoard.userId !== foundUser.id) {
-      throw new ForbiddenException('접근 권한이 없습니다.');
-    }
 
     const { title, content } = updateOnlineBoardDto;
     const board = await this.onlineBoardsRepository.save({
-      id,
+      id: foundBoard.id,
       title,
       content,
     });
+
     return board;
   }
 
   // 자유게시판 삭제
-  async removeBoard(id: number, userInfo: UserInfos) {
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
+  async removeBoard(id: number) {
     const foundBoard = await this.findBoardId(id);
 
-    if (foundBoard.userId !== foundUser.id) {
-      throw new ForbiddenException('접근 권한이 없습니다.');
-    }
-
-    await this.onlineBoardsRepository.softDelete({ id });
+    await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
 
     return `This action removes a #${id} onlineBoard`;
   }
 
   // 자유게시판 아이디 조회
-  async findBoardId(id: number) {
-    const foundBoard = await this.onlineBoardsRepository.findOneBy({
-      id,
+  async findBoardId(boardId: number) {
+    // console.log('boardId: ', boardId);
+    const foundBoard = await this.onlineBoardsRepository.findOne({
+      where: { id: boardId },
     });
 
     if (!foundBoard) {
@@ -111,5 +95,11 @@ export class OnlineBoardsService {
     }
 
     return foundBoard;
+  }
+
+  async verifyBoardOwner(userId: number, boardId: number) {
+    return await this.onlineBoardsRepository.findOne({
+      where: { userId, id: boardId },
+    });
   }
 }

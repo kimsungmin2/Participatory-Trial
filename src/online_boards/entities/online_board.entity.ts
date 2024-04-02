@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoardLike } from './online_board_like.entity';
 import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
+import { OnlineBoardLike } from './online_board_like.entity';
 
 @Entity()
 export class OnlineBoards {
@@ -33,7 +33,7 @@ export class OnlineBoards {
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -42,7 +42,7 @@ export class OnlineBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   user: Users;
 
   @OneToMany(

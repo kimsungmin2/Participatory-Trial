@@ -19,7 +19,6 @@ export class UserInfos {
   @Column({ type: 'varchar', select: false, nullable: false })
   password: string;
   @Column({ type: 'varchar', nullable: false })
-  @Column({ type: 'varchar', nullable: false })
   nickName: string;
 
   @Column({ type: 'varchar', nullable: false })

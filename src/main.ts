@@ -2,11 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-
 import { setupSwagger } from './utils/swagger';
 import { LoggingInterceptor } from './utils/logging.interceptor';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const logger = new Logger();

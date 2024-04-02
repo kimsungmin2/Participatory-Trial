@@ -12,20 +12,18 @@ import { OnlineBoardCommentModule } from './online_board_comment/online_board_co
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
-
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CacheModule } from '@nestjs/cache-manager';
-import { CacheConfigService } from './cache/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { CacheConfigService } from './cache/config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -42,7 +40,7 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-
+console.log(typeOrmModuleOptions);
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -93,6 +91,10 @@ export const typeOrmModuleOptions = {
     EmailModule,
     VoteModule,
     OnlineBoardCommentModule,
+    OnlineBoardCommentModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
