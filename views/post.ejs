@@ -18,7 +18,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:3000/main">CPT</a>
+        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -33,7 +33,6 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav"></ul>
           <ul class="navbar-nav mx-auto">
-            <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
             <li class="nav-item">
               <a class="nav-link" href="http://localhost:3000/online-boards"
                 >자유게시판</a
@@ -60,29 +59,37 @@
     </nav>
 
     <header>
-      <%= JSON.stringify(data)  %>
       <div class="board_title">
-        <span>유머 게시판</span>
-      </div>
-      <hr width="70%" color="black" size="2" style="margin-left: 30px" />
-      <div class="search-container">
-        <form action="/search" method="get">
-          <input type="text" placeholder="검색..." name="search" />
-          <button type="submit">검색</button>
-        </form>
-      </div>
-      <div class="cards-container">
-        <!-- 첫 번째 카드 -->
-        <% for (let i = 0; i < data.length; i++) {  %>
-        <div class="card">
-          <div class="card-header"><%= data[i].title %></div>
-          <div class="card-stats">
-            <div>조회 : <%= data[i].view %></div>
-            <div>좋아요 : <%= data[i].like %></div>
-          </div>
-        </div>
+        <% if (boardType === 'humor') { %>
+          <span>유머 게시판</span>
+        <% } else if (boardType === 'online') { %>
+          <span>자유 게시판</span>
+        <% } else if (boardType === '정치토론') { %>
+          <span>정치토론 게시판</span>
+        <% } else if (boardType === '재판') { %>
+          <span>재판 게시판</span>
         <% } %>
       </div>
+      <hr width="70%" color="lightskyblue" size="2" style="margin-left: 30px; height: 3px;" />
+      <div class="post_title">
+        <span><%= data.title  %></span>
+        <div>
+          <span>조회수:<%= data.view  %></span>
+          <span>좋아요:<%= data.like  %></span>
+        </div>
+      </div>
+      <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
+      <div class="post_content">
+        <span><%= data.content  %></span>
+      </div>
+      <% if (data.imageUrl) { %>
+      <div class="post_image">
+        <% for (let i = 0; i < JSON.parse(data.imageUrl).length; i++) {  %>
+        <img src="<%=JSON.parse(data.imageUrl)[i] %>" alt="Post Image" >
+        <% } %>
+      </div>
+      <% } %>
+    
     </header>
   </body>
 </html>

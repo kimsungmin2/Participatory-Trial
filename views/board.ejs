@@ -18,7 +18,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:3000/main">CPT</a>
+        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -61,27 +61,56 @@
 
     <header>
       <div class="board_title">
-        <span>자유 게시판</span>
+        <% if (boardType === 'humor') { %>
+          <span>유머 게시판</span>
+        <% } else if (boardType === 'online') { %>
+          <span>자유 게시판</span>
+        <% } else if (boardType === '정치토론') { %>
+          <span>정치토론 게시판</span>
+        <% } else if (boardType === '재판') { %>
+          <span>재판 게시판</span>
+        <% } %>
       </div>
       <hr width="70%" color="black" size="2" style="margin-left: 30px" />
+      
+      <div class="cards-container">
+        <% for (let i = 0; i < data.length; i++) {  %>
+        <div class="card">
+          <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <div class="card-stats">
+            <div>조회 : <%= data[i].view %></div>
+            <div>좋아요 : <%= data[i].like %></div>
+          </div>
+        </div>
+        <% } %>
+      </div>
+      <div class="pagination">
+        
+        <% for(let i =  1; i <= pageCount; i++) {%>
+          <% if (i === currentPage) {%>
+            <span class="current-page-number"><%= i %></span>
+            <% } else { %>
+              <a href="/humors?page=<%= i %>"><%= i  %></a>
+              <% } %>
+        <% } %>
+      </div>
+      <% if (boardType === 'humor') { %>
+        <a class="submit-button" href="/humors/create">글쓰기</a>
+      <% } else if (boardType === 'online') { %>
+        <a class="submit-button" href="/online-board/create">글쓰기</a>
+      <% } else if (boardType === '정치토론') { %>
+        <a class="submit-button" href="/poltical-debate/create">글쓰기</a>
+      <% } else if (boardType === '재판') { %>
+        <a class="submit-button" href="/trial/create">글쓰기</a>
+      <% } %>
+     
       <div class="search-container">
         <form action="/search" method="get">
           <input type="text" placeholder="검색..." name="search" />
           <button type="submit">검색</button>
         </form>
       </div>
-      <div class="cards-container">
-        <!-- 첫 번째 카드 -->
-        <% for (let i = 0; i < 10; i++) {  %>
-        <div class="card">
-          <div class="card-header">내배캠이 지옥인 <%= i %>번째 이유</div>
-          <div class="card-stats">
-            <div>조회: 59</div>
-            <div>좋아요: 20</div>
-          </div>
-        </div>
-        <% } %>
-      </div>
+      
     </header>
   </body>
 </html>

@@ -30,7 +30,6 @@ export const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.

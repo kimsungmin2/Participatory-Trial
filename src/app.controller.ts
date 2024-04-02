@@ -9,21 +9,10 @@ export class AppController {
     private readonly humorService: HumorsService,
   ) {}
 
-  @Get('main')
+  @Get('')
   @Render('index.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getIndex() {
-    const PaginationQueryDto = {
-      limit: 10,
-      page: 1,
-    };
-    const humorBoard =
-      await this.humorService.getAllHumorBoards(PaginationQueryDto);
-    console.log(humorBoard);
-    return { data: humorBoard };
-  }
-
   @Get('online-boards')
-  @Render('online-board.ejs') // index.ejs 파일을 렌더링하여 응답
+  @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
   async getOnlineBoard() {
     const PaginationQueryDto = {
       limit: 10,
@@ -35,21 +24,8 @@ export class AppController {
     return { data: humorBoard };
   }
 
-  @Get('humors')
-  @Render('humor-board.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getHumorBoard() {
-    const PaginationQueryDto = {
-      limit: 10,
-      page: 1,
-    };
-    const humorBoard =
-      await this.humorService.getAllHumorBoards(PaginationQueryDto);
-    console.log(humorBoard);
-    return { data: humorBoard };
-  }
-
   @Get('online-boards')
-  @Render('online-board.ejs') // index.ejs 파일을 렌더링하여 응답
+  @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
   async getTrialBoard() {
     const PaginationQueryDto = {
       limit: 10,
@@ -57,8 +33,7 @@ export class AppController {
     };
     const humorBoard =
       await this.humorService.getAllHumorBoards(PaginationQueryDto);
-    console.log(humorBoard);
-    return { data: humorBoard };
+    return { data: humorBoard, boardType: 'online' };
   }
 
   @Get('online-boards')
