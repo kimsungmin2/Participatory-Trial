@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { HumorBoards } from './humor.entity';
+import { HumorBoards } from '../../humors/entities/humor-board.entity';
 
 @Entity()
 export class HumorComments {
@@ -33,10 +33,10 @@ export class HumorComments {
   updatedAt: Date;
 
   @ManyToOne(() => HumorBoards, (humorBoard) => humorBoard.humorComment)
-  @JoinColumn({ name: 'humor_board_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'humorBoardId', referencedColumnName: 'id' })
   humorBoard: HumorBoards;
 
-  @ManyToOne(() => Users, (user) => user.humorBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @ManyToOne(() => Users, (user) => user.humorComment)
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 }

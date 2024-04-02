@@ -11,14 +11,17 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+
+import { HumorCommentsModule } from './humor-comments/humor-comments.module';
+import { S3Module } from './s3/s3.module';
+import { LikeModule } from './like/like.module';;
+import { SchedulerModule } from './scheduler/scheduler.module';
 import { Users } from './users/entities/user.entity';
 import { UserInfos } from './users/entities/user-info.entity';
 import { Trials } from './trials/entities/trial.entity';
 import { Votes } from './trials/entities/vote.entity';
 import { OnlineBoardComments } from './online_boards/entities/online_board_comment.entity';
 import { OnlineBoards } from './online_boards/entities/online_board.entity';
-import { HumorComments } from './humors/entities/humor_comment.entity';
-import { HumorBoards } from './humors/entities/humor.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { BullModule } from '@nestjs/bull';
@@ -26,6 +29,7 @@ import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheConfigService } from './cache/cache.config';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 
 
@@ -45,6 +49,7 @@ export const typeOrmModuleOptions = {
   inject: [ConfigService],
 };
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -59,6 +64,13 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: 'single',
+        url: process.env.REDIS_URL,
+      }),
+    }),
+    ScheduleModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       useClass: CacheConfigService
@@ -69,17 +81,21 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
-    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
     TrialsModule,
     HumorsModule,
     PolticalDebatesModule,
+    HumorCommentsModule,
+    AuthModule,
+    EmailModule,
+    S3Module,
+    LikeModule,
+    SchedulerModule,
     AuthModule,
     EmailModule,
     VoteModule,
-    FilteringBadWordsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "프로그램 시작",
+      "program": "${workspaceFolder}\\src\\humor-comments\\humor-comments.service.spec.ts",
+      "args": ["--runInBand"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "name": "현재 파일 실행",
+      "request": "launch",
+      "program": "${workspaceFolder}\\src\\humor-comments\\humor-comments.service.spec.ts"
+    },
+    {
+      "type": "node-terminal",
+      "name": "스크립트 실행: test:debug",
+      "request": "launch",
+      "command": "npm run test:debug",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
