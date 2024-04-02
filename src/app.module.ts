@@ -18,6 +18,8 @@ import { LikeModule } from './like/like.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -49,6 +51,9 @@ export const typeOrmModuleOptions = {
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),
     RedisModule.forRootAsync({
       useFactory: () => ({
