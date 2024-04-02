@@ -1,34 +1,52 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { HumorBoards } from 'src/humors/entities/humor.entity';
-import { HumorComments } from 'src/humors/entities/humor_comment.entity';
-import { OnlineBoards } from 'src/online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from 'src/online_boards/entities/online_board_comment.entity';
-import { CreatePolticalDebateCommentDto } from 'src/poltical_debates/dto/create-poltical_debate_comment_dto';
-import { PolticalDebateBoards } from 'src/poltical_debates/entities/poltical_debate.entity';
-import { PolticalDebateComments } from 'src/poltical_debates/entities/poltical_debate_comments.entity';
-import { Trials } from 'src/trials/entities/trial.entity';
-import { UserInfos } from 'src/users/entities/user-info.entity';
-import { Users } from 'src/users/entities/user.entity';
-import { Role } from 'src/users/types/userRole.type';
+import { HumorBoards } from '../humors/entities/humor-board.entity';
+import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
+import { OnlineBoards } from '../online_boards/entities/online_board.entity';
+import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
+import { PolticalDebateBoards } from './entities/poltical_debate.entity';
+import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
+import { Trials } from '../trials/entities/trial.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { Users } from '../users/entities/user.entity';
+import { Role } from '../users/types/userRole.type';
+import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
 
-const mockUser = {
+const mockedUser = {
   id: 1,
-  role: Role.User,
+  email: 'example@naver.com',
+  password: '1',
+  nickName: 'test',
+  birth: '1992-02-22',
+  provider: 'test',
+  verifiCationCode: 1,
+  emailVerified: true,
   createdAt: new Date(),
   updatedAt: new Date(),
-  userInfo: new UserInfos(),
-  onlineBoard: [new OnlineBoards()],
-  onlineBoardComment: [new OnlineBoardComments()],
-  trial: [new Trials()],
-  humorBoard: [new HumorBoards()],
-  humorComment: [new HumorComments()],
-  polticalDebateBoards: [new PolticalDebateBoards()],
-  polticalDebateComments: [new PolticalDebateComments()],
+  user: null,
 };
+
+const mockPolticalDebate = {
+  id: 1,
+  userId: 1,
+  title: '기존 타이틀',
+  content: '기존 컨텐츠',
+  view: 1,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+} as PolticalDebateBoards;
+
+const mockComment = {
+  id: 1,
+  userId: 1,
+  polticalDebateId: 1,
+  content: 'test',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+} as PolticalDebateComments;
 
 describe('PolticalDebateCommentsService', () => {
   let polticalDebateCommentsService: PolticalDebateCommentsService;
@@ -103,15 +121,83 @@ describe('PolticalDebateCommentsService', () => {
         content: 'test',
       };
 
-      const mockParams = {
-        boardId: 1,
-        user: mockUser,
-      };
+      const mockPolticalDebateId = 1;
+      const mockUserId = 1;
+
+      const mockPolticalDebate = {
+        id: mockPolticalDebateId,
+        userId: mockUserId,
+        title: '기존 타이틀',
+        content: '기존 컨텐츠',
+        view: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateBoards;
 
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
-        .mockResolvedValue({ id: 1 } as PolticalDebateBoards);
+        .mockResolvedValue(mockPolticalDebate);
 
+      jest
+        .spyOn(polticalDebateCommentsRepository, 'save')
+        .mockResolvedValue(mockComment);
+
+      const result = await polticalDebateCommentsService.createComment(
+        mockedUser,
+        mockPolticalDebateId,
+        createPolticalDebateCommentDto,
+      );
+
+      expect(polticalDebatesRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockPolticalDebateId },
+      });
+
+      expect(polticalDebateCommentsRepository.save).toHaveBeenCalledWith({
+        userId: mockedUser.id,
+        polticalDebateId: mockPolticalDebateId,
+        ...createPolticalDebateCommentDto,
+      });
+      expect(result).toEqual(mockComment);
+    });
+    it('실패: 게시물을 찾을 수 없습니다.', async () => {
+      const createPolticalDebateCommentDto: CreatePolticalDebateCommentDto = {
+        content: 'test',
+      };
+
+      const mockPolticalDebateId = 1;
+
+      jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        polticalDebateCommentsService.createComment(
+          mockedUser,
+          mockPolticalDebateId,
+          createPolticalDebateCommentDto,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getAllComments', () => {
+    it('성공', async () => {
+      const polticalDebateId = 1;
+      const mockComments: PolticalDebateComments[] = [mockComment];
+
+      jest
+        .spyOn(polticalDebateCommentsRepository, 'find')
+        .mockResolvedValue(mockComments);
+
+      const result =
+        await polticalDebateCommentsService.getAllComments(polticalDebateId);
+
+      expect(result).toEqual(mockComments);
+    });
+  });
+
+  describe('getCommentById', () => {
+    it('성공', async () => {
+      const polticalDebateId = 1;
+      const commentId = 1;
       const mockComment = {
         id: 1,
         userId: 1,
@@ -122,265 +208,211 @@ describe('PolticalDebateCommentsService', () => {
       } as PolticalDebateComments;
 
       jest
-        .spyOn(polticalDebateCommentsRepository, 'save')
-        .mockResolvedValue(mockComment);
-      const result = await polticalDebateCommentsService.createComment(
-        mockParams.user,
-        mockParams.boardId,
-        createPolticalDebateCommentDto,
-      );
-      expect(polticalDebateCommentsRepository.findOne).toHaveBeenCalledTimes(1);
-      expect(polticalDebateCommentsRepository.findOne).toHaveBeenCalledWith({
-        id: 1,
-      });
-      expect(result).toEqual(mockComment);
-    });
-    it('실패: 게시물을 찾을 수 없습니다.', async () => {
-      const createPolticalDebateCommentDto: CreatePolticalDebateCommentDto = {
-        content: 'test',
-      };
-      const mockParams = {
-        boardId: 1,
-        user: mockUser,
-      };
-      jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(null);
-
-      await expect(
-        polticalDebateCommentsService.createComment(
-          mockParams.user,
-          mockParams.boardId,
-          createPolticalDebateCommentDto,
-        ),
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('getCommentById', () => {
-    it('성공', async () => {
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
-      const mockComment: PolticalDebateComments = {
-        id: mockCommentId,
-        userId: 1,
-        polticalDebateId: mockPolticalDebateId,
-        content: 'test',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        user: new Users(),
-        polticalDebateBoard: new PolticalDebateBoards(),
-      };
-      jest
         .spyOn(polticalDebateCommentsRepository, 'findOne')
-        .mockResolvedValueOnce(mockComment);
+        .mockResolvedValue(mockComment);
 
       const result = await polticalDebateCommentsService.getCommentById(
-        mockPolticalDebateId,
-        mockCommentId,
+        polticalDebateId,
+        commentId,
       );
 
-      expect(polticalDebateCommentsRepository.findOne).toHaveBeenCalledWith({
-        where: {
-          id: mockCommentId,
-          polticalDebateBoard: { id: mockPolticalDebateId },
-        },
-      });
       expect(result).toEqual(mockComment);
-    });
-
-    it('실패: 댓글을 찾을 수 없습니다.', async () => {
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
-      jest
-        .spyOn(polticalDebateCommentsRepository, 'findOne')
-        .mockResolvedValueOnce(null);
-
-      await expect(
-        polticalDebateCommentsService.getCommentById(
-          mockPolticalDebateId,
-          mockCommentId,
-        ),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('updateComment', () => {
     it('성공', async () => {
-      const mockUser = {
-        id: 1,
-        role: Role.User,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userInfo: new UserInfos(),
-        onlineBoard: [new OnlineBoards()],
-        onlineBoardComment: [new OnlineBoardComments()],
-        trial: [new Trials()],
-        humorBoard: [new HumorBoards()],
-        humorComment: [new HumorComments()],
-        polticalDebateBoards: [new PolticalDebateBoards()],
-        polticalDebateComments: [new PolticalDebateComments()],
+      const userInfo = { id: 1 };
+      const polticalDebateId = 1;
+      const commentId = 1;
+      const updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto = {
+        content: 'Updated content',
       };
 
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
-      const mockUpdateDto: CreatePolticalDebateCommentDto = {
-        content: 'updated comment',
-      };
       const mockComment: PolticalDebateComments = {
-        id: mockCommentId,
-        userId: mockUser.id,
-        polticalDebateId: mockPolticalDebateId,
-        content: 'test comment',
+        id: commentId,
+        userId: userInfo.id,
+        polticalDebateId,
+        content: 'Original content',
         createdAt: new Date(),
         updatedAt: new Date(),
         user: new Users(),
         polticalDebateBoard: new PolticalDebateBoards(),
       };
+
       jest
         .spyOn(polticalDebateCommentsService, 'getCommentById')
-        .mockResolvedValueOnce(mockComment);
-      jest
-        .spyOn(polticalDebateCommentsRepository, 'merge')
-        .mockReturnValueOnce(mockComment);
+        .mockResolvedValue(mockComment);
+
+      jest.spyOn(polticalDebateCommentsRepository, 'merge');
       jest
         .spyOn(polticalDebateCommentsRepository, 'save')
-        .mockResolvedValueOnce(mockComment);
+        .mockResolvedValue(mockComment);
 
       const result = await polticalDebateCommentsService.updateComment(
-        mockUser,
-        mockPolticalDebateId,
-        mockCommentId,
-        mockUpdateDto,
+        mockedUser,
+        polticalDebateId,
+        commentId,
+        updatePolticalDebateCommentDto,
       );
 
       expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
-        mockPolticalDebateId,
-        mockCommentId,
+        polticalDebateId,
+        commentId,
       );
+
       expect(polticalDebateCommentsRepository.merge).toHaveBeenCalledWith(
         mockComment,
-        mockUpdateDto,
+        updatePolticalDebateCommentDto,
       );
-      expect(polticalDebateCommentsRepository.save).toHaveBeenCalledWith(
-        mockComment,
-      );
+
+      expect(polticalDebateCommentsRepository.save).toHaveBeenCalled();
+
       expect(result).toEqual(mockComment);
     });
-
-    it('실패: 댓글을 찾을 수 없습니다.', async () => {
-      const mockUser = {
-        id: 1,
-        role: Role.User,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userInfo: new UserInfos(),
-        onlineBoard: [new OnlineBoards()],
-        onlineBoardComment: [new OnlineBoardComments()],
-        trial: [new Trials()],
-        humorBoard: [new HumorBoards()],
-        humorComment: [new HumorComments()],
-        polticalDebateBoards: [new PolticalDebateBoards()],
-        polticalDebateComments: [new PolticalDebateComments()],
+    it('실패: 정치 토론 게시판을 찾을 수 없습니다.', async () => {
+      const polticalDebateId = 1;
+      const commentId = 1;
+      const updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto = {
+        content: 'Updated content',
       };
 
-      const mockUpdateDto: CreatePolticalDebateCommentDto = {
-        content: '수정 댓글',
-      };
-
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
       jest
         .spyOn(polticalDebateCommentsService, 'getCommentById')
-        .mockResolvedValueOnce(null);
+        .mockResolvedValue(null);
 
       await expect(
         polticalDebateCommentsService.updateComment(
-          mockUser,
-          mockPolticalDebateId,
-          mockCommentId,
-          mockUpdateDto,
+          mockedUser,
+          polticalDebateId,
+          commentId,
+          updatePolticalDebateCommentDto,
         ),
       ).rejects.toThrow(NotFoundException);
+
+      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
+        polticalDebateId,
+        commentId,
+      );
+    });
+    it('실패: 게시판을 수정할 권한이 없습니다.', async () => {
+      const userInfo = { id: 2 };
+      const polticalDebateId = 1;
+      const commentId = 1;
+      const updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto = {
+        content: 'Updated content',
+      };
+
+      const mockComments = {
+        id: commentId,
+        userId: userInfo.id,
+        polticalDebateId: 1,
+        content: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateComments;
+
+      jest
+        .spyOn(polticalDebateCommentsService, 'getCommentById')
+        .mockResolvedValue(mockComments);
+
+      await expect(
+        polticalDebateCommentsService.updateComment(
+          mockedUser,
+          polticalDebateId,
+          commentId,
+          updatePolticalDebateCommentDto,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
+        polticalDebateId,
+        commentId,
+      );
     });
   });
 
   describe('deleteComment', () => {
     it('성공', async () => {
-      const mockUser = {
-        id: 1,
-        role: Role.User,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userInfo: new UserInfos(),
-        onlineBoard: [new OnlineBoards()],
-        onlineBoardComment: [new OnlineBoardComments()],
-        trial: [new Trials()],
-        humorBoard: [new HumorBoards()],
-        humorComment: [new HumorComments()],
-        polticalDebateBoards: [new PolticalDebateBoards()],
-        polticalDebateComments: [new PolticalDebateComments()],
-      };
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
+      const polticalDebateId = 1;
+      const commentId = 1;
+      jest
+        .spyOn(polticalDebateCommentsService, 'getCommentById')
+        .mockResolvedValue(mockComment);
+
+      jest
+        .spyOn(polticalDebateCommentsRepository, 'delete')
+        .mockResolvedValue(null);
+
+      const result = await polticalDebateCommentsService.deleteComment(
+        mockedUser,
+        polticalDebateId,
+        commentId,
+      );
+
+      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
+        polticalDebateId,
+        commentId,
+      );
+
+      expect(polticalDebateCommentsRepository.delete).toHaveBeenCalledWith(
+        commentId,
+      );
+
+      expect(result).toEqual({ message: '댓글이 삭제되었습니다.' });
+    });
+    it('실패: 댓글을 찾을 수 없습니다.', async () => {
+      const polticalDebateId = 1;
+      const commentId = 1;
+
+      jest
+        .spyOn(polticalDebateCommentsService, 'getCommentById')
+        .mockResolvedValue(null);
+
+      await expect(
+        polticalDebateCommentsService.deleteComment(
+          mockedUser,
+          polticalDebateId,
+          commentId,
+        ),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
+        polticalDebateId,
+        commentId,
+      );
+    });
+    it('실패: 댓글을 삭제할 권한이 없습니다.', async () => {
+      const polticalDebateId = 1;
+      const commentId = 1;
+
       const mockComment: PolticalDebateComments = {
-        id: mockCommentId,
-        userId: mockUser.id,
-        polticalDebateId: mockPolticalDebateId,
-        content: 'test comment',
+        id: commentId,
+        userId: 2,
+        polticalDebateId,
+        content: 'Test comment',
         createdAt: new Date(),
         updatedAt: new Date(),
         user: new Users(),
         polticalDebateBoard: new PolticalDebateBoards(),
       };
+
       jest
         .spyOn(polticalDebateCommentsService, 'getCommentById')
-        .mockResolvedValueOnce(mockComment);
-      jest
-        .spyOn(polticalDebateCommentsRepository, 'delete')
-        .mockResolvedValueOnce({} as DeleteResult);
-
-      const result = await polticalDebateCommentsService.deleteComment(
-        mockUser,
-        mockPolticalDebateId,
-        mockCommentId,
-      );
-
-      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
-        mockPolticalDebateId,
-        mockCommentId,
-      );
-      expect(polticalDebateCommentsRepository.delete).toHaveBeenCalledWith(
-        mockCommentId,
-      );
-      expect(result).toEqual({ message: '댓글이 삭제되었습니다.' });
-    });
-    it('실패: 댓글을 찾을 수 없습니다.', async () => {
-      const mockUser = {
-        id: 1,
-        role: Role.User,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        userInfo: new UserInfos(),
-        onlineBoard: [new OnlineBoards()],
-        onlineBoardComment: [new OnlineBoardComments()],
-        trial: [new Trials()],
-        humorBoard: [new HumorBoards()],
-        humorComment: [new HumorComments()],
-        polticalDebateBoards: [new PolticalDebateBoards()],
-        polticalDebateComments: [new PolticalDebateComments()],
-      };
-      const mockPolticalDebateId = 1;
-      const mockCommentId = 1;
-      jest
-        .spyOn(polticalDebateCommentsService, 'getCommentById')
-        .mockResolvedValueOnce(null);
+        .mockResolvedValue(mockComment);
 
       await expect(
         polticalDebateCommentsService.deleteComment(
-          mockUser,
-          mockPolticalDebateId,
-          mockCommentId,
+          mockedUser,
+          polticalDebateId,
+          commentId,
         ),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(polticalDebateCommentsService.getCommentById).toHaveBeenCalledWith(
+        polticalDebateId,
+        commentId,
+      );
     });
   });
 });

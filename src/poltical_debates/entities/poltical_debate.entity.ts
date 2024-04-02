@@ -35,7 +35,7 @@ export class PolticalDebateBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.polticalDebateBoards)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(

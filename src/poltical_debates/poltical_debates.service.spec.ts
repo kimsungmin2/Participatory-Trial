@@ -1,14 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { PolticalDebatesService } from './poltical_debates.service';
-import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
 import { Trials } from '../trials/entities/trial.entity';
-import { HumorBoards } from '../humors/entities/humor.entity';
-import { HumorComments } from '../humors/entities/humor_comment.entity';
+import { HumorBoards } from '../humors/entities/humor-board.entity';
+import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { Role } from '../users/types/userRole.type';
 import {
@@ -16,22 +15,23 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UpdatePolticalDebateDto } from 'src/poltical_debates/dto/update-poltical_debate.dto';
-import { Users } from 'src/users/entities/user.entity';
+import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
+import { Users } from '../users/entities/user.entity';
+import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
+import { UserInfos } from '../users/entities/user-info.entity';
 
 const mockedUser = {
   id: 1,
-  role: Role.User,
+  email: 'example@naver.com',
+  password: '1',
+  nickName: 'test',
+  birth: '1992-02-22',
+  provider: 'test',
+  verifiCationCode: 1,
+  emailVerified: true,
   createdAt: new Date(),
   updatedAt: new Date(),
-  users: new Users(),
-  onlineBoard: [new OnlineBoards()],
-  onlineBoardComment: [new OnlineBoardComments()],
-  trial: [new Trials()],
-  humorBoard: [new HumorBoards()],
-  humorComment: [new HumorComments()],
-  polticalDebateBoards: [new PolticalDebateBoards()],
-  polticalDebateComments: [new PolticalDebateComments()],
+  user: null,
 };
 
 const mockPolticalDebate = {
@@ -100,7 +100,7 @@ describe('PolticalDebatesService', () => {
         .mockResolvedValue(mockPolticalDebate);
 
       const createPolticalDebate = await polticalDebatesService.create(
-        mockedUser.users,
+        mockedUser,
         createPolticalDebateDto,
       );
 
@@ -162,105 +162,156 @@ describe('PolticalDebatesService', () => {
     });
   });
 
-  describe('update', () => {
-    it('성공', async () => {
+  describe('정치 토론 게시판 수정', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('정치 토론 게시판 업데이트 성공', async () => {
       const updatePolticalDebateDto: UpdatePolticalDebateDto = {
-        title: 'test2',
-        content: 'testtest2',
+        title: 'Updated Title',
+        content: 'Updated Content',
       };
+
+      const mockPolticalDebateId = 1;
+      const mockUserId = 1;
+
+      const mockPolticalDebate = {
+        id: mockPolticalDebateId,
+        userId: mockUserId,
+        title: '기존 타이틀',
+        content: '기존 컨텐츠',
+        view: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateBoards;
 
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
         .mockResolvedValue(mockPolticalDebate);
-
       jest
-        .spyOn(polticalDebatesRepository, 'update')
-        .mockResolvedValue({ raw: [], affected: 1 } as UpdateResult);
+        .spyOn(polticalDebatesRepository, 'save')
+        .mockResolvedValue(mockPolticalDebate);
 
-      const result = await polticalDebatesService.update(
-        mockedUser.users,
-        mockPolticalDebate.id,
+      const updatedBoard = await polticalDebatesService.update(
+        mockedUser,
+        mockPolticalDebateId,
         updatePolticalDebateDto,
       );
 
-      expect(result).toEqual({
-        ...mockPolticalDebate,
-        ...updatePolticalDebateDto,
-      });
-    });
+      expect(polticalDebatesRepository.save).toHaveBeenCalledWith(
+        mockPolticalDebate,
+      );
 
+      expect(updatedBoard).toEqual(mockPolticalDebate);
+    });
     it('실패: 정치 토론 게시판을 찾을 수 없습니다.', async () => {
       const updatePolticalDebateDto: UpdatePolticalDebateDto = {
-        title: '타이틀 수정',
-        content: '내용 수정',
+        title: 'Updated Title',
+        content: 'Updated Content',
       };
 
       const mockPolticalDebateId = 1000;
+
       jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(
         polticalDebatesService.update(
-          mockedUser.users,
+          mockedUser,
           mockPolticalDebateId,
           updatePolticalDebateDto,
         ),
       ).rejects.toThrow(NotFoundException);
     });
-
     it('실패: 게시판을 수정할 권한이 없습니다.', async () => {
       const updatePolticalDebateDto: UpdatePolticalDebateDto = {
         title: 'Updated Title',
         content: 'Updated Content',
       };
 
+      const mockPolticalDebate = {
+        id: 1,
+        userId: 2,
+        title: '테스트',
+        content: '테스트',
+        view: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateBoards;
+
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
         .mockResolvedValue(mockPolticalDebate);
 
-      mockedUser.id = 2;
-
       await expect(
         polticalDebatesService.update(
-          mockedUser.users,
+          mockedUser,
           mockPolticalDebate.id,
           updatePolticalDebateDto,
         ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
+  describe('정치 토론 게시판 삭제', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    it('정치 토론 게시판 삭제 성공', async () => {
+      const mockPolticalDebateId = 1;
+      const mockUserId = 1;
 
-  describe('delete', () => {
-    it('성공', async () => {
+      const mockPolticalDebate = {
+        id: mockPolticalDebateId,
+        userId: mockUserId,
+        title: '기존 타이틀',
+        content: '기존 컨텐츠',
+        view: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateBoards;
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
         .mockResolvedValue(mockPolticalDebate);
+      jest
+        .spyOn(polticalDebatesRepository, 'remove')
+        .mockResolvedValue(mockPolticalDebate);
 
-      const result = await polticalDebatesService.delete(
-        mockedUser.users,
-        mockPolticalDebate.id,
+      const deleteBoard = await polticalDebatesService.delete(
+        mockedUser,
+        mockPolticalDebateId,
       );
 
-      expect(result).toBeUndefined();
+      expect(polticalDebatesRepository.remove).toHaveBeenCalledWith(
+        mockPolticalDebate,
+      );
+      expect(deleteBoard).toEqual(mockPolticalDebate);
     });
 
-    it('실패: 존재하지 않는 정치 토론 게시판입니다.', async () => {
+    it('정치 토론 게시판을 찾을 수 없습니다.', async () => {
       const mockPolticalDebateId = 1000;
+
       jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(null);
 
       await expect(
-        polticalDebatesService.delete(mockedUser.users, mockPolticalDebateId),
+        polticalDebatesService.delete(mockedUser, mockPolticalDebateId),
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('실패: 게시판을 삭제할 권한이 없습니다.', async () => {
+    it('게시판를 삭제할 권한이 없습니다.', async () => {
+      const mockPolticalDebate = {
+        id: 1,
+        userId: 2,
+        title: '테스트',
+        content: '테스트',
+        view: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as PolticalDebateBoards;
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
         .mockResolvedValue(mockPolticalDebate);
-
-      mockedUser.id = 2;
-
       await expect(
-        polticalDebatesService.delete(mockedUser.users, mockPolticalDebate.id),
+        polticalDebatesService.delete(mockedUser, mockPolticalDebate.id),
       ).rejects.toThrow(UnauthorizedException);
     });
   });

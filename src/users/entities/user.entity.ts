@@ -11,14 +11,16 @@ import { UserInfos } from './user-info.entity';
 import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
 import { OnlineBoardComments } from '../../online_boards/entities/online_board_comment.entity';
 import { Trials } from '../../trials/entities/trial.entity';
-import { HumorBoards } from '../../humors/entities/humor.entity';
-import { HumorComments } from '../../humors/entities/humor_comment.entity';
+import { HumorBoards } from '../../humors/entities/humor-board.entity';
+import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';
+import { HumorLike } from '../../humors/entities/humor_like.entity';
+import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
 
 @Entity({
-  name: "users"
+  name: 'users',
 })
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
@@ -46,7 +48,7 @@ export class Users {
   onlineBoardComment: OnlineBoardComments[];
 
   @OneToMany(() => Trials, (trial) => trial.user, {
-    eager: true
+    eager: true,
   })
   trial: Trials[];
 
@@ -69,4 +71,13 @@ export class Users {
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];
+
+  @OneToMany(() => HumorLike, (humorLike) => humorLike.user, {
+    cascade: true,
+  })
+  humorLike: HumorLike[];
+  @OneToMany(() => OnlineBoardLike, (onlineBoardLike) => onlineBoardLike.user, {
+    cascade: true,
+  })
+  onlineBoardLike: OnlineBoardLike[];
 }

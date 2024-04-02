@@ -4,13 +4,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UpdatePolticalDebateDto } from 'src/poltical_debates/dto/update-poltical_debate.dto';
-import { PolticalDebateBoards } from 'src/poltical_debates/entities/poltical_debate.entity';
-import { UserInfos } from 'src/users/entities/user-info.entity';
-import { Users } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Users } from '../users/entities/user.entity';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
+import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
+import { PolticalDebateBoards } from './entities/poltical_debate.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
 
 @Injectable()
 export class PolticalDebatesService {
@@ -19,7 +19,7 @@ export class PolticalDebatesService {
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
   ) {}
   async create(
-    userInfo: Users,
+    userInfo: UserInfos,
     createPolticalDebateDto: CreatePolticalDebateDto,
   ) {
     const { title, content } = createPolticalDebateDto;
@@ -67,7 +67,7 @@ export class PolticalDebatesService {
   }
 
   async update(
-    userInfo: Users,
+    userInfo: UserInfos,
     id: number,
     updatePolticalDebateDto: UpdatePolticalDebateDto,
   ) {
@@ -82,19 +82,23 @@ export class PolticalDebatesService {
     }
 
     if (polticalDebateBoard.userId !== userId) {
-      throw new UnauthorizedException('게사판을 수정할 권한이 없습니다.');
+      throw new UnauthorizedException('게시판을 수정할 권한이 없습니다.');
     }
 
     const existingViewCount = polticalDebateBoard.view;
 
-    const updateBoard = await this.polticalDebateRepository.update(
-      polticalDebateBoard.id,
-      { ...updatePolticalDebateDto, view: existingViewCount },
-    );
+    polticalDebateBoard.userId = userId;
+    polticalDebateBoard.title = updatePolticalDebateDto.title;
+    polticalDebateBoard.content = updatePolticalDebateDto.content;
+    polticalDebateBoard.view = existingViewCount;
 
-    return updateBoard;
+    const updatedBoard =
+      await this.polticalDebateRepository.save(polticalDebateBoard);
+    return updatedBoard;
   }
-  async delete(userInfo: Users, id: number) {
+
+  async delete(userInfo: UserInfos, id: number) {
+    console.log(userInfo);
     const userId = userInfo.id;
 
     const politicalDebateBoard = await this.polticalDebateRepository.findOne({
@@ -102,7 +106,7 @@ export class PolticalDebatesService {
     });
 
     if (!politicalDebateBoard) {
-      throw new NotFoundException('존재하지 않는 정치 토론 게시판입니다.');
+      throw new NotFoundException('정치 토론 게시판을 찾을 수 없습니다.');
     }
 
     if (politicalDebateBoard.userId !== userId) {
@@ -110,7 +114,7 @@ export class PolticalDebatesService {
     }
 
     const deleteBoard =
-      await this.polticalDebateRepository.delete(politicalDebateBoard);
+      await this.polticalDebateRepository.remove(politicalDebateBoard);
 
     return deleteBoard;
   }

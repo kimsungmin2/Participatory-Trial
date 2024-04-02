@@ -8,7 +8,8 @@ import { Repository } from 'typeorm';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
-import { Users } from 'src/users/entities/user.entity';
+import { Users } from '../users/entities/user.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
 
 @Injectable()
 export class PolticalDebateCommentsService {
@@ -20,7 +21,7 @@ export class PolticalDebateCommentsService {
   ) {}
 
   async createComment(
-    user: Users,
+    userInfo: UserInfos,
     polticalDebateId: number,
     createPolticalDebateCommentDto: CreatePolticalDebateCommentDto,
   ) {
@@ -36,7 +37,7 @@ export class PolticalDebateCommentsService {
       );
 
     const createdComment = await this.polticalDebateCommentsRepository.save({
-      userId: user.id,
+      userId: userInfo.id,
       polticalDebateId,
       ...createPolticalDebateCommentDto,
     });
@@ -58,7 +59,7 @@ export class PolticalDebateCommentsService {
   }
 
   async updateComment(
-    user: Users,
+    userInfo: UserInfos,
     polticalDebateId: number,
     commentId: number,
     updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto,
@@ -68,7 +69,7 @@ export class PolticalDebateCommentsService {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
 
-    if (comment.userId !== user.id) {
+    if (comment.userId !== userInfo.id) {
       throw new UnauthorizedException('댓글을 수정할 권한이 없습니다.');
     }
 
@@ -80,7 +81,7 @@ export class PolticalDebateCommentsService {
   }
 
   async deleteComment(
-    user: Users,
+    userInfo: UserInfos,
     polticalDebateId: number,
     commentId: number,
   ) {
@@ -89,7 +90,7 @@ export class PolticalDebateCommentsService {
       throw new NotFoundException('댓글을 찾을 수 없습니다.');
     }
 
-    if (comment.userId !== user.id) {
+    if (comment.userId !== userInfo.id) {
       throw new UnauthorizedException('댓글을 삭제할 권한이 없습니다.');
     }
 

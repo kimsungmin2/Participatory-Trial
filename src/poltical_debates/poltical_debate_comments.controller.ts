@@ -12,13 +12,14 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CreatePolticalDebateCommentDto } from 'src/poltical_debates/dto/create-poltical_debate_comment_dto';
-import { Users } from 'src/users/entities/user.entity';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { Users } from '../users/entities/user.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
 
 @ApiTags('정치 토론 댓글')
-@Controller('polticalDebates/:polticalDebateId/comments')
+@Controller('poltical-debates/:polticalDebateId/comments')
 export class PolticalDebateCommentsController {
   constructor(
     private readonly polticalDebateCommentsService: PolticalDebateCommentsService,
@@ -28,12 +29,12 @@ export class PolticalDebateCommentsController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async createComment(
-    @UserInfo() user: Users,
+    @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') polticalDebateId: number,
     @Body() createPolticalDebateCommentDto: CreatePolticalDebateCommentDto,
   ) {
     const data = await this.polticalDebateCommentsService.createComment(
-      user,
+      userInfo,
       polticalDebateId,
       createPolticalDebateCommentDto,
     );
@@ -76,7 +77,7 @@ export class PolticalDebateCommentsController {
   @UseGuards(AuthGuard('jwt'))
   @Put(':commentId')
   async updateComment(
-    @UserInfo() userInfo: Users,
+    @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') polticalDebateId: number,
     @Param('commentId') commentId: number,
     @Body() updatePolticalDebateCommentDto: CreatePolticalDebateCommentDto,
@@ -93,7 +94,7 @@ export class PolticalDebateCommentsController {
   @UseGuards(AuthGuard('jwt'))
   @Delete(':commentId')
   async deleteComment(
-    @UserInfo() userInfo: Users,
+    @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') polticalDebateId: number,
     @Param('commentId') commentId: number,
   ) {

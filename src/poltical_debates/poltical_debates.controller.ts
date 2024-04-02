@@ -9,17 +9,19 @@ import {
   UseGuards,
   Patch,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { UpdatePolticalDebateDto } from 'src/poltical_debates/dto/update-poltical_debate.dto';
-import { Users } from 'src/users/entities/user.entity';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
+import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
+import { Users } from '../users/entities/user.entity';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { UserInfos } from '../users/entities/user-info.entity';
 
 @ApiTags('정치 토론')
-@Controller('polticalDebates')
+@Controller('poltical-debates')
 export class PolticalDebatesController {
   constructor(
     private readonly polticalDebatesService: PolticalDebatesService,
@@ -29,7 +31,7 @@ export class PolticalDebatesController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
-    @UserInfo() userInfo: Users,
+    @UserInfo() userInfo: UserInfos,
     @Body() createPolticalDebateDto: CreatePolticalDebateDto,
   ) {
     const data = await this.polticalDebatesService.create(
@@ -78,6 +80,7 @@ export class PolticalDebatesController {
     }
   }
 
+  // 상세 조회
   @ApiOperation({
     summary: '정치 토론 게시판 상세 조회',
     description: '상세 조회',
@@ -101,7 +104,7 @@ export class PolticalDebatesController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':polticalDebateId')
   async update(
-    @UserInfo() userInfo: Users,
+    @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') id: string,
     @Body() updatePolticalDebateDto: UpdatePolticalDebateDto,
   ) {
@@ -110,7 +113,7 @@ export class PolticalDebatesController {
       +id,
       updatePolticalDebateDto,
     );
-
+    console.log(updatedBoard);
     return {
       statusCode: HttpStatus.OK,
       message: '정치 토론방이 수정되었습니다.',
@@ -123,7 +126,7 @@ export class PolticalDebatesController {
   @UseGuards(AuthGuard('jwt'))
   @Delete(':polticalDebateId')
   async delete(
-    @UserInfo() userInfo: Users,
+    @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') id: string,
   ) {
     const deleteBoard = await this.polticalDebatesService.delete(userInfo, +id);

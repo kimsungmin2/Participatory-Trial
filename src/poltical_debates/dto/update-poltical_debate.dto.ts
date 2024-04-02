@@ -7,10 +7,9 @@ export class UpdatePolticalDebateDto {
     description: '정치 토론 게시판 타이틀 수정',
     required: false,
   })
-  @IsOptional()
-  @IsNotEmpty({ message: '토론 타이틀을 입력해 주세요.' })
+  @IsNotEmpty({ message: '타이틀을 입력해 주세요' })
   @IsString()
-  title?: string;
+  title: string;
 
   @ApiProperty({
     example: '누가 이길까?',

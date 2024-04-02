@@ -31,7 +31,7 @@ export class PolticalDebateComments {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.polticalDebateComments)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @ManyToOne(
