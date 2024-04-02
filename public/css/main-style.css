@@ -40,6 +40,10 @@ a {
   text-decoration: none;
 }
 
+.navbar {
+  background-color: #f4edcc;
+}
+
 .hot_vote {
   border-radius: 10px;
   background-color: lightsalmon;
@@ -49,10 +53,6 @@ a {
   box-shadow: 0px 0px 5px #444;
   margin-top: 5%;
   padding: 20px;
-}
-
-.fword {
-  font-size: 100px;
 }
 
 .hot_vote_container {
@@ -152,6 +152,7 @@ a {
   flex-direction: column; /* 세로로 내용을 쌓기 위해 */
   justify-content: space-between; /* 내용 사이에 공간을 균등하게 분배 */
   margin-bottom: 5%;
+  border-radius: 5px;
 }
 
 .vote-title {

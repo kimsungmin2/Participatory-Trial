@@ -1,0 +1,144 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'SUITE-Regular';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'MBC1961GulimM';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+/* body {
+  background-color: lightskyblue;
+} */
+
+* {
+  margin: 0px;
+  padding: 0px;
+}
+header {
+  padding: 0 20%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.navbar {
+  background-color: #f4edcc;
+}
+
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+
+.navbar-brand {
+  font-size: 24px;
+}
+
+.board_title {
+  font-size: 50px;
+  font-family: 'SUITE-Regular';
+  margin-top: 30px;
+  margin-left: 40px;
+  margin-bottom: 30px;
+}
+
+/* 검색창 스타일 */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
+  /* 컨테이너의 너비를 필요에 따라 조정하세요 */
+}
+
+input[type='text'],
+button[type='submit'] {
+  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+}
+
+input[type='text'] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  width: calc(100% - 120px); /* 버튼 너비와 마진을 고려하여 조정 */
+  background: #f1f1f1;
+  margin-right: 10px; /* 버튼과의 간격 */
+}
+
+button[type='submit'] {
+  width: 100px; /* 버튼의 너비를 고정값으로 설정 */
+  padding: 10px;
+  background: #2196f3;
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  cursor: pointer;
+}
+
+.board-container {
+  width: 100%;
+  background-color: #2196f3;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 박스 간의 간격 */
+  margin: 20px;
+  padding: 20px;
+}
+
+.card {
+  background-color: #a1b1dc;
+  border-radius: 8px; /* 둥근 모서리 */
+  padding: 20px; /* 내부 여백 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  margin-bottom: 45px;
+}
+
+.card-header {
+  font-family: 'SUITE-Regular';
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.card-stats {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 1.2rem;
+}
+
+.card-stats div {
+  font-family: 'SUITE-Regular';
+  display: inline-block;
+  margin-left: 50px;
+}
