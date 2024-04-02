@@ -20,6 +20,7 @@ export class UserInfos {
   password: string;
 
   @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   nickName: string;
 
   @Column({ type: 'varchar', nullable: false })

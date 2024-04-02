@@ -24,7 +24,6 @@ import {
 } from '@nestjs/swagger';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from 'src/users/entities/user-info.entity';
-import { userInfo } from 'os';
 import { MyTrialsGuard } from './guards/myTrials.guard';
 import { VoteDto } from './vote/dto/voteDto';
 import { number } from 'joi';
@@ -33,6 +32,7 @@ import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
 
+@ApiTags('Trials')
 @ApiTags('Trials')
 @Controller('trials')
 export class TrialsController {
@@ -166,6 +166,7 @@ export class TrialsController {
       message: '모든 조회에 성공하였습니다.',
       data,
     };
+
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
@@ -429,3 +430,4 @@ export class TrialsController {
     };
   }
 }
+

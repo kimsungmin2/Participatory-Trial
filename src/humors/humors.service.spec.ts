@@ -3,7 +3,6 @@ import { HumorsService } from './humors.service';
 import { Role } from '../users/types/userRole.type';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
 import { Trials } from '../trials/entities/trial.entity';
 import { HumorBoards } from './entities/humor-board.entity';
 import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
@@ -22,6 +21,7 @@ import { forbidden } from 'joi';
 import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
 import { Redis } from 'ioredis';
+import { OnlineBoardComments } from 'src/online_board_comment/entities/online_board_comment.entity';
 
 const mockedUser: Users = {
   id: 1,

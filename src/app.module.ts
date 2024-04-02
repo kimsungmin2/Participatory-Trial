@@ -8,6 +8,7 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
@@ -20,7 +21,6 @@ import { Users } from './users/entities/user.entity';
 import { UserInfos } from './users/entities/user-info.entity';
 import { Trials } from './trials/entities/trial.entity';
 import { Votes } from './trials/entities/vote.entity';
-import { OnlineBoardComments } from './online_boards/entities/online_board_comment.entity';
 import { OnlineBoards } from './online_boards/entities/online_board.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
@@ -96,6 +96,7 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    OnlineBoardCommentModule
   ],
   controllers: [AppController],
   providers: [AppService],

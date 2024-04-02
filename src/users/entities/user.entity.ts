@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { UserInfos } from './user-info.entity';
 import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from '../../online_boards/entities/online_board_comment.entity';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Trials } from '../../trials/entities/trial.entity';
 import { HumorBoards } from '../../humors/entities/humor-board.entity';
 import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
