@@ -7,6 +7,7 @@ import { OnlineBoards } from './entities/online_board.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { OnlineBoardLike } from './entities/online_board_like.entity';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { OnlineBoardLike } from './entities/online_board_like.entity';
       OnlineBoardLike,
     ]),
     UsersModule,
+    S3Module,
   ],
   controllers: [OnlineBoardsController],
   providers: [OnlineBoardsService],

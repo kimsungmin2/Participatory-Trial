@@ -15,12 +15,17 @@ import { EmailModule } from './email/email.module';
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
-import { BullModule } from '@nestjs/bull';
-import { CacheConfigService } from './cache/config';
-import { CacheModule } from '@nestjs/cache-manager';
+import { SchedulerModule } from './scheduler/scheduler.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BullModule } from '@nestjs/bull';
+import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import { CacheConfigService } from './cache/config';
+import { CacheModule } from '@nestjs/cache-manager';
 
+console.log(1, process.env.DB_NAME);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -51,6 +56,16 @@ console.log(typeOrmModuleOptions);
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: 'single',
+        url: process.env.REDIS_URL,
+      }),
+    }),
+    ScheduleModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       useClass: CacheConfigService,
@@ -72,10 +87,11 @@ console.log(typeOrmModuleOptions);
     EmailModule,
     S3Module,
     LikeModule,
+    SchedulerModule,
+    AuthModule,
+    EmailModule,
+    VoteModule,
     OnlineBoardCommentModule,
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
-    }),
   ],
   controllers: [AppController],
   providers: [AppService],

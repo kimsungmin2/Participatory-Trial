@@ -5,7 +5,6 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -26,7 +25,7 @@ export class PolticalDebateBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
   @CreateDateColumn({ type: 'timestamp' })
@@ -35,13 +34,13 @@ export class PolticalDebateBoards {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.onlineBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @ManyToOne(() => Users, (user) => user.polticalDebateBoards)
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(
     () => PolticalDebateComments,
-    (polticalDebateComments) => polticalDebateComments.polticalDebateBoard,
+    (polticalDebateComment) => polticalDebateComment.polticalDebateBoard,
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];

@@ -42,7 +42,7 @@ export class LikeService {
 
     let boardRepository;
     let likeRepository;
-    let entityKey: 'humorBoardId' | 'onlineBoardId';
+    let entityKey: 'humorBoardId' | 'onlineBoardId' | 'trialBoardId';
 
     //타입 별 의존성 주입
     switch (boardType) {
@@ -73,6 +73,8 @@ export class LikeService {
       });
 
     if (!isLikeExist) {
+      console.log(boardId);
+      console.log(id);
       const like = {
         [entityKey]: boardId,
         userId: id,

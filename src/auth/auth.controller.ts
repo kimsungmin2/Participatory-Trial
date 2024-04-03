@@ -26,7 +26,6 @@ export class AuthController {
 
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
-  @Render('sign-up.ejs')
   async register(@Body() signUpdto: SignUpDto) {
     console.log(signUpdto);
     const user = await this.authService.signUp(

@@ -161,6 +161,7 @@ describe('OnlineBoardCommentService', () => {
     const foundComment: OnlineBoardComments = {
       id: commentId,
       onlineBoardId: 1,
+
       content: 'content',
       userId: 1,
       createdAt: new Date(),

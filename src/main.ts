@@ -19,9 +19,6 @@ async function bootstrap() {
       },
     }),
   );
-  // app.useStaticAssets(join(__dirname, '..', 'src', 'public'));
-  // app.setBaseViewsDir(join(__dirname, '..', 'src', 'views'));
-  // app.setViewEngine('ejs');
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
   app.set('views', join(__dirname, '..', 'views'));

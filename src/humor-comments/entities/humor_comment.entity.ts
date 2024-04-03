@@ -33,10 +33,10 @@ export class HumorComments {
   updatedAt: Date;
 
   @ManyToOne(() => HumorBoards, (humorBoard) => humorBoard.humorComment)
-  @JoinColumn({ name: 'humor_board_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'humorBoardId', referencedColumnName: 'id' })
   humorBoard: HumorBoards;
 
   @ManyToOne(() => Users, (user) => user.humorComment)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 }

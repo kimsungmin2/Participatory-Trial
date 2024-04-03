@@ -2,6 +2,9 @@
 /dist
 /node_modules
 /buildt 
+/drivers
+/logstash
+/elasticsearch
 
 # Logs
 logs
@@ -58,3 +61,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 elasticsearch-data
 postgres-data
+docker-compose.yaml
+Dockerfile

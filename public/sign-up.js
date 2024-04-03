@@ -25,16 +25,17 @@ form.addEventListener('submit', (event) => {
       // if (!response.ok) {
       //   throw new Error('요청이 잘못되었습니다.');
       // }
-      return response.json();
+      response.json();
     })
     .then((data) => {
       alert('Verification successful');
       console.log(data);
-      window.location.href = '/signup/verification';
+      window.location.href = 'http://localhost:3000/signup/verifiCation';
     })
     .catch((error) => {
       // 요청이 실패했을 때의 처리
       alert(error);
       console.error('Error:', error.stack);
+      console.error(error.message);
     });
 });

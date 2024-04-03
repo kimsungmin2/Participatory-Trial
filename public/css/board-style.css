@@ -1,0 +1,217 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'SUITE-Regular';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'MBC1961GulimM';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+/* body {
+  background-color: lightskyblue;
+} */
+
+* {
+  margin: 0px;
+  padding: 0px;
+}
+header {
+  padding: 0 20%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.navbar {
+  background-color: #f4edcc;
+}
+
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+
+.navbar-brand {
+  font-size: 24px;
+}
+
+.board_title,
+.post_title,
+.post_content {
+  font-size: 50px;
+  font-family: 'SUITE-Regular';
+  margin-top: 30px;
+  margin-left: 40px;
+  margin-bottom: 30px;
+}
+
+.post_content {
+  font-size: 20px;
+}
+.post_title {
+  font-size: 30px;
+  display: flex; /* Flexbox 레이아웃 사용 */
+  justify-content: space-between; /* 자식 요소들을 양 끝으로 정렬 */
+  align-items: center; /* 자식 요소들을 세로 중앙 정렬 */
+}
+.post_title > div {
+  display: flex; /* 조회수와 좋아요를 가진 div도 Flexbox로 설정 */
+  gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
+  font-size: 1.3rem;
+}
+
+.post_image {
+  text-align: center;
+  margin-bottom: 100px;
+}
+.post_image img {
+  width: 500px;
+  height: auto;
+}
+
+/* 검색창 스타일 */
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
+  /* 컨테이너의 너비를 필요에 따라 조정하세요 */
+  margin-bottom: 50px;
+}
+
+input[type='text'],
+button[type='submit'] {
+  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+}
+
+input[type='text'] {
+  padding: 10px;
+  font-size: 17px;
+  border: 1px solid grey;
+  width: calc(100% - 120px); /* 버튼 너비와 마진을 고려하여 조정 */
+  background: #f1f1f1;
+  margin-right: 10px; /* 버튼과의 간격 */
+}
+
+button[type='submit'] {
+  width: 100px; /* 버튼의 너비를 고정값으로 설정 */
+  padding: 10px;
+  background: #2196f3;
+  color: white;
+  font-size: 17px;
+  border: 1px solid grey;
+  cursor: pointer;
+}
+
+.board-container {
+  width: 100%;
+  background-color: #2196f3;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 박스 간의 간격 */
+  padding: 20px;
+}
+
+.card {
+  background-color: #a1b1dc;
+  border-radius: 8px; /* 둥근 모서리 */
+  padding: 20px; /* 내부 여백 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
+  margin-bottom: 45px;
+}
+
+.card-header {
+  font-family: 'SUITE-Regular';
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.card-stats {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 1.2rem;
+}
+
+.card-stats div {
+  font-family: 'SUITE-Regular';
+  display: inline-block;
+  margin-left: 50px;
+}
+
+.card-header a {
+  text-decoration: none; /* 밑줄 제거 */
+  color: inherit; /* 상위 요소의 글자색을 상속받음 */
+  /* 추가적인 스타일링 */
+}
+.pagination {
+  display: flex; /* Flexbox를 사용하여 내부 요소들을 나열 */
+  justify-content: center; /* 가로 방향으로 중앙 정렬 */
+  list-style-type: none; /* 기본 리스트 스타일 제거 */
+  padding: 0; /* 기본 패딩 제거 */
+  font-size: 1.2rem;
+  margin-top: 0px;
+}
+
+.pagination a,
+.pagination .current-page-number {
+  margin: 0 5px; /* 숫자 사이의 간격 조정 */
+  text-decoration: none; /* 링크의 밑줄 제거 */
+  color: black; /* 링크 색상 설정 */
+}
+
+.pagination .current-page-number {
+  font-weight: bold; /* 현재 페이지 숫자 강조 */
+}
+
+.submit-button {
+  background-color: #007bff; /* 밝은 파란색 */
+  color: white; /* 텍스트 색상은 흰색 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 상하 10px, 좌우 20px의 패딩 */
+  font-size: 16px; /* 폰트 크기 */
+  border-radius: 5px; /* 버튼 모서리를 약간 둥글게 */
+  cursor: pointer; /* 마우스 오버 시 커서 모양 변경 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+.submit-button:hover {
+  background-color: #0056b3; /* 호버 시 더 어두운 파란색으로 변경 */
+  transform: scale(1.05); /* 호버 시 버튼을 약간 확대 */
+}
+
+.submit-button:active {
+  transform: scale(0.95); /* 클릭 시 버튼을 약간 축소 */
+}

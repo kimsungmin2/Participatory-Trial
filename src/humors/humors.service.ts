@@ -13,6 +13,9 @@ import { Users } from '../users/entities/user.entity';
 import { S3Service } from '../s3/s3.service';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 import { BoardType } from '../s3/board-type';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { cache } from 'joi';
 
 @Injectable()
 export class HumorsService {
@@ -20,6 +23,8 @@ export class HumorsService {
     @InjectRepository(HumorBoards)
     private HumorBoardRepository: Repository<HumorBoards>,
     private s3Service: S3Service,
+    @InjectRedis()
+    private readonly redis: Redis,
   ) {}
 
   //게시물 생성
@@ -58,22 +63,31 @@ export class HumorsService {
   //모든 게시물 조회(페이지네이션)
 
   async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
+    let humorBoards: HumorBoards[];
+    const totalItems = await this.HumorBoardRepository.count();
     try {
       const { page, limit } = paginationQueryDto;
       const skip = (page - 1) * limit;
-      const humorBoards = await this.HumorBoardRepository.find({
+      humorBoards = await this.HumorBoardRepository.find({
         skip,
         take: limit,
+        order: {
+          createdAt: 'DESC',
+        },
       });
-      if (humorBoards.length === 0) {
-        throw new NotFoundException('더이상 게시물이 없습니다!');
-      }
-      return humorBoards;
     } catch (err) {
+      console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
+    if (humorBoards.length === 0) {
+      throw new NotFoundException('더이상 게시물이 없습니다!');
+    }
+    return {
+      humorBoards,
+      totalItems,
+    };
   }
 
   //단건 게시물 조회
@@ -84,6 +98,31 @@ export class HumorsService {
     if (!findHumorBoard)
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     return findHumorBoard;
+  }
+  //조회수를 증가시키고 데이터를 반환
+  async findOneHumorBoardWithIncreaseView(id: number): Promise<HumorBoards> {
+    const findHumorBoard: HumorBoards = await this.HumorBoardRepository.findOne(
+      {
+        where: { id },
+        relations: ['humorComment'],
+      },
+    );
+    if (!findHumorBoard) {
+      throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
+    }
+    let cachedView: number;
+    try {
+      cachedView = await this.redis.incr(`humors:${id}:view`);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '요청을 처리하는 도중 오류가 발생했습니다.',
+      );
+    }
+
+    return {
+      ...findHumorBoard,
+      view: findHumorBoard.view + cachedView,
+    };
   }
 
   //게시물 업데이트

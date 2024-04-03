@@ -68,7 +68,7 @@ describe('UsersService', () => {
 
       expect(mockUserInfoRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserInfoRepository.findOne).toHaveBeenCalledWith({
-        select: ['id', 'password', 'verifiCationCode', 'email'],
+        select: ['id', 'nickName', 'birth', 'email'],
         where: { email: user.email },
       });
       expect(result).toEqual(user);

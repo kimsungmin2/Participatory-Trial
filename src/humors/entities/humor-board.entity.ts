@@ -27,17 +27,17 @@ export class HumorBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
   imageUrl: string;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -46,7 +46,7 @@ export class HumorBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.humorBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToMany(() => HumorComments, (humorComment) => humorComment.humorBoard, {

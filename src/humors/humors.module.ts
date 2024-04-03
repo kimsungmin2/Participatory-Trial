@@ -16,5 +16,6 @@ import { LikeModule } from '../like/like.module';
   ],
   controllers: [HumorsController],
   providers: [HumorsService],
+  exports: [HumorsService],
 })
 export class HumorsModule {}

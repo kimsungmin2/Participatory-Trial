@@ -8,6 +8,9 @@ import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
+import { ForbiddenException } from '@nestjs/common';
+import { Users } from '../users/entities/user.entity';
+import { UserInfo } from 'os';
 import { NotFoundException } from '@nestjs/common';
 
 describe('OnlineBoardsService', () => {
@@ -101,7 +104,7 @@ describe('OnlineBoardsService', () => {
         OnlineBoardComment: null,
         onlineBoardLike: null,
       },
-    ];
+    ] as OnlineBoards[];
 
     jest.spyOn(repository, 'find').mockResolvedValue(expectedResult);
 
@@ -197,8 +200,23 @@ describe('OnlineBoardsService', () => {
   });
 
   // 게시 삭제
+
   it('should remove a board', async () => {
     const id = 2;
+
+    const userInfo: UserInfos = {
+      id: 1,
+      email: 'example@example.com',
+      password: 'password123',
+      nickName: 'JohnDoe',
+      birth: '1990-01-01',
+      provider: 'local',
+      verifiCationCode: 1,
+      emailVerified: false,
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+    };
 
     const foundUser: UserInfos = {
       id: 1,
@@ -216,7 +234,7 @@ describe('OnlineBoardsService', () => {
 
     const foundBoard: OnlineBoards = {
       id,
-      userId: 1,
+      userId: 2,
       title: 'title',
       content: 'content',
       view: 1,

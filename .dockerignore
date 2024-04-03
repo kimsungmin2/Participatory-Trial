@@ -10,3 +10,4 @@ Dockerfile
 *.sh
 *.yml
 scripts
+*.yaml

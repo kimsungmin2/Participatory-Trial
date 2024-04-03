@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="./email-validation-check.css">
-  <script src="email-validation-check.js"></script>
+  <script src="./email-validation-check.js"></script>
   <title>이메일 인증</title>
 </head>
 <body>
@@ -17,18 +17,16 @@
     </ul>
   </nav>
   <main>
-    <form action="" id="verifyEmail">
+    <form id="verifyEmail">
       <div>
         <label for="email">Email: </label>
-        <input id="email" type="text">
+        <input id="email" type="email" name="email">
       </div>
       <div>
         <label for="code">Code: </label>
-        <input id="code" type="text">
+        <input id="code" type="text" name="code">
       </div>
-      <a href="">
-        <button>인증완료</button>
-      </a>
+      <button type="submit">인증완료</button>
     </form>
   </main>
   <footer></footer>
