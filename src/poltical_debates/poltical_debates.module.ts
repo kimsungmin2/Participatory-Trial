@@ -6,10 +6,12 @@ import { PolticalDebateCommentsService } from './poltical_debate_comments.servic
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { PolticalDebateCommentsController } from './poltical_debate_comments.controller';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments]),
+    S3Module,
   ],
   controllers: [PolticalDebatesController, PolticalDebateCommentsController],
   providers: [PolticalDebatesService, PolticalDebateCommentsService],

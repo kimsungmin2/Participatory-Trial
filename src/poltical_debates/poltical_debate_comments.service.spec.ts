@@ -13,7 +13,6 @@ import { Trials } from '../trials/entities/trial.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Users } from '../users/entities/user.entity';
 import { Role } from '../users/types/userRole.type';
-import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
 
 const mockedUser = {
   id: 1,

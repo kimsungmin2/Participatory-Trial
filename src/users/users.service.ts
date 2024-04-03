@@ -15,7 +15,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<UserInfos> {
     const user = await this.usersInfoRepository.findOne({
       where: { email },
-      select: ['id', 'password', 'email'],
+      select: ['id', 'nickName', 'birth', 'email'],
     });
     return user;
   }
@@ -27,7 +27,7 @@ export class UsersService {
     if (!user) throw new NotFoundException('유저정보를 찾을 수 없습니다.');
     return user;
   }
-  
+
   async userUpdate(id: number, nickName: string) {
     const user = await this.usersInfoRepository.findOneBy({ id });
     if (!user) {

@@ -19,7 +19,6 @@ export class UserInfos {
   @Column({ type: 'varchar', select: false, nullable: false })
   password: string;
   @Column({ type: 'varchar', nullable: false })
-  @Column({ type: 'varchar', nullable: false })
   nickName: string;
 
   @Column({ type: 'varchar', nullable: false })
@@ -27,9 +26,6 @@ export class UserInfos {
 
   @Column({ type: 'varchar', select: true, nullable: false, default: 'local' })
   provider: string;
-
-  @Column({ type: 'int', nullable: false })
-  verifiCationCode: number;
 
   @Column({ type: 'boolean', nullable: false, default: false })
   emailVerified: boolean;

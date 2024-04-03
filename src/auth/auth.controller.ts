@@ -6,9 +6,9 @@ import {
   Req,
   HttpStatus,
   Post,
-  Render,
   Body,
   Patch,
+  Render,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from '../utils/guard/kakao.guard';
@@ -23,7 +23,12 @@ import { GoogleAuthGuard } from '../utils/guard/google.guard';
 @Controller('')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
+  //회원가입 페이지
+  @Get('sign-up')
+  @Render('sign-up.ejs')
+  async getSignUp() {
+    return {};
+  }
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
   async register(@Body() signUpdto: SignUpDto) {

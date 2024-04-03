@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { VotesService } from './vote.service';
 import { VoteDto } from './dto/voteDto';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
+import { UserInfo } from '../../utils/decorator/userInfo.decorator';
 import { userInfo } from 'os';
-import { UserInfos } from 'src/users/entities/user-info.entity';
+import { UserInfos } from '../../users/entities/user-info.entity';
 import { Request } from 'express';
 import { IsVoteGuard } from '../guards/isvote.guard';
 import {

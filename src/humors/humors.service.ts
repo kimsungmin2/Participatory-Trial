@@ -62,16 +62,18 @@ export class HumorsService {
 
   //모든 게시물 조회(페이지네이션)
 
-  async getAllHumorBoards(
-    paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoards[]> {
+  async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     let humorBoards: HumorBoards[];
+    const totalItems = await this.HumorBoardRepository.count();
     try {
       const { page, limit } = paginationQueryDto;
       const skip = (page - 1) * limit;
       humorBoards = await this.HumorBoardRepository.find({
         skip,
         take: limit,
+        order: {
+          createdAt: 'DESC',
+        },
       });
     } catch (err) {
       console.log(err.message);
@@ -82,7 +84,10 @@ export class HumorsService {
     if (humorBoards.length === 0) {
       throw new NotFoundException('더이상 게시물이 없습니다!');
     }
-    return humorBoards;
+    return {
+      humorBoards,
+      totalItems,
+    };
   }
 
   //단건 게시물 조회

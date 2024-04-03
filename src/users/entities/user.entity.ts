@@ -16,7 +16,7 @@ import { HumorComments } from '../../humor-comments/entities/humor_comment.entit
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';
-import { EachVote } from 'src/trials/entities/Uservote.entity';
+import { EachVote } from '../../trials/entities/Uservote.entity';
 import { HumorLike } from '../../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
 

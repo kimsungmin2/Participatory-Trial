@@ -6,13 +6,15 @@ import { OnlineBoards } from 'src/online_boards/entities/online_board.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OnlineBoardsModule } from 'src/online_boards/online_boards.module';
 import { UsersModule } from 'src/users/users.module';
-import { OnlineBoardsService } from 'src/online_boards/online_boards.service';
+import { OnlineBoardsService } from '../online_boards/online_boards.service';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([OnlineBoardComments, OnlineBoards]),
     OnlineBoardsModule,
     UsersModule,
+    S3Module,
   ],
   controllers: [OnlineBoardCommentController],
   providers: [OnlineBoardCommentService, OnlineBoardsService],
