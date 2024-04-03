@@ -1,30 +1,40 @@
-// 모달
-const modal = document.getElementById('emailModal');
+const form = document.getElementById('signupForm');
 
-// 모달 닫기 버튼
-const closeModalBtn = document.getElementById('closeBtn');
+form.addEventListener('submit', (event) => {
+  event.preventDefault(); //이벤트 발생 시 새로고침을 방지하는 메소드.
 
-// 모달 열기 이벤트 리스너
-document
-  .getElementById('openModalBtn')
-  .addEventListener('click', function (event) {
-    event.preventDefault(); // 이벤트의 기본 동작(여기서는 폼 제출)을 방지
-    document.getElementById('emailModal').style.display = 'block'; // 모달을 보여주는 코드
-  });
-
-// 모달 닫기 이벤트 리스너
-closeModalBtn.addEventListener('click', () => {
-  modal.style.display = 'none';
-});
-
-// 모달 외부 클릭 시 닫기 이벤트 리스너
-window.addEventListener('click', (event) => {
-  if (event.target === modal) {
-    modal.style.display = 'none';
-  }
-});
-
-// 모달 내부 클릭 시 닫기 이벤트 전파 방지
-modal.addEventListener('click', (event) => {
-  event.stopPropagation();
+  const formData = {
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value,
+    passwordConfirm: document.getElementById('passwordConfirm').value,
+    nickName: document.getElementById('nickName').value,
+    birth: document.getElementById('birth').value,
+  };
+  console.log(formData.birth, formData.confirmPassword);
+  console.log(JSON.stringify(formData));
+  console.log(formData.email);
+  fetch('http://localhost:3000/sign-up', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  })
+    .then((response) => {
+      console.log(response);
+      // if (!response.ok) {
+      //   throw new Error('요청이 잘못되었습니다.');
+      // }
+      return response.json();
+    })
+    .then((data) => {
+      alert('Verification successful');
+      console.log(data);
+      window.location.href = '/signup/verification';
+    })
+    .catch((error) => {
+      // 요청이 실패했을 때의 처리
+      alert(error);
+      console.error('Error:', error.stack);
+    });
 });

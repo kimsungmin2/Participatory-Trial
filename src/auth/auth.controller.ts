@@ -8,6 +8,7 @@ import {
   Post,
   Body,
   Patch,
+  Render,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from '../utils/guard/kakao.guard';
@@ -25,7 +26,9 @@ export class AuthController {
 
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
+  @Render('sign-up.ejs')
   async register(@Body() signUpdto: SignUpDto) {
+    console.log(signUpdto);
     const user = await this.authService.signUp(
       signUpdto.email,
       signUpdto.password,
@@ -65,6 +68,7 @@ export class AuthController {
       secure: true,
     });
     res.send('로그인에 성공하였습니다.');
+    res.redirect('/online-board');
   }
 
   // @ApiOperation({ summary: '유저 정보' })
@@ -148,5 +152,18 @@ export class AuthController {
       secure: true,
     });
     res.redirect('/');
+  }
+
+  // 회원가입 페이지로 이동
+  @Get('sign-up')
+  @Render('sign-up.ejs')
+  async getSignUp() {
+    return {};
+  }
+
+  @Get('signup/verifiCation')
+  @Render('email-validation-check.ejs')
+  async getVerifyEmail() {
+    return {};
   }
 }

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./sign-in.css">
+  <script></script>
+  <title>sign in</title>
+</head>
+<body>
+  <header>header</header>
+  <nav>
+    <ul>
+      <li>Home</li>
+      <li>menu1</li>
+      <li>menu2</li>
+    </ul>
+  </nav>
+  <main>
+    <form action="">
+      <div class="email">
+        <label for="email">email</label>
+        <input id="emailInput" class="emailInput" type="email" name="email" placeholder="example@google.com" autofocus>
+      </div>
+      <div class="password">
+        <label for="password">password</label>
+        <input id="passwordInput" class="passwordInput" type="text" name="password" placeholder="password" autofocus>
+      </div>
+      <a href="">
+        <button id="submitBtn" class="submitBtn" type="submit">로그인</button>
+      </a>
+    </form>
+    <div id="shiftPage">
+      <a href="/sign-up" class="shiftBtn">
+        <div id="signUp" class="Btn">회원가입</div>
+      </a>
+      <a class="shiftBtn" href="https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NAVER_REST_API_KEY}&redirect_uri=${NAVER_REDIRECT_URI}&state=hLiDdL2uhPtsftcU">
+        <div id="kakao" class="Btn">카카오 로그인</div>
+      </a>
+      <a class="shiftBtn" href="https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${KAKAO_REST_API_KEY}&redirect_uri=${KAKAO_REDIRECT_URI}">
+        <div id="naver" class="Btn">네이버 로그인</div>
+      </a>
+      <a class="shiftBtn" href="https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${process.env.GOOGLE_REDIRECT_URI}&response_type=code&scope=email%20profile">
+        <div id="google" class="Btn">구글 로그인</div>
+      </a>
+    </div>
+  </main>
+  <footer>footer</footer>
+</body>
+</html>
