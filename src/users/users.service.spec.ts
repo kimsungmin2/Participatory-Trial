@@ -62,17 +62,19 @@ describe('UsersService', () => {
   describe('유저 조회', () => {
     it('성공적으로 조회', async () => {
       const user = { id: 1, email: 'test@example.com', name: 'Test User' };
-      mockUserInfoRepository.findOneBy.mockResolvedValue(user);
+      mockUserInfoRepository.findOne.mockResolvedValue(user);
 
       const result = await service.findByEmail(user.email);
 
-      expect(mockUserInfoRepository.findOneBy).toHaveBeenCalledTimes(1);
-      expect(mockUserInfoRepository.findOneBy).toHaveBeenCalledWith({
-        email: user.email,
+      expect(mockUserInfoRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockUserInfoRepository.findOne).toHaveBeenCalledWith({
+        select: ['id', 'password', 'email'],
+        where: { email: user.email },
       });
       expect(result).toEqual(user);
     });
   });
+
   describe('유저 업데이트', () => {
     it('업데이트 성공함', async () => {
       mockUserInfoRepository.findOneBy.mockResolvedValue(user.id);

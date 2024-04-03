@@ -60,8 +60,11 @@ export class AuthController {
       loginDto.password,
     );
 
-    res.cookie('authorization', `Bearer ${user.accessToken}`);
-    res.cookie('refreshToken', user.refreshToken);
+    res.cookie('authorization', `Bearer ${user.accessToken}`, {
+      maxAge: 1000 * 60 * 60 * 12,
+      httpOnly: true,
+      secure: true,
+    });
     res.send('로그인에 성공하였습니다.');
   }
 
@@ -95,10 +98,12 @@ export class AuthController {
   @Get('kakao/callback')
   async kakaoCallbacks(@Req() req, @Res() res) {
     const accessToken = req.user.accessToken;
-    const refreshToken = req.user.refreshToken;
 
-    res.cookie('authorization', `Bearer ${accessToken}`);
-    res.cookie('refreshToken', refreshToken);
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      maxAge: 1000 * 60 * 60 * 12,
+      httpOnly: true,
+      secure: true,
+    });
     res.redirect('/');
   }
 
@@ -116,10 +121,12 @@ export class AuthController {
   @Get('/naver/callback')
   async naverCallbacks(@Req() req, @Res() res) {
     const accessToken = req.user.accessToken;
-    const refreshToken = req.user.refreshToken;
 
-    res.cookie('authorization', `Bearer ${accessToken}`);
-    res.cookie('refreshToken', refreshToken);
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      maxAge: 1000 * 60 * 60 * 12,
+      httpOnly: true,
+      secure: true,
+    });
     res.redirect('/');
   }
 
@@ -135,10 +142,12 @@ export class AuthController {
   @Get('/google/callback')
   async googleCallbacks(@Req() req, @Res() res) {
     const accessToken = req.user.accessToken;
-    const refreshToken = req.user.refreshToken;
 
-    res.cookie('authorization', `Bearer ${accessToken}`);
-    res.cookie('refreshToken', refreshToken);
+    res.cookie('authorization', `Bearer ${accessToken}`, {
+      maxAge: 1000 * 60 * 60 * 12,
+      httpOnly: true,
+      secure: true,
+    });
     res.redirect('/');
   }
 }

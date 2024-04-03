@@ -1,24 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PolticalDebatesService } from './poltical_debates.service';
-import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
-import { OnlineBoardComments } from '../online_boards/entities/online_board_comment.entity';
-import { Trials } from '../trials/entities/trial.entity';
-import { HumorBoards } from '../humors/entities/humor-board.entity';
-import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
-import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
-import { Role } from '../users/types/userRole.type';
 import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
-import { Users } from '../users/entities/user.entity';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { UserInfos } from '../users/entities/user-info.entity';
 
 const mockedUser = {
   id: 1,

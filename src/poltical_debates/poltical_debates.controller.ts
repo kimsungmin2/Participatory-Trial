@@ -9,7 +9,7 @@ import {
   UseGuards,
   Patch,
   NotFoundException,
-  BadRequestException,
+  Render,
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
@@ -86,9 +86,11 @@ export class PolticalDebatesController {
     description: '상세 조회',
   })
   @Get(':polticalDebateId')
+  @Render('vote.ejs')
   async findOne(@Param('polticalDebateId') id: string) {
     try {
       const data = await this.polticalDebatesService.findOne(+id);
+      console.log(data);
       return {
         statusCode: HttpStatus.OK,
         message: '정치 토론 상세 조회에 성공했습니다.',

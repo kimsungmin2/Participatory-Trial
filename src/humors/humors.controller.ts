@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UploadedFiles,
   Query,
+  Render,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -112,6 +113,7 @@ export class HumorsController {
 
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
   @Get('humor-board-id/:id')
+  @Render('vote.ejs')
   @ApiParam({
     name: 'id',
     required: true,

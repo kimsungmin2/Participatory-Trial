@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from '../users/entities/user.entity';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';

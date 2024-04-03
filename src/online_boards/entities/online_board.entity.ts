@@ -5,12 +5,11 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoardComments } from './online_board_comment.entity';
 import { OnlineBoardLike } from './online_board_like.entity';
 
 @Entity()

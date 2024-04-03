@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
-import { Users } from '../users/entities/user.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 
 @Injectable()

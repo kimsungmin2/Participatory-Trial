@@ -13,7 +13,6 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';

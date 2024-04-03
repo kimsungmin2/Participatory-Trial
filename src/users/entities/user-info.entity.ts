@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from './user.entity';
-@Entity()
+@Entity({ name: 'userInfos' })
 export class UserInfos {
   @PrimaryColumn({ type: 'int' })
   id: number;
@@ -26,9 +26,6 @@ export class UserInfos {
 
   @Column({ type: 'varchar', select: true, nullable: false, default: 'local' })
   provider: string;
-
-  @Column({ type: 'int', nullable: false })
-  verifiCationCode: number;
 
   @Column({ type: 'boolean', nullable: false, default: false })
   emailVerified: boolean;
