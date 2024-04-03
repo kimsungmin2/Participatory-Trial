@@ -13,27 +13,16 @@ header {
   text-align: center;
 }
 
-nav ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
-  overflow: hidden;
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
 }
-
-nav ul li {
-  float: left;
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
 }
-
-nav ul li a {
-  display: block;
-  color: #333;
-  padding: 10px 15px;
-  text-decoration: none;
-}
-
-nav ul li a:hover {
-  background-color: #ddd;
+.navbar-brand {
+  font-size: 24px;
 }
 
 main {

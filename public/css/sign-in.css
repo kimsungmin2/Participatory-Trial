@@ -11,27 +11,23 @@ header {
   text-align: center;
 }
 
-nav {
-  background-color: #666;
-  color: #fff;
-  padding: 10px 0;
-  text-align: center;
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
 }
-
-nav ul {
-  list-style: none;
-  padding: 0;
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
 }
-
-nav ul li {
-  display: inline-block;
-  margin-right: 20px;
+.navbar-brand {
+  font-size: 24px;
 }
 
 main {
   padding: 20px;
 }
 
+#shift,
 form {
   width: 300px;
   margin: 0 auto;
@@ -54,7 +50,7 @@ input[type="text"] {
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-
+.Btn,
 .submitBtn {
   display: block;
   width: 100%;
@@ -67,20 +63,6 @@ input[type="text"] {
   cursor: pointer;
   text-decoration: none;
   margin-bottom: 10px;
-}
-
-.Btn {
-  display: block;
-  width: 20%;
-  padding: 10px;
-  text-align: center;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  text-decoration: none;
-  margin: 0 auto 10px; /* 페이지 가운데 정렬 */
 }
 
 .submitBtn:hover,

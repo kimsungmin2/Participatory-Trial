@@ -10,15 +10,16 @@ header, footer {
   padding: 10px;
 }
 
-nav ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
 }
-
-nav ul li {
-  display: inline;
-  margin-right: 10px;
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+.navbar-brand {
+  font-size: 24px;
 }
 
 main {
@@ -39,8 +40,9 @@ label {
   margin-bottom: 5px;
 }
 
-input[type="text"] {
-  width: 100%;
+input[type="text"],
+input[type="email"] {
+  width: calc(100% - 20px);
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;

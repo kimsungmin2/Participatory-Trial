@@ -22,20 +22,14 @@ form.addEventListener('submit', (event) => {
   })
     .then((response) => {
       console.log(response);
-      // if (!response.ok) {
-      //   throw new Error('요청이 잘못되었습니다.');
-      // }
       response.json();
     })
     .then((data) => {
-      alert('Verification successful');
-      console.log(data);
-      window.location.href = 'http://localhost:3000/signup/verifiCation';
+      alert('가입을 완료하였습니다. 해당 이메일로 인증코드를 전송하였습니다.');
+      window.location.href = 'http://localhost:3000/email-verification';
     })
     .catch((error) => {
-      // 요청이 실패했을 때의 처리
       alert(error);
-      console.error('Error:', error.stack);
       console.error(error.message);
     });
 });
