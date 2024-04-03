@@ -60,6 +60,7 @@
     </nav>
 
     <header>
+      
       <div class="board_title">
         <% if (boardType === 'humor') { %>
           <span>유머 게시판</span>
@@ -123,7 +124,6 @@
       <% } else if (boardType === 'trial') { %>
         <a class="submit-button" href="/trials/create">글쓰기</a>
       <% } %>
-     
       <div class="search-container">
         <form action="/search" method="get">
           <input type="text" placeholder="검색..." name="search" />
@@ -132,5 +132,6 @@
       </div>
       
     </header>
+    <p><%= statusCode %></p>
   </body>
 </html>
