@@ -28,6 +28,7 @@ services:
       - '9300:9300'
     environment:
       - 'discovery.type=single-node'
+      - 'ELASTIC_PASSWORD=0000'
   kibana:
     image: docker.elastic.co/kibana/kibana:7.9.3
     restart: always

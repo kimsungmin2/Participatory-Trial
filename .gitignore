@@ -5,6 +5,7 @@
 /drivers
 /logstash
 /elasticsearch
+/py
 
 # Logs
 logs

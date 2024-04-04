@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { CacheConfigService } from './cache/config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { WinstonModule } from 'nest-winston';
 
 console.log(1, process.env.DB_NAME);
 export const typeOrmModuleOptions = {
@@ -92,6 +93,7 @@ console.log(typeOrmModuleOptions);
     EmailModule,
     VoteModule,
     OnlineBoardCommentModule,
+    WinstonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
