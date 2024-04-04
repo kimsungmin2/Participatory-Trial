@@ -11,7 +11,6 @@ import {
   Get,
 } from '@nestjs/common';
 import { VotesService } from './vote.service';
-import { VoteDto } from './dto/voteDto';
 import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 import { userInfo } from 'os';
 import { UserInfos } from 'src/users/entities/user-info.entity';
@@ -25,7 +24,6 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { VoteForDto } from '../dto/vote.dto';
-import { Users } from '../../users/entities/user.entity';
 
 @Controller('trials/vote')
 export class VotesController {
@@ -60,11 +58,12 @@ export class VotesController {
 
     const userId = users.id ? users.id : null;
     const vote = await this.votesService.addVoteUserorNanUser(
-      req,
+      // req,
       userId,
       voteId,
       voteForDro.voteFor,
     );
+
     return {
       statusCode: HttpStatus.CREATED,
       message: '투표에 성공하였습니다.',

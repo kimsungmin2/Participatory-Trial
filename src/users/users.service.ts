@@ -15,10 +15,11 @@ export class UsersService {
   async findByEmail(email: string): Promise<UserInfos> {
     const user = await this.usersInfoRepository.findOne({
       where: { email },
-      select: ['id', 'password', 'email'],
+      select: ['id', 'nickName', 'email', 'birth'],
     });
     return user;
   }
+
   async userUpdate(id: number, nickName: string) {
     const user = await this.usersInfoRepository.findOneBy({ id });
     if (!user) {

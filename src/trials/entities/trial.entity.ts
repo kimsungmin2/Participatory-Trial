@@ -11,9 +11,10 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
+import { TrialsChannels } from '../../events/entities/trialsChannel.entity';
 
 @Entity({
-  name: "trials"
+  name: 'trials',
 })
 export class Trials {
   @PrimaryGeneratedColumn({ type: 'int' })
@@ -36,10 +37,10 @@ export class Trials {
 
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
-  
-  @Column({ type: 'boolean', nullable: false, default: true})
+
+  @Column({ type: 'boolean', nullable: false, default: true })
   is_time_over: boolean;
-  
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
@@ -47,11 +48,16 @@ export class Trials {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.trial, {
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
   @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
   vote: Votes;
+
+  @OneToOne(() => TrialsChannels, (trialsChannels) => trialsChannels.trials, {
+    cascade: true,
+  })
+  trialsChannels: TrialsChannels;
 }

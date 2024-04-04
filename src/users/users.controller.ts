@@ -7,12 +7,15 @@ import {
   ForbiddenException,
   UseGuards,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UpdateDto } from './dto/update.dto';
 import { DeleteDto } from './dto/delete.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { UserInfos } from './entities/user-info.entity';
 
 @ApiTags('USER_UD')
 @Controller('users')
@@ -49,6 +52,17 @@ export class UsersController {
       statusCode: HttpStatus.NO_CONTENT,
       message: '회원 탈퇴가 완료됐습니다.',
       data,
+    };
+  }
+
+  @ApiOperation({ summary: '유저 정보' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('')
+  getUser(@UserInfo() userInfos: UserInfos) {
+    return {
+      statusCode: HttpStatus.OK,
+      message: '회원 정보입니다.',
+      data: [userInfos.nickName, userInfos.birth],
     };
   }
 }

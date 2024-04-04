@@ -26,7 +26,8 @@ import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheConfigService } from './cache/cache.config';
-
+import { EventsModule } from './events/events.module';
+import { ChatsModule } from './chats/chats.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -60,7 +61,7 @@ export const typeOrmModuleOptions = {
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useClass: CacheConfigService
+      useClass: CacheConfigService,
     }),
     BullModule.forRoot({
       redis: {
@@ -78,6 +79,8 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    EventsModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

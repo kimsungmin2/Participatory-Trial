@@ -10,7 +10,6 @@ import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Votes } from '../entities/vote.entity';
 import { Request } from 'express';
 import { EachVote } from '../entities/Uservote.entity';
-import { VoteDto } from './dto/voteDto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
@@ -101,42 +100,25 @@ export class VotesService {
     await queryRunner.manager.save(EachVote, voteData);
   }
 
-  // 카운팅 함수
-  private async updateVoteCount(
-    voteId: number,
-    voteFor: boolean,
-    queryRunner: QueryRunner,
-  ) {
-    await queryRunner.manager
-      .createQueryBuilder()
-      .update(Votes)
-      .set({
-        voteCount1: () => (voteFor ? 'voteCount1 + 1' : 'voteCount1'),
-        voteCount2: () => (voteFor ? 'voteCount2' : 'voteCount2 + 1'),
-      })
-      .where('id = :id', { id: voteId })
-      .execute(); // 쿼리 실행
-  }
-
   // 투표하기
   async addVoteUserorNanUser(
-    req: Request,
-    userId: number | null,
+    // req: Request,
+    userId: number,
     voteId: number,
     voteFor: boolean,
   ) {
-    const userCode = await this.findOrCreateUserCodeVer2(req, userId);
+    // const userCode = await this.findOrCreateUserCodeVer2(req, userId);
     const queryRunner = this.dataSource.createQueryRunner();
-
+    console.log('123', userId);
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, userCode, voteId, voteFor },
+        { userId, voteId, voteFor },
         queryRunner,
       );
-      await this.updateVoteCount(voteId, voteFor, queryRunner);
+
       await queryRunner.commitTransaction();
     } catch (err) {
       console.log(err);
@@ -174,7 +156,9 @@ export class VotesService {
       },
     });
   }
-  async getUserVoteCounts(voteId: number) {
+  async getUserVoteCounts(
+    voteId: number,
+  ): Promise<{ vote1Percentage: string; vote2Percentage: string }> {
     const result = await this.dataSource
       .getRepository(EachVote)
       .createQueryBuilder('eachVote')
@@ -207,6 +191,49 @@ export class VotesService {
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
   }
+
+  // async createChannelChats(
+  //   channelTypes: string,
+  //   userId: number,
+  //   message: string,
+  //   RoomId: number,=
+  // ) {
+  //   try {
+  //     const chat = new Chat();
+
+  //     chat.message = message;
+  //     chat.userId = userId;
+  //     chat.RoomId = RoomId;
+
+  //     const chatKey = `${channelTypes}:${RoomId}`;
+  //     const chatValue = JSON.stringify(chat);
+
+  //     await this.redisPublisher.rpush(chatKey, chatValue);
+
+  //     await this.redisPublisher.expire(chatKey, 60 * 60 * 24 * 2);
+
+  //     const publishResult = await new Promise((resolve, reject) => {
+  //       this.redisPublisher.publish(
+  //         'channelChats',
+  //         JSON.stringify({
+  //           channelType: channelTypes,
+  //           RoomId: RoomId,
+  //           message: message,
+  //           userId: userId,
+  //         }),
+  //         (err, reply) => {
+  //           if (err) reject(err);
+  //           else resolve(reply);
+  //         },
+  //       );
+  //     });
+
+  //     console.log('펍:', publishResult);
+  //   } catch (error) {
+  //     console.error('채팅 생성에 실패하였습니다.', error);
+  //     throw error;
+  //   }
+  // }
 
   async getVoteCounts(voteId: number) {
     const result = await this.dataSource

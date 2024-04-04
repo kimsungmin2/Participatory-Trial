@@ -15,12 +15,22 @@ import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity'
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trials, PanryeInfo, EachVote, Votes,TrialHallOfFames, TrialLikeHallOfFames, TrialViewHallOfFames]),
-  HttpModule,
-  BullModule.registerQueue({
-    name: 'trial-queue'
-  }),
-  VoteModule,],
+  imports: [
+    TypeOrmModule.forFeature([
+      Trials,
+      PanryeInfo,
+      EachVote,
+      Votes,
+      TrialHallOfFames,
+      TrialLikeHallOfFames,
+      TrialViewHallOfFames,
+    ]),
+    HttpModule,
+    BullModule.registerQueue({
+      name: 'trial-queue',
+    }),
+    VoteModule,
+  ],
   controllers: [TrialsController],
   providers: [TrialsService, TrialHallOfFameService],
 })

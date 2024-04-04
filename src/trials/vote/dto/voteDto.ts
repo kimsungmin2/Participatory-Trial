@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
-export class VoteDto {
+export class VoteTrialDto {
   // 토론 제목
   @ApiProperty({
     example: '음주운전 형량 늘려야 한다.',

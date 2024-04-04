@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   Req,
+  Render,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
@@ -26,12 +27,12 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { userInfo } from 'os';
 import { MyTrialsGuard } from './guards/myTrials.guard';
-import { VoteDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
+import { VoteTrialDto } from './vote/dto/voteDto';
 
 @ApiTags('Trials')
 @Controller('trials')
@@ -63,11 +64,16 @@ export class TrialsController {
   async create(
     // @UserInfo() userInfo: UserInfos,
     @Req() req,
-    @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
+    @Body() createTrialDto: CreateTrialDto,
+    voteTrialDto: VoteTrialDto, // 재판 제목하고 재판 내용 들어감
   ) {
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
     const user = req.user;
-    const data = await this.trialsService.createTrial(user.id, createTrialDto);
+    const data = await this.trialsService.createTrial(
+      user.id,
+      createTrialDto,
+      voteTrialDto,
+    );
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -169,6 +175,7 @@ export class TrialsController {
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
+  @Render('vote.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
     name: 'trialsId',
@@ -273,7 +280,7 @@ export class TrialsController {
   @Post(':trialId')
   async voteOfSubject(
     @Param('trialId') trialId: number,
-    @Body() voteDto: VoteDto,
+    @Body() voteDto: VoteTrialDto,
   ) {
     console.log(trialId);
     const data = await this.trialsService.createSubject(+trialId, voteDto);
