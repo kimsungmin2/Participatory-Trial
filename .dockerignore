@@ -5,8 +5,7 @@ postgres-data/*
 .git
 .gitignore
 .dockerignore
-Dockerfile
+
 *.md
 *.sh
-*.yml
 scripts

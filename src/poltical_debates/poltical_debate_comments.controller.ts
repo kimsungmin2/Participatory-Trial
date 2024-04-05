@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
@@ -26,6 +26,13 @@ export class PolticalDebateCommentsController {
   ) {}
 
   @ApiOperation({ summary: '정치 토론 댓글 생성', description: '생성' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async createComment(
@@ -47,6 +54,12 @@ export class PolticalDebateCommentsController {
   }
 
   @ApiOperation({ summary: '정치 토론 댓글 조회', description: '조회' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
   @Get()
   async getAllComments(@Param('polticalDebateId') polticalDebateId: number) {
     return await this.polticalDebateCommentsService.getAllComments(
@@ -57,6 +70,18 @@ export class PolticalDebateCommentsController {
   @ApiOperation({
     summary: '정치 토론 댓글 상세 조회',
     description: '상세 조회',
+  })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
+  @ApiParam({
+    name: 'commentId',
+    required: true,
+    description: ' 정치 토론 게시판 댓글 ID',
+    type: Number,
   })
   @Get(':commentId')
   async getCommentById(
@@ -74,6 +99,18 @@ export class PolticalDebateCommentsController {
   }
 
   @ApiOperation({ summary: '정치 토론 댓글 수정', description: '수정' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
+  @ApiParam({
+    name: 'commentId',
+    required: true,
+    description: ' 정치 토론 게시판 댓글 ID',
+    type: Number,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Put(':commentId')
   async updateComment(
@@ -91,6 +128,18 @@ export class PolticalDebateCommentsController {
   }
 
   @ApiOperation({ summary: '정치 토론 댓글 삭제', description: '삭제' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
+  @ApiParam({
+    name: 'commentId',
+    required: true,
+    description: ' 정치 토론 게시판 댓글 ID',
+    type: Number,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Delete(':commentId')
   async deleteComment(

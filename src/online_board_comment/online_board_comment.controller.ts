@@ -16,7 +16,9 @@ import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.d
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
 @Controller('comments/:onlineBoardId')
 export class OnlineBoardCommentController {

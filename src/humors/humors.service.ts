@@ -16,19 +16,25 @@ import { BoardType } from '../s3/board-type';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { cache } from 'joi';
+import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
+import { HumorVotes } from './entities/HumorVote.entity';
 
 @Injectable()
 export class HumorsService {
   constructor(
     @InjectRepository(HumorBoards)
     private HumorBoardRepository: Repository<HumorBoards>,
+    private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
     @InjectRedis()
     private readonly redis: Redis,
   ) {}
 
   //게시물 생성
-
+  /**
+   * 
+   * @deprecated 아마 게시물과 투표를 한번에 만들어야 해서 새로 만들어야 할겁니다. 밑에 새로 만들어 놨어요
+   */
   async createHumorBoard(
     createHumorBoardDto: CreateHumorBoardDto,
     user: Users,
@@ -59,6 +65,54 @@ export class HumorsService {
       );
     }
   }
+
+  /**
+   * 유머게시판 투표와 게시물 동시에 생성함수
+   * 
+   * @param createHumorBoardDto title, content
+   * @param voteTitleDto title1, title2
+   * @param user user
+   * @param files 파일
+   * @returns 
+   */
+  async createHumorBoardAndVotes(
+    createHumorBoardDto: CreateHumorBoardDto,
+    voteTitleDto: VoteTitleDto,
+    user: Users,
+    files: Express.Multer.File[],
+  ): Promise<HumorBoards> {
+    let uploadResult: string[] = [];
+    if (files.length !== 0) {
+      const uploadResults = await this.s3Service.saveImages(
+        files,
+        BoardType.Humor,
+      );
+      for (let i = 0; i < uploadResults.length; i++) {
+        uploadResult.push(uploadResults[i].imageUrl);
+      }
+    }
+    const imageUrl =
+      uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
+      try {
+        const createdBoard = await this.HumorBoardRepository.save({
+          userId: user.id,
+          ...createHumorBoardDto,
+          imageUrl,
+        });
+
+        const createdVotes = await this.HumorVotesRepository.save({
+          humorId: createdBoard.id,
+          ...voteTitleDto
+        })
+
+        return createdBoard;
+      } catch {
+        throw new InternalServerErrorException(
+          '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+        );
+      }
+    }
+  
 
   //모든 게시물 조회(페이지네이션)
 

@@ -12,7 +12,7 @@ import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { VoteDto } from 'src/trials/vote/dto/voteDto';
+import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { UpdateVoteDto } from 'src/trials/vote/dto/updateDto';
 
@@ -23,6 +23,12 @@ export class PolticalDebatesService {
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
     private readonly dataSource: DataSource
   ) {}
+
+  /** 
+   * 투표 정치 게시물 생성 함수
+   * @deprecated 이제 이거 안씀니다.... 투표 기능 한번에 합쳐야 해요!
+   * 
+   */
   async create(
     userInfo: UserInfos,
     createPolticalDebateDto: CreatePolticalDebateDto,
@@ -40,6 +46,68 @@ export class PolticalDebatesService {
 
     return this.polticalDebateRepository.save(createdPolticalDebate);
   }
+
+
+  
+  /**
+   * 정치 게시판 게시물과 투표 동시에 생성해주는 함수
+   * @param userId 
+   * @param createPolticalDebateDto title, content
+   * @param voteTitleDto title1, title2
+   * @returns 
+   */
+  async createBothBoardandVote(userId: number, 
+    createPolticalDebateDto: CreatePolticalDebateDto, 
+    voteTitleDto: VoteTitleDto,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+
+    await queryRunner.startTransaction();
+    try{
+    const { title, content } = createPolticalDebateDto;
+    const { title1, title2 } = voteTitleDto
+
+    const data = {
+      title,
+      content,
+      userId,
+    }
+
+    const newBoard = queryRunner.manager.create(PolticalDebateBoards, data);
+
+    const savedBoard = await queryRunner.manager.save(PolticalDebateBoards, newBoard)
+    const polticalId = savedBoard.id
+
+    const vote = {
+      title1,
+      title2,
+      polticalId
+    }
+
+    const newVote = queryRunner.manager.create(PolticalDebateVotes, vote)
+
+    const savedVote = await queryRunner.manager.save(PolticalDebateVotes, newVote)
+
+    await queryRunner.commitTransaction();
+
+    return { newVote, savedVote }
+
+
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+
+    console.log('정치 게시물 생성 에러:', error);
+
+    throw new InternalServerErrorException(
+      '정치 게시물 중 오류가 발생했습니다.',
+    );
+  } finally {
+    await queryRunner.release();
+  }
+}
+  
 
   async findAll() {
     const findAllPolticalDebateBoard = await this.polticalDebateRepository.find(
@@ -125,7 +193,7 @@ export class PolticalDebatesService {
   }
 
   // 정치 게시만 투표 vs 만들기 매서드
-  async createSubject(polticalId: number, voteDto: VoteDto) {
+  async createSubject(polticalId: number, voteDto: VoteTitleDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

@@ -27,4 +27,6 @@ export class CreateTrialDto {
   })
   @IsNotEmpty({ message: '토론 시간을 입력해 주세요.' })
   trialTime: Date;
+
+  
 }

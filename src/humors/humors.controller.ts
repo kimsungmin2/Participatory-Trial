@@ -34,6 +34,7 @@ import { BoardType } from '../s3/board-type';
 import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
+import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -53,6 +54,8 @@ export class HumorsController {
       properties: {
         title: { type: 'string' },
         content: { type: 'string' },
+        title1: { type: 'string'},
+        title2: { type: 'string'},
         files: {
           type: 'array',
           items: {
@@ -82,6 +85,54 @@ export class HumorsController {
       data: createdBoard,
     };
   }
+
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '유머 게시판 게시물 생성' })
+  @ApiBody({
+    description: '유머 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        title1: { type: 'string'},
+        title2: { type: 'string'},
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  /**
+   * 유머게시물과 투표를 한번에 생성하는 함수임
+   */
+  async createHumorBoardAndVotes(
+    @Body() createHumorBoardDto: CreateHumorBoardDto,
+    @Body() voteTitleDto: VoteTitleDto,
+    @UserInfo() user: Users,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<HumorBoardReturnValue> {
+    const createdBoard = await this.humorsService.createHumorBoardAndVotes(
+      createHumorBoardDto,
+      voteTitleDto,
+      user,
+      files,
+    );
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: '게시물 생성에 성공하였습니다.',
+      data: createdBoard,
+    };
+  }
+
 
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
   @ApiQuery({

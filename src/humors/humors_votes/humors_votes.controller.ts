@@ -19,6 +19,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Users } from '../../users/entities/user.entity';
@@ -26,6 +27,7 @@ import { VoteForDto } from 'src/trials/dto/vote.dto';
 import { IsVoteGuard } from 'src/trials/guards/isvote.guard';
 import { HumorVotesService } from './humors_votes.service';
 
+@ApiTags('유머 투표')
 @Controller('humors/vote')
 export class HumorVotesController {
   constructor(private readonly humorVotesService: HumorVotesService) {}

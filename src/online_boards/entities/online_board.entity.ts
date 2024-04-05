@@ -26,10 +26,10 @@ export class OnlineBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 1 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
@@ -42,7 +42,7 @@ export class OnlineBoards {
   updatedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   user: Users;
 
   @OneToMany(

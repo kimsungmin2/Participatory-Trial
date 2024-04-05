@@ -19,6 +19,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Users } from '../../users/entities/user.entity';
@@ -26,6 +27,7 @@ import { PolticalVotesService } from './poltical_debates_vote.service';
 import { VoteForDto } from 'src/trials/dto/vote.dto';
 import { IsVoteGuard } from 'src/trials/guards/isvote.guard';
 
+@ApiTags('정치 토론 투표')
 @Controller('poltical-debates/vote')
 export class PolticalVotesController {
   constructor(private readonly polticalVotesService: PolticalVotesService) {}
@@ -46,7 +48,7 @@ export class PolticalVotesController {
   @ApiParam({
     name: 'polticalVoteId',
     required: true,
-    description: ' 정치 투표 ID',
+    description: ' 정치 토론 게시판 투표 ID',
     type: Number,
   })
   async vote(
@@ -91,6 +93,13 @@ export class PolticalVotesController {
   }
 
   // 투표 현황 조회하기 API(회원 유저만 투표 취소 가능)
+  @ApiOperation({ summary: '정치 투표 게시판 투표 취소 API' })
+  @ApiParam({
+    name: 'polticalVoteId',
+    required: true,
+    description: ' 정치 토론 게시판 투표 ID',
+    type: Number,
+  })
   @Get(':polticalVoteId')
   async getVoteCounts(@Param('polticalVoteId') polticalVoteId: number) {
     const vote = await this.polticalVotesService.getVoteCounts(polticalVoteId);
@@ -103,6 +112,12 @@ export class PolticalVotesController {
 
   // 투표 현황 조회 하기 API
   @Get('member/:polticalVoteId')
+  @ApiParam({
+    name: 'polticalVoteId',
+    required: true,
+    description: ' 정치 토론 게시판 투표 ID',
+    type: Number,
+  })
   async getUserVoteCounts(@Param('polticalVoteId') polticalVoteId: number) {
     const vote = await this.polticalVotesService.getUserVoteCounts(polticalVoteId);
     return {

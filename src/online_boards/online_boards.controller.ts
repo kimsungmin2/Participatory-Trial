@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { OnlineBoardsService } from './online_boards.service';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
@@ -16,9 +17,10 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
 
+@ApiTags('자유 게시판')
 @UseGuards(AuthGuard('jwt'))
 @Controller('online-boards')
 export class OnlineBoardsController {
@@ -26,7 +28,20 @@ export class OnlineBoardsController {
     private readonly onlineBoardsService: OnlineBoardsService,
     private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService
     ) {}
-
+  
+  @ApiOperation({ summary: '자유 게시판 생성 API' })
+  @ApiBearerAuth('access-token')
+  @ApiBody({
+    description: '자유 게시판 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+      },
+    },
+  })
+  @ApiBearerAuth('access-token')
   @Post()
   async create(
     @Body() createOnlineBoardDto: CreateOnlineBoardDto,
@@ -44,10 +59,21 @@ export class OnlineBoardsController {
     };
   }
 
+
+  // 모든 자유 게시판 검색어 조회 API
+  @ApiOperation({ summary: '모든 자유 게시판 검색어 조회 API' })
+  @ApiBearerAuth('access-token')
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    description: '키워드',
+    type: String,
+    example: '은가누',
+  })
   @Get()
-  async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
+  async findAll(@Query('keyword') keyword: string) {
     const boards = await this.onlineBoardsService.findAllBoard(
-      findAllOnlineBoardDto,
+      keyword,
     );
 
     return {
@@ -57,6 +83,15 @@ export class OnlineBoardsController {
     };
   }
 
+  // 특정 자유 게시판 id 조회 API
+  @ApiOperation({ summary: '특정 게시물 조회 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: ' 자유 게시판 ID',
+    type: Number,
+  })
   @Get(':id')
   async findOne(@Param('id') id: number) {
     const board = await this.onlineBoardsService.findBoard(id);
@@ -68,6 +103,25 @@ export class OnlineBoardsController {
     };
   }
 
+  // 내 자유 게시물 수정 API
+  @ApiOperation({ summary: '자유 게시물 수정 API' })
+  @ApiBearerAuth('access-token')
+  @ApiBody({
+    description: '자유 게시물 수정',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+      },
+    },
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: '자유 게시물 ID',
+    type: Number,
+  })
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -86,7 +140,16 @@ export class OnlineBoardsController {
       data: board,
     };
   }
-
+  
+  // 내 자유 게시물 삭제 API
+  @ApiOperation({ summary: ' 내 자유 게시물 삭제 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: ' 자유 게시물 게시물 ID',
+    type: Number,
+  })
   @Delete(':id')
   async remove(@Param('id') id: number, @UserInfo() userInfo: UserInfos) {
     const board = await this.onlineBoardsService.removeBoard(id, userInfo);

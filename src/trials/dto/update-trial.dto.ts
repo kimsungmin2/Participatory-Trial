@@ -11,7 +11,7 @@ export class UpdateTrialDto extends PartialType(CreateTrialDto) {
         description:"토론을 할 주제를 입력해주세요."
     })
     @IsOptional()
-    @IsNotEmpty({ message: '토론 제목을 입력 해주세요.'})
+    @IsNotEmpty({ message: '토론 제목을 입력 해주세요.'})ㅊ
     @IsString({ message: '토론 제목은 문자열로 입력 해주세요.'})
     title?: string;
 

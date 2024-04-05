@@ -13,13 +13,14 @@ import {
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
+import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -29,21 +30,47 @@ export class PolticalDebatesController {
     private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
   ) {}
 
+
+  /**
+   * 
+   * @param userInfo 유저 정보 받아오는 데코레이터
+   * @param createPolticalDebateDto 제목, 컨텐츠 받아오는 Dto
+   * @param voteTitleDto  title1 vs title 하는 Dto
+   * @returns 
+   */
   @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
+  @ApiBearerAuth('access-token')
+  @ApiBody({
+    description: '정치 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        trialTime: { type: 'number' },
+        title1: { type: 'string' },
+        title2: { type: 'string' },
+      },
+    },
+  })
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @UserInfo() userInfo: UserInfos,
     @Body() createPolticalDebateDto: CreatePolticalDebateDto,
+    @Body() voteTitleDto: VoteTitleDto
+
   ) {
-    const data = await this.polticalDebatesService.create(
-      userInfo,
+    const userId = userInfo.id
+    const data = await this.polticalDebatesService.createBothBoardandVote(
+      userId,
       createPolticalDebateDto,
+      voteTitleDto,
     );
 
     return {
       statusCode: HttpStatus.CREATED,
-      message: '보드 생성에 성공했습니다.',
+      message: '정치 게시판과 투표 생성에 성공했습니다.',
       data,
     };
   }
@@ -66,6 +93,7 @@ export class PolticalDebatesController {
 
   //내 게시판 조회
   @ApiOperation({ summary: '유저의 정치 토론방 조회', description: '조회' })
+  @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
   @Get('my')
   async findMyBoards(@UserInfo() userInfo: Users) {
@@ -87,6 +115,12 @@ export class PolticalDebatesController {
     summary: '정치 토론 게시판 상세 조회',
     description: '상세 조회',
   })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판ID',
+    type: Number,
+  })
   @Get(':polticalDebateId')
   async findOne(@Param('polticalDebateId') id: string) {
     try {
@@ -103,6 +137,12 @@ export class PolticalDebatesController {
 
   //게시판 수정
   @ApiOperation({ summary: '정치 토론 게시판 수정', description: '수정' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판ID',
+    type: Number,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Patch(':polticalDebateId')
   async update(
@@ -125,6 +165,12 @@ export class PolticalDebatesController {
 
   //게시판 삭제
   @ApiOperation({ summary: '정치 토론 게시판 삭제', description: '삭제' })
+  @ApiParam({
+    name: 'polticalDebateId',
+    required: true,
+    description: ' 정치 토론 게시판 ID',
+    type: Number,
+  })
   @UseGuards(AuthGuard('jwt'))
   @Delete(':polticalDebateId')
   async delete(

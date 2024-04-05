@@ -36,8 +36,7 @@ export class OnlineBoardsService {
     });
   }
   // 게시판 모두/키워드만 조회
-  async findAllBoard(findAllOnlineBoardDto: FindAllOnlineBoardDto) {
-    const { keyword } = findAllOnlineBoardDto;
+  async findAllBoard(keyword: string) {
     const boards = await this.onlineBoardsRepository.find({
       where: {
         ...(keyword && { title: Like(`%${keyword}%`) }),
@@ -95,7 +94,7 @@ export class OnlineBoardsService {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
-    await this.onlineBoardsRepository.softDelete({ id });
+    await this.onlineBoardsRepository.delete({ id });
 
     return `This action removes a #${id} onlineBoard`;
   }

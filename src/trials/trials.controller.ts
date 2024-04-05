@@ -25,7 +25,7 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { MyTrialsGuard } from './guards/myTrials.guard';
-import { VoteDto } from './vote/dto/voteDto';
+import { VoteTitleDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
@@ -36,8 +36,7 @@ import { LikeService } from 'src/like/like.service';
 import { Users } from 'src/users/entities/user.entity';
 import { CreateTrialDto } from './dto/create-trial.dto';
 
-@ApiTags('Trials')
-@ApiTags('Trials')
+@ApiTags('재판')
 @Controller('trials')
 export class TrialsController {
   constructor(
@@ -60,6 +59,8 @@ export class TrialsController {
         title: { type: 'string' },
         content: { type: 'string' },
         trialTime: { type: 'number' },
+        title1: { type: 'string' },
+        title2: { type: 'string' },
       },
     },
   })
@@ -69,10 +70,11 @@ export class TrialsController {
     // @UserInfo() userInfo: UserInfos,
     @Req() req,
     @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
+    @Body() voteTitleDto: VoteTitleDto
   ) {
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
     const user = req.user;
-    const data = await this.trialsService.createTrial(user.id, createTrialDto);
+    const data = await this.trialsService.createTrial(user.id, createTrialDto, voteTitleDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -218,17 +220,16 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'))
-  @UseGuards(MyTrialsGuard)
+  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
   @Patch(':trialsId')
   async update(
-    @Param('trialsId') id: string,
+    @Param('trialsId') trialsId: number,
     @Body() updateTrialDto: UpdateTrialDto,
     @UserInfo() userInfo: UserInfos,
   ) {
     const data = await this.trialsService.updateTrials(
       userInfo.id,
-      +id,
+      +trialsId,
       updateTrialDto,
     );
 
@@ -248,7 +249,7 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(MyTrialsGuard)
+  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
   @Delete(':trialsId')
   async remove(@Param('trialsId') id: string) {
     await this.trialsService.deleteTrials(+id);
@@ -320,9 +321,8 @@ export class TrialsController {
   @Post(':trialId')
   async voteOfSubject(
     @Param('trialId') trialId: number,
-    @Body() voteDto: VoteDto,
+    @Body() voteDto: VoteTitleDto,
   ) {
-    console.log(trialId);
     const data = await this.trialsService.createSubject(+trialId, voteDto);
     return {
       statusCode: HttpStatus.OK,

@@ -1,9 +1,9 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { VoteDto } from './voteDto';
+import { VoteTrialDto } from './voteDto';
 
-export class UpdateVoteDto extends PartialType(VoteDto) {
+export class UpdateVoteDto extends PartialType(VoteTrialDto) {
 
     // 토론 제목
     @ApiProperty({
