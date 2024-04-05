@@ -7,7 +7,7 @@ import { LoggingInterceptor } from './utils/logging.interceptor';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { winstonLogger } from './utils/winston';
-import { HttpLoggingInterceptor } from './utils/http.loggin.interceptor';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { WinstonLogger } from 'nest-winston';
 
 async function bootstrap() {
@@ -25,7 +25,6 @@ async function bootstrap() {
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
   app.set('views', join(__dirname, '..', 'views'));
-  app.useGlobalInterceptors(new HttpLoggingInterceptor());
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);
