@@ -18,17 +18,15 @@ export class ErrorInterceptor implements NestInterceptor {
   ): Observable<any> | Promise<Observable<any>> {
     const httpContext = context.switchToHttp();
     const request = httpContext.getRequest();
-    const response = httpContext.getResponse();
+
     const { url, method } = request;
-    const { statusCode } = response;
     const referer = request.headers['referer'] || request.headers['referrer'];
     const userAgent = request.headers['user-agent'];
     const clientIp = request.headers['x-forwarded-for'] || request.ip;
-    console.log(request);
-    console.log(request.headers['referer']);
-    console.log(request.body);
     return next.handle().pipe(
       catchError((err) => {
+        const response = httpContext.getResponse();
+        const { statusCode } = response;
         this.logger.error(
           JSON.stringify({
             logLevel: 'error',

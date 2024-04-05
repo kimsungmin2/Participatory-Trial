@@ -2,9 +2,6 @@ import { DateTime } from 'luxon';
 import * as winston from 'winston';
 import { WinstonModule, utilities } from 'nest-winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
-import { Client as EelasticsearchClient } from '@elastic/elasticsearch';
-import { ElasticsearchTransportOptions } from 'winston-elasticsearch';
-import * as WinstonElasticsearch from 'winston-elasticsearch';
 
 const isProduction = process.env['NODE_ENV'] === 'production';
 console.log(isProduction);
@@ -57,7 +54,7 @@ export const winstonLogger = WinstonModule.createLogger({
     appendTimestamp({ tz: 'Asia/Seoul' }),
     winston.format.json(),
     winston.format.printf((info) => {
-      return ` ${info.message}`;
+      return `${info.message}`;
     }),
   ),
 });

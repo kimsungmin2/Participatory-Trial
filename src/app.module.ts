@@ -104,10 +104,10 @@ export const typeOrmModuleOptions = {
       provide: APP_INTERCEPTOR,
       useClass: HttpLoggingInterceptor,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ErrorInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: ErrorInterceptor,
+    // },
   ],
 })
 export class AppModule {}

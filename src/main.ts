@@ -9,6 +9,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { winstonLogger } from './utils/winston';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { WinstonLogger } from 'nest-winston';
+import { HttpExceptionFilter } from './utils/filter/exception.filter';
 
 async function bootstrap() {
   const logger = winstonLogger;
@@ -22,6 +23,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
   app.set('views', join(__dirname, '..', 'views'));
