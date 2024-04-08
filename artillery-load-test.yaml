@@ -23,7 +23,7 @@ config:
     ensure: {}
     apdex: {}
     metrics-by-endpoint: {}
-  # processor: './dist/create-dummy-one.js'
+  processor: './dist/create-dummy-one.js'
 scenarios:
   - name: 'GET request online board'
     flow:

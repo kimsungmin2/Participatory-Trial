@@ -10,6 +10,7 @@ import { OnlineBoards } from './online_boards/entities/online_board.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { Trials } from './trials/entities/trial.entity';
+import { OnlineBoardLike } from './online_boards/entities/online_board_like.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -26,6 +27,7 @@ const AppDataSource = new DataSource({
     HumorBoards,
     OnlineBoardComments,
     OnlineBoards,
+    OnlineBoardLike,
     PolticalDebateComments,
     PolticalDebateBoards,
     Trials,
@@ -38,14 +40,14 @@ async function createDummyData() {
   await AppDataSource.initialize()
     .then(async () => {
       console.log(`==========[ Dummy Data Creater Started ]==========`);
-      // 팀 생성
+      // 자유게시판 생성
       for (let i = 0; i < 3; i++) {
         const onlineBoard = new OnlineBoards();
         onlineBoard.title = faker.company.catchPhrase();
         onlineBoard.content = faker.lorem.text();
         await AppDataSource.manager.save(onlineBoard);
 
-        // 해당 팀에 속하는 플레이어 생성
+        // 해당 자유게시판에 속하는 댓글 생성
         for (let j = 0; j < 5; j++) {
           const onlineBoardComment = new OnlineBoardComments();
           onlineBoardComment.content = faker.lorem.sentence(1);
