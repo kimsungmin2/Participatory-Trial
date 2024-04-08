@@ -24,8 +24,11 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { CacheConfigService } from './cache/config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { WinstonModule } from 'nest-winston';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
+import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
 
-console.log(1, process.env.DB_NAME);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -41,7 +44,6 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-console.log(typeOrmModuleOptions);
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -63,6 +65,7 @@ console.log(typeOrmModuleOptions);
       useFactory: () => ({
         type: 'single',
         url: process.env.REDIS_URL,
+        options: {},
       }),
     }),
     ScheduleModule.forRoot(),
@@ -92,8 +95,19 @@ console.log(typeOrmModuleOptions);
     EmailModule,
     VoteModule,
     OnlineBoardCommentModule,
+    WinstonModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: ErrorInterceptor,
+    // },
+  ],
 })
 export class AppModule {}

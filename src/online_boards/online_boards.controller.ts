@@ -57,7 +57,7 @@ export class OnlineBoardsController {
       data: board,
     };
   }
-
+  //전체조회
   @Get('')
   @Render('board.ejs')
   async paginateBoards(
@@ -89,7 +89,7 @@ export class OnlineBoardsController {
       data: boards,
     };
   }
-
+  //단건조회
   @Get(':id')
   @Render('post.ejs')
   async findOne(@Param('id') id: number) {
