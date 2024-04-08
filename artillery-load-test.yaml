@@ -1,0 +1,33 @@
+config:
+  target: http://localhost:3000
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 20
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+  plugin:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  # processor: './dist/create-dummy-one.js'
+scenarios:
+  - name: 'GET request online board'
+    flow:
+      - get:
+          url: 'http://localhost:3000/online-boards'
+# ./node_modules/.bin/artillery run ./asciiart-load-test.yaml
+# ./node_modules/.bin/artillery run --output report.json ./asciiart-load-test.yaml
