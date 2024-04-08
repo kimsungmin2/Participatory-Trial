@@ -13,22 +13,16 @@ header {
   text-align: center;
 }
 
-/* 네비게이션 스타일 */
-nav {
-  background-color: #666;
-  color: #fff;
-  padding: 10px 0;
-  text-align: center;
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
 }
-
-nav ul {
-  list-style: none;
-  padding: 0;
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
 }
-
-nav ul li {
-  display: inline-block;
-  margin-right: 20px;
+.navbar-brand {
+  font-size: 24px;
 }
 
 /* 메인 영역 스타일 */

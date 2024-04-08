@@ -28,7 +28,7 @@ import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
-
+console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -58,6 +58,7 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),

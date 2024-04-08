@@ -13,6 +13,7 @@ import { Users } from '../users/entities/user.entity';
 import { UserInfo } from 'os';
 import { NotFoundException } from '@nestjs/common';
 
+const files: Express.Multer.File[] = [];
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
   let usersService: UsersService;
@@ -54,7 +55,6 @@ describe('OnlineBoardsService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -69,6 +69,7 @@ describe('OnlineBoardsService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
+      imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -80,7 +81,7 @@ describe('OnlineBoardsService', () => {
 
     jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
 
-    const result = await service.createBoard(dto, userInfo);
+    const result = await service.createBoard(dto, userInfo, files);
     expect(result).toEqual(expectedResult);
   });
 
@@ -89,7 +90,7 @@ describe('OnlineBoardsService', () => {
       keyword: 'string',
     };
 
-    const expectedResult = [
+    const expectedResult: OnlineBoards[] = [
       {
         id: 1,
         userId: 1,
@@ -115,7 +116,7 @@ describe('OnlineBoardsService', () => {
   it('should get a board', async () => {
     const id: number = 1;
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
@@ -123,6 +124,7 @@ describe('OnlineBoardsService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
+      imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -151,7 +153,6 @@ describe('OnlineBoardsService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -166,6 +167,7 @@ describe('OnlineBoardsService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
+      imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -173,13 +175,14 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: null,
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -211,7 +214,6 @@ describe('OnlineBoardsService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -225,7 +227,6 @@ describe('OnlineBoardsService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -240,6 +241,7 @@ describe('OnlineBoardsService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
+      imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
@@ -267,6 +269,7 @@ describe('OnlineBoardsService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
+      imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,

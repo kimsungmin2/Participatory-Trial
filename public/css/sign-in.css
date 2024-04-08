@@ -1,13 +1,9 @@
-/* sign-in.css */
-
-/* 전체 스타일 */
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* 헤더 영역 스타일 */
 header {
   background-color: #333;
   color: #fff;
@@ -15,37 +11,31 @@ header {
   text-align: center;
 }
 
-/* 네비게이션 스타일 */
-nav {
-  background-color: #666;
-  color: #fff;
-  padding: 10px 0;
-  text-align: center;
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+.navbar-brand {
+  font-size: 24px;
 }
 
-nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-nav ul li {
-  display: inline-block;
-  margin-right: 20px;
-}
-
-/* 메인 영역 스타일 */
 main {
   padding: 20px;
 }
 
-/* 폼 스타일 */
+#shift,
 form {
-  width: 400px;
+  width: 300px;
   margin: 0 auto;
 }
 
-div {
-  margin-bottom: 10px;
+.email,
+.password {
+  margin-bottom: 20px;
 }
 
 label {
@@ -53,31 +43,33 @@ label {
   margin-bottom: 5px;
 }
 
-input[type="text"],
 input[type="email"],
-input[type="password"],
-input[type="date"] {
-  width: 100%;
+input[type="text"] {
+  width: calc(100% - 20px);
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-
-input[type="submit"] {
+.Btn,
+.submitBtn {
+  display: block;
   width: 100%;
   padding: 10px;
+  text-align: center;
   background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  text-decoration: none;
+  margin-bottom: 10px;
 }
 
-input[type="submit"]:hover {
+.submitBtn:hover,
+.Btn:hover {
   background-color: #0056b3;
 }
 
-/* 푸터 영역 스타일 */
 footer {
   background-color: #333;
   color: #fff;

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/css/sign-up.css" />
+    <!-- <link rel="stylesheet" href="/css/email-validation-check.css" /> -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -11,7 +11,7 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-    <title>sign up</title>
+    <title>Email Validation Check</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -55,56 +55,32 @@
       </div>
     </nav>
     <main>
-      <form id="signupForm">
-        <div class="email">
-          <label for="email">Email</label>
+      <form id="verifyEmail">
+        <div>
+          <label for="email">Email: </label>
           <input
             id="email"
-            class="emailInput"
+            class="input"
             type="email"
             name="email"
             placeholder="example@google.com"
             autofocus
           />
         </div>
-        <div class="password">
-          <label for="password">Password</label>
+        <div>
+          <label for="code">Code: </label>
           <input
-            id="password"
-            class="passwordInput"
-            name="password"
-            placeholder="password"
+            id="code"
+            class="input"
             type="text"
+            name="code"
+            placeholder="serial number"
           />
         </div>
-        <div class="confirm password">
-          <label for="confirmPassword">Confirm Password</label>
-          <input
-            id="passwordConfirm"
-            class="confirmPasswordInput"
-            name="passwordConfirm"
-            placeholder="confirm password"
-            type="text"
-          />
-        </div>
-        <div class="nickname">
-          <label for="nickname">Nickname</label>
-          <input
-            id="nickName"
-            class="NicknameInput"
-            name="nickName"
-            placeholder="Nickname"
-            type="text"
-          />
-        </div>
-        <div class="birthday">
-          <label for="birthday">Birthday</label>
-          <input id="birth" name="birth" type="date" />
-        </div>
-        <button id="submitBtn" class="submitBtn" type="submit">회원가입</button>
+        <button type="submit">인증완료</button>
       </form>
     </main>
-    <footer>footer 영역</footer>
-    <script src="/scripts/sign-up.js"></script>
+    <footer></footer>
+    <script src="/scripts/email-validation-check.js" type="module"></script>
   </body>
 </html>

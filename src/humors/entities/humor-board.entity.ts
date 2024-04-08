@@ -43,7 +43,7 @@ export class HumorBoards {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @ManyToOne(() => Users, (user) => user.humorBoard)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
