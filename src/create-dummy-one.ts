@@ -11,6 +11,10 @@ import { PolticalDebateComments } from './poltical_debates/entities/poltical_deb
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { Trials } from './trials/entities/trial.entity';
 import { OnlineBoardLike } from './online_boards/entities/online_board_like.entity';
+import { Votes } from './trials/entities/vote.entity';
+import { EachVote } from './trials/entities/Uservote.entity';
+import { HumorComments } from './humor-comments/entities/humor_comment.entity';
+import { TrialHallOfFames } from './trials/entities/trial_hall_of_fame.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -25,12 +29,16 @@ const AppDataSource = new DataSource({
     HumorHallOfFames,
     HumorLike,
     HumorBoards,
+    HumorComments,
     OnlineBoardComments,
     OnlineBoards,
     OnlineBoardLike,
     PolticalDebateComments,
     PolticalDebateBoards,
     Trials,
+    TrialHallOfFames,
+    Votes,
+    EachVote,
   ],
   synchronize: true,
   logging: false,
@@ -45,6 +53,7 @@ async function createDummyData() {
         const onlineBoard = new OnlineBoards();
         onlineBoard.title = faker.company.catchPhrase();
         onlineBoard.content = faker.lorem.text();
+        onlineBoard.userId = faker.number.int({ min: 1, max: 200 });
         await AppDataSource.manager.save(onlineBoard);
 
         // 해당 자유게시판에 속하는 댓글 생성
