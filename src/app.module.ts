@@ -11,16 +11,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import { Users } from './users/entities/user.entity';
-import { UserInfos } from './users/entities/user-info.entity';
-import { Trials } from './trials/entities/trial.entity';
-import { Votes } from './trials/entities/vote.entity';
-import { OnlineBoardComments } from './online_boards/entities/online_board_comment.entity';
-import { OnlineBoards } from './online_boards/entities/online_board.entity';
-import { HumorComments } from './humors/entities/humor_comment.entity';
-import { HumorBoards } from './humors/entities/humor.entity';
-import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
-import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -58,6 +50,9 @@ export const typeOrmModuleOptions = {
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),
     CacheModule.registerAsync({
       isGlobal: true,

@@ -20,6 +20,7 @@ async function bootstrap() {
       },
     }),
   );
+
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
   app.set('views', join(__dirname, '..', 'views'));

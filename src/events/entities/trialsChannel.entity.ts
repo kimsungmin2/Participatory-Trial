@@ -31,9 +31,6 @@ export class TrialsChannels {
   @Column('int', { name: 'trialsId', nullable: true })
   trialsId: number;
 
-  @OneToMany(() => TrialsChat, (trialsChat) => trialsChat.trialsChannels)
-  trialsChat: TrialsChat[];
-
   @OneToOne(() => Trials, (trials) => trials.trialsChannels, {
     onDelete: 'SET NULL',
     onUpdate: 'CASCADE',

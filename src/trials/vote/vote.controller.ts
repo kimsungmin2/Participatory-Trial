@@ -42,34 +42,34 @@ export class VotesController {
   //     },
   //   },
   // })
-  @ApiParam({
-    name: 'voteId',
-    required: true,
-    description: ' 투표 ID',
-    type: Number,
-  })
-  async vote(
-    @Param('voteId') voteId: number,
-    @UserInfo() users: UserInfos,
-    @Body() voteForDro: VoteForDto,
-    @Req() req: Request,
-  ) {
-    // UserInfo에서 userInfo가 있으면 id 추출하고 없으면 null로 함req.user.id ? req.user.id :
+  // @ApiParam({
+  //   name: 'voteId',
+  //   required: true,
+  //   description: ' 투표 ID',
+  //   type: Number,
+  // })
+  // async vote(
+  //   @Param('voteId') voteId: number,
+  //   @UserInfo() users: UserInfos,
+  //   @Body() voteForDro: VoteForDto,
+  //   @Req() req: Request,
+  // ) {
+  //   // UserInfo에서 userInfo가 있으면 id 추출하고 없으면 null로 함req.user.id ? req.user.id :
 
-    const userId = users.id ? users.id : null;
-    const vote = await this.votesService.addVoteUserorNanUser(
-      // req,
-      userId,
-      voteId,
-      voteForDro.voteFor,
-    );
+  //   const userId = users.id ? users.id : null;
+  //   const vote = await this.votesService.addVoteUserorNanUser(
+  //     req,
+  //     userId,
+  //     voteId,
+  //     voteForDro.voteFor,
+  //   );
 
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: '투표에 성공하였습니다.',
-      vote,
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.CREATED,
+  //     message: '투표에 성공하였습니다.',
+  //     vote,
+  //   };
+  // }
 
   // 투표 취소하기 API(회원 유저만 투표 취소 가능)
   @ApiOperation({ summary: '투표 취소 API' })
@@ -99,6 +99,7 @@ export class VotesController {
       data: vote,
     };
   }
+
   @Get('member/:voteId')
   async getUserVoteCounts(@Param('voteId') voteId: number) {
     const vote = await this.votesService.getUserVoteCounts(voteId);

@@ -43,8 +43,7 @@ export class VotesService {
     return userCode;
   }
 
-  // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
-  private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
+  async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
     if (userId) {
       return null;
     }
@@ -55,12 +54,12 @@ export class VotesService {
       return userCode;
     }
     const userKey = req.ip;
-    // 레디스에서 찾기
+
     userCode = await this.cacheManager.get<string>(userKey);
 
     if (!userCode) {
       userCode = this.generateUserCode();
-      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60); // 밀리초 단위임
+      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
       req.res.cookie('user-code', userCode, {
         maxAge: 1000 * 24 * 60 * 60,
         httpOnly: true,
@@ -76,7 +75,12 @@ export class VotesService {
       userCode,
       voteId,
       voteFor,
-    }: { userId?: number; userCode?: string; voteId: number; voteFor: boolean },
+    }: {
+      userId?: number;
+      userCode?: string;
+      voteId: number;
+      voteFor: boolean;
+    },
     queryRunner: QueryRunner,
   ) {
     // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
@@ -84,11 +88,15 @@ export class VotesService {
       ? await queryRunner.manager.findOneBy(EachVote, { userId, voteId })
       : await queryRunner.manager.findOneBy(EachVote, { userCode, voteId });
 
-    // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
-      throw new BadRequestException(
-        '이미 투표했습니다. 재 투표는 불가능 합니다.',
-      );
+      if (isExistingVote.voteFor === voteFor) {
+        const vote = await this.canselEachVote(isExistingVote.id);
+        return vote;
+      } else {
+        isExistingVote.voteFor = voteFor;
+        await queryRunner.manager.save(EachVote, isExistingVote);
+        return isExistingVote;
+      }
     }
 
     const voteData = this.eachVoteRepository.create({
@@ -102,14 +110,14 @@ export class VotesService {
 
   // 투표하기
   async addVoteUserorNanUser(
-    // req: Request,
+    userCode: string,
     userId: number,
     voteId: number,
     voteFor: boolean,
   ) {
-    // const userCode = await this.findOrCreateUserCodeVer2(req, userId);
+    // const userCodes = await this.findOrCreateUserCodeVer2(req, userId);
     const queryRunner = this.dataSource.createQueryRunner();
-    console.log('123', userId);
+
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
@@ -156,9 +164,11 @@ export class VotesService {
       },
     });
   }
-  async getUserVoteCounts(
-    voteId: number,
-  ): Promise<{ vote1Percentage: string; vote2Percentage: string }> {
+  async getUserVoteCounts(voteId: number): Promise<{
+    vote1Percentage: string;
+    vote2Percentage: string;
+    totalVotes: number;
+  }> {
     const result = await this.dataSource
       .getRepository(EachVote)
       .createQueryBuilder('eachVote')
@@ -189,51 +199,9 @@ export class VotesService {
     return {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
+      totalVotes: totalVotes,
     };
   }
-
-  // async createChannelChats(
-  //   channelTypes: string,
-  //   userId: number,
-  //   message: string,
-  //   RoomId: number,=
-  // ) {
-  //   try {
-  //     const chat = new Chat();
-
-  //     chat.message = message;
-  //     chat.userId = userId;
-  //     chat.RoomId = RoomId;
-
-  //     const chatKey = `${channelTypes}:${RoomId}`;
-  //     const chatValue = JSON.stringify(chat);
-
-  //     await this.redisPublisher.rpush(chatKey, chatValue);
-
-  //     await this.redisPublisher.expire(chatKey, 60 * 60 * 24 * 2);
-
-  //     const publishResult = await new Promise((resolve, reject) => {
-  //       this.redisPublisher.publish(
-  //         'channelChats',
-  //         JSON.stringify({
-  //           channelType: channelTypes,
-  //           RoomId: RoomId,
-  //           message: message,
-  //           userId: userId,
-  //         }),
-  //         (err, reply) => {
-  //           if (err) reject(err);
-  //           else resolve(reply);
-  //         },
-  //       );
-  //     });
-
-  //     console.log('펍:', publishResult);
-  //   } catch (error) {
-  //     console.error('채팅 생성에 실패하였습니다.', error);
-  //     throw error;
-  //   }
-  // }
 
   async getVoteCounts(voteId: number) {
     const result = await this.dataSource

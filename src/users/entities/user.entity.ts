@@ -1,7 +1,9 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -16,12 +18,13 @@ import { HumorComments } from '../../humors/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';
-import { EachVote } from 'src/trials/entities/Uservote.entity';
 import { TrialsChat } from '../../events/entities/trialsChat.entity';
+import { EachVote } from '../../trials/entities/Uservote.entity';
 
 @Entity({
   name: 'users',
 })
+@Index(['id'])
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
@@ -34,6 +37,9 @@ export class Users {
 
   @UpdateDateColumn({ type: 'date' })
   updatedAt: Date;
+
+  @DeleteDateColumn({ type: 'date' })
+  deletedAt: Date | null;
 
   @OneToOne(() => UserInfos, (userInfo) => userInfo.user)
   userInfo: UserInfos;

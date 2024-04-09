@@ -4,11 +4,40 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TrialsChannels } from '../events/entities/trialsChannel.entity';
 import { TrialsChat } from '../events/entities/trialsChat.entity';
 import { Users } from '../users/entities/user.entity';
-import { RedisPubSubService } from './redis.service';
+import { HumorsChat } from '../events/entities/humorsChat.entity';
+import { PolticalsChat } from '../events/entities/polticalsChat.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
+import Redis from 'ioredis';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TrialsChannels, TrialsChat, Users])],
-  providers: [ChatsService],
+  imports: [
+    TypeOrmModule.forFeature([
+      TrialsChannels,
+      TrialsChat,
+      UserInfos,
+      HumorsChat,
+      PolticalsChat,
+    ]),
+  ],
+  providers: [
+    ChatsService,
+    {
+      provide: 'REDIS_DATA_CLIENT',
+      useFactory: () =>
+        new Redis({
+          host: process.env.REDIS_HOST,
+          port: Number(process.env.REDIS_PORT),
+        }),
+    },
+    {
+      provide: 'REDIS_SUB_CLIENT',
+      useFactory: () =>
+        new Redis({
+          host: process.env.REDIS_HOST,
+          port: Number(process.env.REDIS_PORT),
+        }),
+    },
+  ],
   exports: [ChatsService],
 })
 export class ChatsModule {}

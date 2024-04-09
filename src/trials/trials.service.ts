@@ -125,6 +125,7 @@ export class TrialsService {
   async findOneByTrialsId(id: number) {
     // 1. id에 대한 재판 조회
     const OneTrials = await this.trialsRepository.findOneBy({ id });
+    const vote = await this.votesRepository.findOneBy({ id });
 
     // 2. 없으면 404
     if (!OneTrials) {
@@ -132,7 +133,7 @@ export class TrialsService {
     }
 
     // 있으면 리턴
-    return OneTrials;
+    return { OneTrials, vote };
   }
 
   // 내 재판 업데이트
@@ -150,7 +151,7 @@ export class TrialsService {
       const existTrial = await this.findOneByTrialsId(trialsId);
 
       // 2. 내 재판이 맞는지 유효성 검사
-      if (existTrial.userId !== userId) {
+      if (existTrial.OneTrials.userId !== userId) {
         throw new NotAcceptableException(
           '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
         );

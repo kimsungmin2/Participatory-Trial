@@ -32,10 +32,6 @@ export class HumorComments {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => HumorBoards, (humorBoard) => humorBoard.humorComment)
-  @JoinColumn({ name: 'humor_board_id', referencedColumnName: 'id' })
-  humorBoard: HumorBoards;
-
   @ManyToOne(() => Users, (user) => user.humorBoard)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   user: Users;

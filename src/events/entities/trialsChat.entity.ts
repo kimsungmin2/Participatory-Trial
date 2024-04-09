@@ -2,21 +2,23 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
-import { TrialsChannels } from './trialsChannel.entity';
 
 @Entity()
+@Index(['roomId'])
 export class TrialsChat {
-  @PrimaryColumn({ type: 'int', unique: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar', nullable: false })
-  content: string;
+  message: string;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -27,8 +29,14 @@ export class TrialsChat {
   @Column('int', { name: 'userId', nullable: true })
   userId: number;
 
-  @Column('int', { name: 'ChannelId', nullable: true })
-  ChannelId: number;
+  @Column('int', { name: 'roomId', nullable: true })
+  roomId: number;
+
+  @CreateDateColumn()
+  timestamp: Date;
+
+  @Column()
+  userName: string;
 
   @ManyToOne(() => Users, (user) => user.trialsChat, {
     onDelete: 'SET NULL',
@@ -36,15 +44,4 @@ export class TrialsChat {
   })
   @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   user: Users;
-
-  @ManyToOne(
-    () => TrialsChannels,
-    (trialsChannels) => trialsChannels.trialsChat,
-    {
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    },
-  )
-  @JoinColumn([{ name: 'ChannelId', referencedColumnName: 'id' }])
-  trialsChannels: TrialsChannels;
 }

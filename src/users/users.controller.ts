@@ -58,11 +58,13 @@ export class UsersController {
   @ApiOperation({ summary: '유저 정보' })
   @UseGuards(AuthGuard('jwt'))
   @Get('')
-  getUser(@UserInfo() userInfos: UserInfos) {
+  async getUser(@Req() req) {
+    const { id } = req.user;
+    const data = await this.usersService.findByMyId(id);
     return {
       statusCode: HttpStatus.OK,
       message: '회원 정보입니다.',
-      data: [userInfos.nickName, userInfos.birth],
+      data: data,
     };
   }
 }

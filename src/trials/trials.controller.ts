@@ -65,7 +65,7 @@ export class TrialsController {
     // @UserInfo() userInfo: UserInfos,
     @Req() req,
     @Body() createTrialDto: CreateTrialDto,
-    voteTrialDto: VoteTrialDto, // 재판 제목하고 재판 내용 들어감
+    @Body() voteTrialDto: VoteTrialDto, // 재판 제목하고 재판 내용 들어감
   ) {
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
     const user = req.user;

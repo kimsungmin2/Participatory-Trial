@@ -1,4 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Chat {
@@ -8,7 +13,7 @@ export class Chat {
   @Column()
   message: string;
 
-  @Column()
+  @CreateDateColumn()
   timestamp: Date;
 
   @Column()
@@ -16,4 +21,7 @@ export class Chat {
 
   @Column()
   RoomId: number;
+
+  @Column()
+  userName: string;
 }
