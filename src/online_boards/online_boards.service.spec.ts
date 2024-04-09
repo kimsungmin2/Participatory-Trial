@@ -12,12 +12,14 @@ import { ForbiddenException } from '@nestjs/common';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from 'os';
 import { NotFoundException } from '@nestjs/common';
+import { S3Service } from '../s3/s3.service';
 
 const files: Express.Multer.File[] = [];
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
   let usersService: UsersService;
   let repository: Repository<OnlineBoards>;
+  let s3Service: S3Service;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -29,14 +31,28 @@ describe('OnlineBoardsService', () => {
           useClass: Repository,
         },
         {
+          provide: S3Service,
+          useValue: {
+            saveImages: jest.fn(),
+          },
+        },
+        {
           provide: getRepositoryToken(UserInfos),
           useClass: Repository,
+        },
+        {
+          provide: 'default_IORedisModuleConnectionToken',
+          useValue: {
+            set: jest.fn(),
+            get: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<OnlineBoardsService>(OnlineBoardsService);
     usersService = module.get<UsersService>(UsersService);
+    s3Service = module.get<S3Service>(S3Service);
     repository = module.get<Repository<OnlineBoards>>(
       getRepositoryToken(OnlineBoards),
     );
@@ -71,10 +87,11 @@ describe('OnlineBoardsService', () => {
       topComments: 'string',
       imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
@@ -100,7 +117,7 @@ describe('OnlineBoardsService', () => {
         like: 1,
         topComments: 'string',
         createdAt: new Date('2024-03-24T02:05:02.602Z'),
-        updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+        updated_at: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
         OnlineBoardComment: null,
         onlineBoardLike: null,
@@ -126,10 +143,11 @@ describe('OnlineBoardsService', () => {
       topComments: 'string',
       imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
@@ -169,10 +187,11 @@ describe('OnlineBoardsService', () => {
       topComments: 'string',
       imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedResult: OnlineBoards = {
@@ -185,10 +204,11 @@ describe('OnlineBoardsService', () => {
       imageUrl: null,
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
@@ -243,10 +263,11 @@ describe('OnlineBoardsService', () => {
       topComments: 'string',
       imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
@@ -271,10 +292,11 @@ describe('OnlineBoardsService', () => {
       topComments: 'string',
       imageUrl: null,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);

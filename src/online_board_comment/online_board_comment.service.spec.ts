@@ -9,11 +9,13 @@ import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
+import { S3Service } from '../s3/s3.service';
 
 describe('OnlineBoardCommentService', () => {
   let service: OnlineBoardCommentService;
   let onlineBoardsService: OnlineBoardsService;
   let usersService: UsersService;
+
   let repository: Repository<OnlineBoardComments>;
 
   beforeEach(async () => {
@@ -33,6 +35,20 @@ describe('OnlineBoardCommentService', () => {
         {
           provide: getRepositoryToken(UserInfos),
           useClass: Repository,
+        },
+        {
+          provide: S3Service,
+          useValue: {
+            saveImages: jest.fn(),
+          },
+        },
+        {
+          provide: 'default_IORedisModuleConnectionToken',
+          useValue: {
+            set: jest.fn(),
+            get: jest.fn(),
+            incr: jest.fn().mockResolvedValue(1),
+          },
         },
       ],
     }).compile();
@@ -74,11 +90,12 @@ describe('OnlineBoardCommentService', () => {
       like: 1,
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedValue: OnlineBoardComments = {
@@ -121,11 +138,12 @@ describe('OnlineBoardCommentService', () => {
       like: 1,
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedValue = [

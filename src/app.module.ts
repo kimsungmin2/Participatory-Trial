@@ -28,6 +28,7 @@ import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
+import { SearchModule } from './search/search.module';
 console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -97,6 +98,7 @@ export const typeOrmModuleOptions = {
     VoteModule,
     OnlineBoardCommentModule,
     WinstonModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

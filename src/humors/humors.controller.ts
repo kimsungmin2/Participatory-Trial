@@ -34,6 +34,7 @@ import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 import { BoardType } from '../s3/board-type';
 import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
+
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -43,6 +44,7 @@ export class HumorsController {
   ) {}
 
   //글쓰기 페이지
+  @ApiOperation({ summary: '유머 게시판 게시물 생성 페이지' })
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage() {
@@ -89,6 +91,7 @@ export class HumorsController {
       data: createdBoard,
     };
   }
+
   //모든 게시물 조회(페이지네이션)
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
   @ApiQuery({

@@ -24,7 +24,8 @@ import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { BoardType } from '../s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
-
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+@ApiTags('자유 게시판')
 @Controller('online-boards')
 export class OnlineBoardsController {
   constructor(private readonly onlineBoardsService: OnlineBoardsService) {}
@@ -38,6 +39,25 @@ export class OnlineBoardsController {
   }
   //게시글 생성
   @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '자유 게시판 게시물 생성' })
+  @ApiBody({
+    description: '자유 게시판 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(

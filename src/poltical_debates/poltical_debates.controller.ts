@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
@@ -40,8 +40,26 @@ export class PolticalDebatesController {
     return { boardType: BoardType.PolticalDebate };
   }
 
-  @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
   @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '정치토론 게시판 게시물 생성' })
+  @ApiBody({
+    description: '정치토론 게시판 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(

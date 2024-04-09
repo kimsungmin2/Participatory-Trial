@@ -18,6 +18,7 @@ import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { S3Service } from '../s3/s3.service';
 
 const mockedUser = {
   id: 1,
@@ -28,8 +29,8 @@ const mockedUser = {
   provider: 'test',
   verifiCationCode: 1,
   emailVerified: true,
-  createdAt: new Date(),
-  updatedAt: new Date(),
+  createdAt: new Date('2024-03-24T02:05:02.602Z'),
+  updatedAt: new Date('2024-03-24T02:05:02.602Z'),
   user: null,
 };
 
@@ -40,7 +41,17 @@ const mockPolticalDebate = {
   content: 'test2',
   view: 1,
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updated_at: new Date(),
+} as PolticalDebateBoards;
+
+const incrViewmockPolticalDebate = {
+  id: 1,
+  userId: 1,
+  title: 'test',
+  content: 'test2',
+  view: 2,
+  createdAt: new Date(),
+  updated_at: new Date(),
 } as PolticalDebateBoards;
 
 describe('PolticalDebatesService', () => {
@@ -62,6 +73,22 @@ describe('PolticalDebatesService', () => {
             findOne: jest.fn(),
             update: jest.fn(),
             remove: jest.fn(),
+            softDelete: jest.fn(),
+            count: jest.fn(),
+          },
+        },
+        {
+          provide: S3Service,
+          useValue: {
+            saveImages: jest.fn(),
+          },
+        },
+        {
+          provide: 'default_IORedisModuleConnectionToken',
+          useValue: {
+            set: jest.fn(),
+            get: jest.fn(),
+            incr: jest.fn().mockResolvedValue(1),
           },
         },
       ],
@@ -89,6 +116,7 @@ describe('PolticalDebatesService', () => {
         title: 'test',
         content: 'testtest',
       };
+      const files: Express.Multer.File[] = [];
 
       jest
         .spyOn(polticalDebatesRepository, 'create')
@@ -101,6 +129,7 @@ describe('PolticalDebatesService', () => {
       const createPolticalDebate = await polticalDebatesService.create(
         mockedUser,
         createPolticalDebateDto,
+        files,
       );
 
       expect(polticalDebatesRepository.save).toHaveBeenCalledTimes(1);
@@ -109,13 +138,28 @@ describe('PolticalDebatesService', () => {
   });
 
   describe('정치 토론 게시판 전체 조회', () => {
+    const mockPolticalDebateBoards = [
+      {
+        mockPolticalDebate,
+      },
+    ] as unknown as PolticalDebateBoards[];
     it('성공', async () => {
-      const mockPolticalDebates: PolticalDebateBoards[] = [mockPolticalDebate];
+      const mockPolticalDebates = {
+        polticalDebateBoards: mockPolticalDebateBoards,
+        totalItems: 3,
+      };
+      const PaginationQueryDto = {
+        limit: 1,
+        page: 1,
+      };
       jest
         .spyOn(polticalDebatesRepository, 'find')
-        .mockResolvedValue(mockPolticalDebates);
+        .mockResolvedValue(mockPolticalDebateBoards);
 
-      const findAllPolticalDebateBoard = await polticalDebatesService.findAll();
+      jest.spyOn(polticalDebatesRepository, 'count').mockResolvedValue(3);
+
+      const findAllPolticalDebateBoard =
+        await polticalDebatesService.findAll(PaginationQueryDto);
 
       expect(findAllPolticalDebateBoard).toEqual(mockPolticalDebates);
     });
@@ -139,16 +183,28 @@ describe('PolticalDebatesService', () => {
   });
 
   describe('정치 토론 게시판 상세 조회', () => {
+    const a = {
+      id: 1,
+      userId: 1,
+      title: 'test',
+      content: 'test2',
+      view: 1,
+      createdAt: new Date(),
+      updated_at: new Date(),
+    } as PolticalDebateBoards;
+
+    const b = {
+      ...a,
+      view: a.view + 1,
+    };
     it('성공', async () => {
       const mockPolticalDebateId = 1;
-      jest
-        .spyOn(polticalDebatesRepository, 'findOne')
-        .mockResolvedValue(mockPolticalDebate);
+      jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(a);
 
       const findOnePolticalDebateBoard =
         await polticalDebatesService.findOne(mockPolticalDebateId);
 
-      expect(findOnePolticalDebateBoard).toEqual(mockPolticalDebate);
+      expect(findOnePolticalDebateBoard).toEqual(b);
     });
 
     it('실패: 정치 토론 게시판을 찾을 수 없습니다.', async () => {
@@ -157,7 +213,7 @@ describe('PolticalDebatesService', () => {
 
       await expect(
         polticalDebatesService.findOne(mockPolticalDebateId),
-      ).rejects.toThrow(BadRequestException);
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -182,7 +238,7 @@ describe('PolticalDebatesService', () => {
         content: '기존 컨텐츠',
         view: 1,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       } as PolticalDebateBoards;
 
       jest
@@ -235,7 +291,7 @@ describe('PolticalDebatesService', () => {
         content: '테스트',
         view: 1,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       } as PolticalDebateBoards;
 
       jest
@@ -258,6 +314,9 @@ describe('PolticalDebatesService', () => {
     it('정치 토론 게시판 삭제 성공', async () => {
       const mockPolticalDebateId = 1;
       const mockUserId = 1;
+      const result = {
+        affected: 1,
+      };
 
       const mockPolticalDebate = {
         id: mockPolticalDebateId,
@@ -266,24 +325,27 @@ describe('PolticalDebatesService', () => {
         content: '기존 컨텐츠',
         view: 1,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       } as PolticalDebateBoards;
+      const updatedResult = {
+        affected: 1,
+      } as UpdateResult;
       jest
         .spyOn(polticalDebatesRepository, 'findOne')
         .mockResolvedValue(mockPolticalDebate);
       jest
-        .spyOn(polticalDebatesRepository, 'remove')
-        .mockResolvedValue(mockPolticalDebate);
+        .spyOn(polticalDebatesRepository, 'softDelete')
+        .mockResolvedValue(updatedResult);
 
       const deleteBoard = await polticalDebatesService.delete(
         mockedUser,
         mockPolticalDebateId,
       );
 
-      expect(polticalDebatesRepository.remove).toHaveBeenCalledWith(
-        mockPolticalDebate,
+      expect(polticalDebatesRepository.softDelete).toHaveBeenCalledWith(
+        mockPolticalDebate.id,
       );
-      expect(deleteBoard).toEqual(mockPolticalDebate);
+      expect(deleteBoard).toEqual(result);
     });
 
     it('정치 토론 게시판을 찾을 수 없습니다.', async () => {
@@ -304,7 +366,7 @@ describe('PolticalDebatesService', () => {
         content: '테스트',
         view: 1,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       } as PolticalDebateBoards;
       jest
         .spyOn(polticalDebatesRepository, 'findOne')

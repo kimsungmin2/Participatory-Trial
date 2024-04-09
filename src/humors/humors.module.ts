@@ -7,12 +7,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Module } from '../s3/s3.module';
 import { LikeModule } from '../like/like.module';
+import { TrialsModule } from '../trials/trials.module';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([HumorBoards, HumorComments, Users]),
     S3Module,
     LikeModule,
+    SearchModule,
   ],
   controllers: [HumorsController],
   providers: [HumorsService],

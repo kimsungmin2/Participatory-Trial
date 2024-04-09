@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -32,7 +33,10 @@ export class PolticalDebateBoards {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deleted_at: Date;
 
   @ManyToOne(() => Users, (user) => user.polticalDebateBoards)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
