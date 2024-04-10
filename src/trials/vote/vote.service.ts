@@ -10,7 +10,7 @@ import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Votes } from '../entities/vote.entity';
 import { Request } from 'express';
 import { EachVote } from '../entities/Uservote.entity';
-import { VoteTrialDto } from './dto/voteDto';
+import { VoteTitleDto } from './dto/voteDto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 @Injectable()
 export class VotesService {

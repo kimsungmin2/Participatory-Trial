@@ -33,6 +33,7 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 
 
 
+
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -96,7 +97,7 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
-    OnlineBoardCommentModule
+    OnlineBoardCommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
