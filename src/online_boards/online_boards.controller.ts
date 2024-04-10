@@ -9,12 +9,9 @@ import {
   UseGuards,
   HttpStatus,
   Query,
-<<<<<<< HEAD
-=======
   Render,
   UseInterceptors,
   UploadedFiles,
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 } from '@nestjs/common';
 import { OnlineBoardsService } from './online_boards.service';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
@@ -23,9 +20,11 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-<<<<<<< HEAD
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
+import { BoardType } from 'src/s3/board-type';
+import { BoardOwnerGuard } from './guards/online_boards.guard';
 
 @ApiTags('자유 게시판')
 @UseGuards(AuthGuard('jwt'))
@@ -49,27 +48,6 @@ export class OnlineBoardsController {
     },
   })
   @ApiBearerAuth('access-token')
-=======
-import { BoardOwnerGuard } from './guards/online_boards.guard';
-import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
-import { BoardType } from '../s3/board-type';
-import { FilesInterceptor } from '@nestjs/platform-express';
-
-@Controller('online-boards')
-export class OnlineBoardsController {
-  constructor(private readonly onlineBoardsService: OnlineBoardsService) {}
-
-  //글쓰기 페이지
-  @UseGuards(AuthGuard('jwt'))
-  @Get('create')
-  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getCreatePostPage() {
-    return { boardType: BoardType.OnlineBoard };
-  }
-  //게시글 생성
-  @UseInterceptors(FilesInterceptor('files'))
-  @UseGuards(AuthGuard('jwt'))
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   @Post()
   async create(
     @Body() createOnlineBoardDto: CreateOnlineBoardDto,
@@ -88,8 +66,8 @@ export class OnlineBoardsController {
       data: board,
     };
   }
+  //전체조회
 
-<<<<<<< HEAD
 
   // 모든 자유 게시판 검색어 조회 API
   @ApiOperation({ summary: '모든 자유 게시판 검색어 조회 API' })
@@ -101,18 +79,16 @@ export class OnlineBoardsController {
     type: String,
     example: '은가누',
   })
-  @Get()
-  async findAll(@Query('keyword') keyword: string) {
-=======
+
   @Get('')
   @Render('board.ejs')
   async paginateBoards(
     @Query() paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoardReturnValue> {
+  ): Promise<HumorBoardReturnValue> 
+  {
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
-    console.log(pageCount);
     return {
       statusCode: HttpStatus.FOUND,
       message: '게시글을 조회합니다.',
@@ -122,12 +98,12 @@ export class OnlineBoardsController {
       currentPage: paginationQueryDto.page,
     };
   }
+  
   //검색 API
   @Get('search')
   async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
     const boards = await this.onlineBoardsService.findAllBoard(
-      keyword,
+      findAllOnlineBoardDto.keyword,
     );
 
     return {
@@ -136,6 +112,7 @@ export class OnlineBoardsController {
       data: boards,
     };
   }
+  //단건조회
 
   // 특정 자유 게시판 id 조회 API
   @ApiOperation({ summary: '특정 게시물 조회 API' })
@@ -158,7 +135,6 @@ export class OnlineBoardsController {
       boardType: BoardType.OnlineBoard,
     };
   }
-<<<<<<< HEAD
 
   // 내 자유 게시물 수정 API
   @ApiOperation({ summary: '자유 게시물 수정 API' })
@@ -179,10 +155,8 @@ export class OnlineBoardsController {
     description: '자유 게시물 ID',
     type: Number,
   })
-=======
-  @UseGuards(AuthGuard('jwt'))
-  @UseGuards(BoardOwnerGuard)
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+  @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
+
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -199,7 +173,7 @@ export class OnlineBoardsController {
       data: board,
     };
   }
-<<<<<<< HEAD
+
   
   // 내 자유 게시물 삭제 API
   @ApiOperation({ summary: ' 내 자유 게시물 삭제 API' })
@@ -210,11 +184,7 @@ export class OnlineBoardsController {
     description: ' 자유 게시물 게시물 ID',
     type: Number,
   })
-=======
-
-  @UseGuards(AuthGuard('jwt'))
-  @UseGuards(BoardOwnerGuard)
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+  @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
   @Delete(':id')
   async remove(@Param('id') id: number) {
     const board = await this.onlineBoardsService.removeBoard(id);

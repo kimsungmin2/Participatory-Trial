@@ -159,15 +159,8 @@ export class OnlineBoardsService {
   async removeBoard(id: number) {
     const foundBoard = await this.findBoardId(id);
 
-<<<<<<< HEAD
-    if (foundBoard.userId !== foundUser.id) {
-      throw new ForbiddenException('접근 권한이 없습니다.');
-    }
-
-    await this.onlineBoardsRepository.delete({ id });
-=======
     await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+
 
     return `This action removes a #${id} onlineBoard`;
   }

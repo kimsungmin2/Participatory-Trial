@@ -59,7 +59,6 @@ describe('OnlineBoardCommentService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -79,6 +78,7 @@ describe('OnlineBoardCommentService', () => {
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      imageUrl: null,
     };
 
     const expectedValue: OnlineBoardComments = {
@@ -125,6 +125,7 @@ describe('OnlineBoardCommentService', () => {
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
+      imageUrl: null,
     };
 
     const expectedValue = [

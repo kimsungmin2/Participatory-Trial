@@ -22,6 +22,14 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { HumorsService } from './humors/humors.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BullModule } from '@nestjs/bull';
+import { VoteModule } from './trials/vote/vote.module';
+import { WinstonModule } from "nest-winston"
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
+import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
+
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -66,6 +74,7 @@ export const typeOrmModuleOptions = {
       useFactory: () => ({
         type: 'single',
         url: process.env.REDIS_URL,
+        options: {},
       }),
     }),
     ScheduleModule.forRoot(),
@@ -81,8 +90,23 @@ export const typeOrmModuleOptions = {
     S3Module,
     LikeModule,
     SchedulerModule,
+    AuthModule,
+    EmailModule,
+    VoteModule,
+    OnlineBoardCommentModule,
+    WinstonModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: ErrorInterceptor,
+    // },
+  ],
 })
 export class AppModule {}
