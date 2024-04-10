@@ -10,7 +10,6 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
  * pingTimeout : 최대 대기 시간(밀리초 단위)
  * sniffOnStart : 스니핑 활성화
  */
-console.log(11111, process.env.ES_NODE);
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({

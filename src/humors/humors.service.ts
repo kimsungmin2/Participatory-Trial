@@ -24,6 +24,7 @@ export class HumorsService {
   constructor(
     @InjectRepository(HumorBoards)
     private HumorBoardRepository: Repository<HumorBoards>,
+    @InjectRepository(HumorVotes)
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
     @InjectRedis()

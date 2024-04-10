@@ -7,10 +7,10 @@ import { PanryeInfo } from '../entities/panryedata.entity';
 import { EachVote } from '../entities/Uservote.entity';
 import { Votes } from '../entities/vote.entity';
 
-
 @Module({
   imports: [TypeOrmModule.forFeature([Trials, PanryeInfo, EachVote, Votes])],
   controllers: [VotesController],
   providers: [VotesService],
+  exports: [VotesService],
 })
 export class VoteModule {}

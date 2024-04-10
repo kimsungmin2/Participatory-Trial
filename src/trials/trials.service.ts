@@ -47,9 +47,7 @@ export class TrialsService {
    */
   async createTrial(userId: number, createTrialDto: CreateTrialDto, voteTitleDto: VoteTitleDto) {
     const queryRunner = this.dataSource.createQueryRunner();
-
     await queryRunner.connect();
-
     await queryRunner.startTransaction();
     try {
       // 1. Dto에서 title, content 뽑아내기
@@ -63,10 +61,8 @@ export class TrialsService {
         userId,
         is_time_over: false,
       };
-
       // 3. 재판 생성
       const newTrial = queryRunner.manager.create(Trials, data);
-
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial);
       const trialId = savedTrial.id
@@ -89,16 +85,13 @@ export class TrialsService {
         { trialId: savedTrial.id },
         { delay: delay },
       );
-
       // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
 
       return { savedTrial, savedVote} ;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
       console.log('재판 생성 에러:', error);
-
       throw new InternalServerErrorException(
         '재판 생성 중 오류가 발생했습니다.',
       );
@@ -139,6 +132,7 @@ export class TrialsService {
   async findOneByTrialsId(id: number) {
     // 1. id에 대한 재판 조회
     const OneTrials = await this.trialsRepository.findOneBy({ id });
+    const vote = await this.votesRepository.findOneBy({ id });
 
     // 2. 없으면 404
     if (!OneTrials) {
@@ -146,7 +140,7 @@ export class TrialsService {
     }
 
     // 있으면 리턴
-    return OneTrials;
+    return { OneTrials, vote };
   }
 
   // 내 재판 업데이트
@@ -164,7 +158,7 @@ export class TrialsService {
       const existTrial = await this.findOneByTrialsId(trialsId);
 
       // 2. 내 재판이 맞는지 유효성 검사
-      if (existTrial.userId !== userId) {
+      if (existTrial.OneTrials.userId !== userId) {
         throw new NotAcceptableException(
           '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
         );

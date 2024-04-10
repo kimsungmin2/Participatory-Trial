@@ -12,11 +12,13 @@ import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { EachPolticalVote } from './entities/userVoteOfPoltical_debate.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { PolticalDebatesVoteModule } from './poltical_debates_vote/poltical_debates_vote.module';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments, PolticalDebateHallOfFame, PolticalDebateBoardsViewHallOfFames, PolticalDebateVotes, EachPolticalVote]),
     PolticalDebatesVoteModule,
+    S3Module
   ],
   controllers: [PolticalDebatesController, PolticalDebateCommentsController],
   providers: [PolticalDebatesService, PolticalDebateCommentsService, PolticalDabateHallOfFameService],

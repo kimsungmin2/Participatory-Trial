@@ -8,7 +8,7 @@ import { Request } from 'express';
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly humorService: HumorsService,
+    // private readonly humorService: HumorsService,
   ) {}
 
   @Get('')
