@@ -1,16 +1,11 @@
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { HumorBoards } from '../humors/entities/humor-board.entity';
-import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
-import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
-import { Trials } from '../trials/entities/trial.entity';
-import { UserInfos } from '../users/entities/user-info.entity';
 import { Users } from '../users/entities/user.entity';
 import { Role } from '../users/types/userRole.type';
 

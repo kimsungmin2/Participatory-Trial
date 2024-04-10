@@ -10,9 +10,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Users } from '../../users/entities/user.entity';
 
 @Entity()
-export class HumorHallOfFames {
+export class HumorsHallOfFame {
   @PrimaryColumn({ type: 'int', unique: true })
   id: number;
 
@@ -25,15 +26,9 @@ export class HumorHallOfFames {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
-  view: number;
-
-  @Column({ type: 'int', nullable: false })
-  like: number;
-
-  @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
-
+  @Column({ type: 'varchar'})
+  totalVotes: number;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

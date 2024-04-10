@@ -11,8 +11,12 @@ import {
   Get,
 } from '@nestjs/common';
 import { VotesService } from './vote.service';
+<<<<<<< HEAD
+import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
+=======
 import { VoteDto } from './dto/voteDto';
 import { UserInfo } from '../../utils/decorator/userInfo.decorator';
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 import { userInfo } from 'os';
 import { UserInfos } from '../../users/entities/user-info.entity';
 import { Request } from 'express';
@@ -22,18 +26,20 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { VoteForDto } from '../dto/vote.dto';
 import { Users } from '../../users/entities/user.entity';
 
+@ApiTags('재판 투표')
 @Controller('trials/vote')
 export class VotesController {
   constructor(private readonly votesService: VotesService) {}
 
   // 투표하기 API
   @UseGuards(AuthGuard('jwt'))
-  @ApiOperation({ summary: '투표하기 API' })
+  @ApiOperation({ summary: '재판 투표하기 API' })
   @Post(':voteId')
   // @ApiBody({
   //   description: '찬성 반대, 찬성일때 true',
@@ -91,6 +97,14 @@ export class VotesController {
     };
   }
 
+  @ApiOperation({ summary: '투표 현황 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'voteId',
+    required: true,
+    description: ' 재판 투표 ID',
+    type: Number,
+  })
   @Get(':voteId')
   async getVoteCounts(@Param('voteId') voteId: number) {
     const vote = await this.votesService.getVoteCounts(voteId);
@@ -100,6 +114,15 @@ export class VotesController {
       data: vote,
     };
   }
+
+  @ApiOperation({ summary: '투표 현황 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'voteId',
+    required: true,
+    description: ' 재판 투표 ID',
+    type: Number,
+  })
   @Get('member/:voteId')
   async getUserVoteCounts(@Param('voteId') voteId: number) {
     const vote = await this.votesService.getUserVoteCounts(voteId);

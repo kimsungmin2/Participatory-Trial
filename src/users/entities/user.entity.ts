@@ -19,6 +19,8 @@ import { Role } from '../types/userRole.type';
 import { EachVote } from '../../trials/entities/Uservote.entity';
 import { HumorLike } from '../../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
+import { EachHumorVote } from 'src/humors/entities/UservoteOfHumorVote.entity';
+import { EachPolticalVote } from 'src/poltical_debates/entities/userVoteOfPoltical_debate.entity';
 
 @Entity({
   name: 'users',
@@ -80,6 +82,19 @@ export class Users {
   )
   eachVote: EachVote[];
 
+  @OneToMany(
+    () => EachPolticalVote,
+    (eachPolticalVote) => eachPolticalVote.user,
+    { cascade: true },
+  )
+  eachPolticalVote: EachPolticalVote[]
+
+  @OneToMany(
+    () => EachHumorVote,
+    (eachHumorVote) => eachHumorVote.user,
+    { cascade: true },
+  )
+  eachHumorVote: EachHumorVote[]
   @OneToMany(() => HumorLike, (humorLike) => humorLike.user, {
     cascade: true,
   })

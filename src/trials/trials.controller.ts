@@ -12,7 +12,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
-import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import {
   ApiBearerAuth,
@@ -26,20 +25,24 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
 import { UserInfos } from 'src/users/entities/user-info.entity';
 import { MyTrialsGuard } from './guards/myTrials.guard';
-import { VoteDto } from './vote/dto/voteDto';
+import { VoteTitleDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
+import { LikeInputDto } from 'src/like/dto/create-like.dto';
+import { LikeService } from 'src/like/like.service';
+import { Users } from 'src/users/entities/user.entity';
+import { CreateTrialDto } from './dto/create-trial.dto';
 
-@ApiTags('Trials')
-@ApiTags('Trials')
+@ApiTags('재판')
 @Controller('trials')
 export class TrialsController {
   constructor(
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
+    private readonly likeServise: LikeService
   ) {}
   // 모든 API는 비동기 처리
 
@@ -56,6 +59,8 @@ export class TrialsController {
         title: { type: 'string' },
         content: { type: 'string' },
         trialTime: { type: 'number' },
+        title1: { type: 'string' },
+        title2: { type: 'string' },
       },
     },
   })
@@ -65,10 +70,11 @@ export class TrialsController {
     // @UserInfo() userInfo: UserInfos,
     @Req() req,
     @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
+    @Body() voteTitleDto: VoteTitleDto
   ) {
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
     const user = req.user;
-    const data = await this.trialsService.createTrial(user.id, createTrialDto);
+    const data = await this.trialsService.createTrial(user.id, createTrialDto, voteTitleDto);
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -208,17 +214,16 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'))
-  @UseGuards(MyTrialsGuard)
+  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
   @Patch(':trialsId')
   async update(
-    @Param('trialsId') id: string,
+    @Param('trialsId') trialsId: number,
     @Body() updateTrialDto: UpdateTrialDto,
     @UserInfo() userInfo: UserInfos,
   ) {
     const data = await this.trialsService.updateTrials(
       userInfo.id,
-      +id,
+      +trialsId,
       updateTrialDto,
     );
 
@@ -238,7 +243,7 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(MyTrialsGuard)
+  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
   @Delete(':trialsId')
   async remove(@Param('trialsId') id: string) {
     await this.trialsService.deleteTrials(+id);
@@ -248,6 +253,42 @@ export class TrialsController {
     };
   }
 
+
+  // 재판 게시물 좋아요 API
+  @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
+  @ApiBody({
+    description: '좋아요/좋아요 취소',
+    schema: {
+      type: 'object',
+      properties: {
+        boardType: { type: 'string' },
+      },
+    },
+  })
+  @ApiParam({
+    name: 'trialId',
+    required: true,
+    description: '재판 게시물 ID',
+    type: Number,
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post('/:trialId/like')
+  async like(
+    @Param('trialId') trialId: number,
+    @UserInfo() user: Users,
+    @Body() likeInputDto: LikeInputDto,
+  ): Promise<HumorBoardReturnValue> {
+    const result = await this.likeServise.like(
+      likeInputDto,
+      user,
+      trialId,
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: result,
+    };
+  }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   // -------------------------------------------------------------------------- 재판 vs API ----------------------------------------------------------------------//
 
@@ -274,9 +315,8 @@ export class TrialsController {
   @Post(':trialId')
   async voteOfSubject(
     @Param('trialId') trialId: number,
-    @Body() voteDto: VoteDto,
+    @Body() voteDto: VoteTitleDto,
   ) {
-    console.log(trialId);
     const data = await this.trialsService.createSubject(+trialId, voteDto);
     return {
       statusCode: HttpStatus.OK,

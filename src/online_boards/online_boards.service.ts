@@ -60,8 +60,7 @@ export class OnlineBoardsService {
     }
   }
   // 게시판 모두/키워드만 조회
-  async findAllBoard(findAllOnlineBoardDto: FindAllOnlineBoardDto) {
-    const { keyword } = findAllOnlineBoardDto;
+  async findAllBoard(keyword: string) {
     const boards = await this.onlineBoardsRepository.find({
       where: {
         ...(keyword && { title: Like(`%${keyword}%`) }),
@@ -161,6 +160,7 @@ export class OnlineBoardsService {
     const foundBoard = await this.findBoardId(id);
 
     await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
+
 
     return `This action removes a #${id} onlineBoard`;
   }

@@ -6,14 +6,19 @@ import { PolticalDebateCommentsService } from './poltical_debate_comments.servic
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { PolticalDebateCommentsController } from './poltical_debate_comments.controller';
-import { S3Module } from '../s3/s3.module';
+import { PolticalDebateHallOfFame } from './entities/poltical_hall_of_fame.entity';
+import { PolticalDebateBoardsViewHallOfFames } from './entities/polticalView_hall_of_fame.entity';
+import { PolticalDebateVotes } from './entities/polticalVote.entity';
+import { EachPolticalVote } from './entities/userVoteOfPoltical_debate.entity';
+import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
+import { PolticalDebatesVoteModule } from './poltical_debates_vote/poltical_debates_vote.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments]),
-    S3Module,
+    TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments, PolticalDebateHallOfFame, PolticalDebateBoardsViewHallOfFames, PolticalDebateVotes, EachPolticalVote]),
+    PolticalDebatesVoteModule,
   ],
   controllers: [PolticalDebatesController, PolticalDebateCommentsController],
-  providers: [PolticalDebatesService, PolticalDebateCommentsService],
+  providers: [PolticalDebatesService, PolticalDebateCommentsService, PolticalDabateHallOfFameService],
 })
 export class PolticalDebatesModule {}

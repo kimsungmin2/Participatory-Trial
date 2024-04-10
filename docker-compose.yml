@@ -1,0 +1,73 @@
+version: "3.9"
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - /usr/src/app/node_modules
+      - .:/usr/src/app
+    restart: unless-stopped
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: localhost:24224 ## ec2 배포 했을 때는 fluentd:24224
+        fluentd-async-connect: "true"
+        tag: TypeValidatorService
+    ports:
+      - "3000:3000"
+      - "9229:9229"
+  postgres:
+    image: postgres:15
+    restart: always
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+
+  elasticsearch:
+    image: elasticsearch:8.13.0
+    container_name: elasticsearch
+    user: "1000:1000"
+    volumes:
+      - type: bind
+        source: ./elasticsearch/data
+        target: /usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "ELASTIC_PASSWORD=0000"
+
+  kibana:
+    image: kibana:8.13.0
+    restart: always
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+  
+  fluentd:
+
+    build: ./fluentd
+    volumes:
+      - ./fluentd/conf:/fluentd/etc
+    ports:
+      - "24224:24224"

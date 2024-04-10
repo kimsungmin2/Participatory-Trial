@@ -9,8 +9,10 @@ import { deflate } from 'zlib';
 import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
+import { Trials } from 'src/trials/entities/trial.entity';
+import { TrialLike } from 'src/trials/entities/trials.like.entity';
 
-type boardTypes = HumorBoards | OnlineBoards;
+type boardTypes = HumorBoards | OnlineBoards | Trials;
 
 interface LikeEntity {
   humorBoardId?: number;
@@ -29,6 +31,10 @@ export class LikeService {
     private humorLikeRepository: Repository<HumorLike>,
     @InjectRepository(OnlineBoardLike)
     private onlineLikeRepository: Repository<OnlineBoardLike>,
+    @InjectRepository(Trials)
+    private trialsRepository: Repository<Trials>,
+    @InjectRepository(TrialLike)
+    private trialsLikeRepository: Repository<TrialLike>,
   ) {}
   async like(
     likeInputDto: LikeInputDto,
@@ -42,7 +48,7 @@ export class LikeService {
 
     let boardRepository;
     let likeRepository;
-    let entityKey: 'humorBoardId' | 'onlineBoardId' | 'trialBoardId';
+    let entityKey: 'humorBoardId' | 'onlineBoardId' | 'trialId';
 
     //타입 별 의존성 주입
     switch (boardType) {
@@ -56,6 +62,10 @@ export class LikeService {
         likeRepository = this.onlineLikeRepository;
         entityKey = `onlineBoardId`;
         break;
+      case BoardType.Trial:
+        boardRepository = this.trialsRepository;
+        likeRepository = this.trialsLikeRepository;
+        entityKey = 'trialId';
       default:
         throw new NotFoundException(`${boardType}은 현재 지원되지 않습니다.`);
     }
@@ -64,7 +74,7 @@ export class LikeService {
       throw new NotFoundException('게시물을 찾을 수 없습니다.');
     }
 
-    const isLikeExist: HumorLike | OnlineBoardLike =
+    const isLikeExist: HumorLike | OnlineBoardLike | TrialLike =
       await likeRepository.findOne({
         where: {
           [entityKey]: boardId,

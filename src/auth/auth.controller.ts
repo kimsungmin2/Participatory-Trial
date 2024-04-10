@@ -23,15 +23,11 @@ import { GoogleAuthGuard } from '../utils/guard/google.guard';
 @Controller('')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  //회원가입 페이지
-  @Get('sign-up')
-  @Render('sign-up.ejs')
-  async getSignUp() {
-    return {};
-  }
+
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
   async register(@Body() signUpdto: SignUpDto) {
+    console.log(signUpdto);
     const user = await this.authService.signUp(
       signUpdto.email,
       signUpdto.password,
@@ -47,7 +43,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '회원가입 이메일 인증' })
-  @Patch('signup/verifiCation')
+  @Patch('signUp/verifiCation')
   async verifiCationEmail(@Body() verifiCation: VerifiCation) {
     const user = await this.authService.verifiCationEmail(verifiCation);
     return {
@@ -71,6 +67,7 @@ export class AuthController {
       secure: true,
     });
     res.send('로그인에 성공하였습니다.');
+    res.redirect('/online-board');
   }
 
   // @ApiOperation({ summary: '유저 정보' })
@@ -89,6 +86,7 @@ export class AuthController {
     res.send('로그아웃에 성공하였습니다.');
   }
 
+  @ApiOperation({ summary: '카카오 로그인', description: '카카오 계정으로 로그인 하세요.' })
   @UseGuards(KakaoAuthGuard)
   @Get('kakao')
   redirectToKakaoAuth(@Res() res) {
@@ -98,7 +96,7 @@ export class AuthController {
 
     res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
   }
-
+  
   @UseGuards(KakaoAuthGuard)
   @Get('kakao/callback')
   async kakaoCallbacks(@Req() req, @Res() res) {
@@ -154,5 +152,24 @@ export class AuthController {
       secure: true,
     });
     res.redirect('/');
+  }
+
+  // 회원가입 페이지로 이동
+  @Get('sign-up')
+  @Render('sign-up.ejs')
+  async getSignUp() {
+    return {};
+  }
+
+  @Get('verification')
+  @Render('email-validation-check.ejs')
+  async getVerifyEmail() {
+    return {};
+  }
+
+  @Get('sign-in')
+  @Render('sign-in.ejs')
+  async getSignIn() {
+    return {};
   }
 }
