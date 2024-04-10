@@ -10,6 +10,7 @@ import {
   HttpStatus,
   Query,
   Req,
+  Render,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { UpdateTrialDto } from './dto/update-trial.dto';
@@ -176,6 +177,7 @@ export class TrialsController {
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
+  @Render('vote.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
     name: 'trialsId',

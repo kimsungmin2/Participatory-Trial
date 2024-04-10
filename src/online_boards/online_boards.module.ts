@@ -11,11 +11,13 @@ import { OnlineBoardLike } from './entities/online_board_like.entity';
 import { OnlineBoardLikeHallOfFames } from './entities/online_boardLike_of_fame.entity';
 import { OnlineBoardViewHallOfFames } from './entities/online_boardVIew_of_fame.entity';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([OnlineBoards, Users, OnlineBoardLike,OnlineBoardLikeHallOfFames, OnlineBoardViewHallOfFames])
   , UsersModule,
-  LikeModule],
+  LikeModule,
+  S3Module],
   controllers: [OnlineBoardsController],
   providers: [OnlineBoardsService, OnlineBoardHallOfFameService],
 })

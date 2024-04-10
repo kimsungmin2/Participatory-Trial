@@ -39,6 +39,8 @@ export class VotesService {
     }
     return userCode;
   }
+
+  
   // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
   private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
     if (userId) {
@@ -49,11 +51,11 @@ export class VotesService {
       return userCode;
     }
     const userKey = req.ip;
-    // 레디스에서 찾기
+
     userCode = await this.cacheManager.get<string>(userKey);
     if (!userCode) {
       userCode = this.generateUserCode();
-      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60); // 밀리초 단위임
+      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
       req.res.cookie('user-code', userCode, {
         maxAge: 1000 * 24 * 60 * 60,
         httpOnly: true,
@@ -68,18 +70,29 @@ export class VotesService {
       userCode,
       voteId,
       voteFor,
-    }: { userId?: number; userCode?: string; voteId: number; voteFor: boolean },
+    }: {
+      userId?: number;
+      userCode?: string;
+      voteId: number;
+      voteFor: boolean;
+    },
     queryRunner: QueryRunner,
   ) {
     // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
     const isExistingVote = userId
       ? await queryRunner.manager.findOneBy(EachVote, { userId, voteId })
       : await queryRunner.manager.findOneBy(EachVote, { userCode, voteId });
+
     // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
-      throw new BadRequestException(
-        '이미 투표했습니다. 재 투표는 불가능 합니다.',
-      );
+      if (isExistingVote.voteFor === voteFor) {
+        const vote = await this.canselEachVote(isExistingVote.id);
+        return vote;
+      } else {
+        isExistingVote.voteFor = voteFor;
+        await queryRunner.manager.save(EachVote, isExistingVote);
+        return isExistingVote;
+      }
     }
     const voteData = this.eachVoteRepository.create({
       userId,
@@ -89,22 +102,24 @@ export class VotesService {
     });
     await queryRunner.manager.save(EachVote, voteData);
   }
+
   // 투표하기
   async addVoteUserorNanUser(
-    req: Request,
-    userId: number | null,
+    userCode: string,
+    userId: number,
     voteId: number,
     voteFor: boolean,
   ) {
-    const userCode = await this.findOrCreateUserCodeVer2(req, userId);
+    // const userCodes = await this.findOrCreateUserCodeVer2(req, userId);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, userCode, voteId, voteFor },
+        { userId, voteId, voteFor },
         queryRunner,
       );
+
       await queryRunner.commitTransaction();
     } catch (err) {
       console.log(err);
@@ -138,7 +153,11 @@ export class VotesService {
       },
     });
   }
-  async getUserVoteCounts(voteId: number) {
+  async getUserVoteCounts(voteId: number): Promise<{
+    vote1Percentage: string;
+    vote2Percentage: string;
+    totalVotes: number;
+  }> {
     const result = await this.dataSource
       .getRepository(EachVote)
       .createQueryBuilder('eachVote')
@@ -163,6 +182,7 @@ export class VotesService {
     return {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
+      totalVotes: totalVotes,
     };
   }
   async getVoteCounts(voteId: number) {

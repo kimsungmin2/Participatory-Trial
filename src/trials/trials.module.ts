@@ -35,6 +35,7 @@ import { HumorsModule } from '../humors/humors.module';
       name: 'trial-queue',
     }),
     VoteModule,
+    LikeModule
   ],
   controllers: [TrialsController],
   providers: [TrialsService, TrialHallOfFameService, TrialsProcessor],

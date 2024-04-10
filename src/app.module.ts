@@ -16,7 +16,6 @@ import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
-import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { HumorsService } from './humors/humors.service';
@@ -24,6 +23,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventsModule } from './events/events.module';
+import { ChatsModule } from './chats/chats.module';
+
 import { WinstonModule } from "nest-winston"
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
@@ -65,7 +68,19 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
-
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useClass: CacheConfigService,
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),
@@ -93,6 +108,8 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    EventsModule,
+    ChatsModule,
     OnlineBoardCommentModule,
     WinstonModule,
     SearchModule,
@@ -100,10 +117,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: HttpLoggingInterceptor,
+    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,
