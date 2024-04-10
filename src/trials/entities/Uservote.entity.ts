@@ -6,8 +6,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Votes } from './vote.entity';
 import { Users } from '../../users/entities/user.entity';
+import { Votes } from './vote.entity';
+
 
 @Entity()
 export class EachVote {

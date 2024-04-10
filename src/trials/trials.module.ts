@@ -13,6 +13,8 @@ import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
+import { LikeModule } from 'src/like/like.module';
+import { TrialsProcessor } from './trialQueue/trialQueue';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { HumorsModule } from '../humors/humors.module';
 
@@ -33,8 +35,9 @@ import { HumorsModule } from '../humors/humors.module';
       name: 'trial-queue',
     }),
     VoteModule,
+    LikeModule
   ],
   controllers: [TrialsController],
-  providers: [TrialsService, TrialHallOfFameService],
+  providers: [TrialsService, TrialHallOfFameService, TrialsProcessor],
 })
 export class TrialsModule {}

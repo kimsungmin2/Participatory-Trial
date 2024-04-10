@@ -34,13 +34,15 @@ import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 import { BoardType } from '../s3/board-type';
 import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
-
+import { HumorHallOfFameService } from './hall_of_fameOfHumor';
+import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
   constructor(
     private readonly humorsService: HumorsService,
     private readonly likeService: LikeService,
+    private readonly humorHallOfFameService: HumorHallOfFameService
   ) {}
 
   //글쓰기 페이지
@@ -62,6 +64,8 @@ export class HumorsController {
       properties: {
         title: { type: 'string' },
         content: { type: 'string' },
+        title1: { type: 'string'},
+        title2: { type: 'string'},
         files: {
           type: 'array',
           items: {
@@ -92,7 +96,54 @@ export class HumorsController {
     };
   }
 
-  //모든 게시물 조회(페이지네이션)
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '유머 게시판 게시물 생성' })
+  @ApiBody({
+    description: '유머 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        title1: { type: 'string'},
+        title2: { type: 'string'},
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
+  @UseGuards(AuthGuard('jwt'))
+  @Post()
+  /**
+   * 유머게시물과 투표를 한번에 생성하는 함수임
+   */
+  async createHumorBoardAndVotes(
+    @Body() createHumorBoardDto: CreateHumorBoardDto,
+    @Body() voteTitleDto: VoteTitleDto,
+    @UserInfo() user: Users,
+    @UploadedFiles() files: Express.Multer.File[],
+  ): Promise<HumorBoardReturnValue> {
+    const createdBoard = await this.humorsService.createHumorBoardAndVotes(
+      createHumorBoardDto,
+      voteTitleDto,
+      user,
+      files,
+    );
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: '게시물 생성에 성공하였습니다.',
+      data: createdBoard,
+    };
+  }
+
+
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
   @ApiQuery({
     name: 'page',
@@ -236,6 +287,65 @@ export class HumorsController {
     return {
       statusCode: HttpStatus.OK,
       message: result,
+    };
+  }
+
+
+  // 유머 게시판 명예의 전당 조회하기 API(투표 수)
+  @ApiOperation({ summary: ' 유머 게시판 명예의 전당 조회하기 API(투표 수)' })
+  @Get('HallofFame/votes')
+  async getRecentHallOfFame() {
+    const recentHallofFame =
+      await this.humorHallOfFameService.getRecentHallOfFame();
+    if (!recentHallofFame) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '유머 게시판 명예의 전당 정보가 없습니다.',
+      };
+    }
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '유머 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
+      recentHallofFame,
+    };
+  }
+
+  // 유머 게시판 명예의 전당 조회하기 API(종아요 수)
+  @ApiOperation({ summary: '유머 게시판 명예의 전당 조회하기 API(종아요 수)' })
+  @Get('HallofFame/likes')
+  async getRecentLikeHallOfFame() {
+    const recentHallofFame =
+      await this.humorHallOfFameService.getLikeRecentHallOfFame();
+    if (!recentHallofFame) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '유머 게시판 명예의 전당 정보가 없습니다.',
+      };
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: '유머 게시판 명예의 전당을 조회하였습니다.(좋아요 순)',
+      recentHallofFame,
+    };
+  }
+
+  // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
+  @ApiOperation({ summary: '유머 게시판 명예의 전당 조회하기 API(조회수 수)' })
+  @Get('HallofFame/views')
+  async getRecentViewHallOfFame() {
+    const recentHallofFame =
+      await this.humorHallOfFameService.getViewRecentHallOfFame();
+    if (!recentHallofFame) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '유머 게시판 명예의 전당 정보가 없습니다.',
+      };
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: '유머 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
+      recentHallofFame,
     };
   }
 }

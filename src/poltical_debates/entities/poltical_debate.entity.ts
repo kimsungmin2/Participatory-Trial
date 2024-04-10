@@ -6,11 +6,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { PolticalDebateComments } from './poltical_debate_comments.entity';
+import { PolticalDebateVotes } from './polticalVote.entity';
 
 @Entity()
 export class PolticalDebateBoards {
@@ -48,4 +50,8 @@ export class PolticalDebateBoards {
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];
+
+  @OneToOne(() => PolticalDebateVotes, (polticalDebateVotes) => polticalDebateVotes.polticalDebateBoards)
+  polticalDebateVotes: PolticalDebateVotes
 }
+

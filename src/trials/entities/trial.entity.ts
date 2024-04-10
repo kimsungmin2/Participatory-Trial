@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
+import { TrialLike } from './trials.like.entity';
 
 @Entity({
   name: 'trials',
@@ -58,4 +59,7 @@ export class Trials {
 
   @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
   vote: Votes;
+
+  @OneToOne(() => TrialLike, (trialLike) => trialLike.trial, { cascade: true })
+  trialLike: TrialLike;
 }

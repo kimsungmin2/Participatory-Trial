@@ -15,7 +15,7 @@ import { PanryeInfo } from './entities/panryedata.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Votes } from './entities/vote.entity';
-import { VoteDto } from './vote/dto/voteDto';
+import { VoteTitleDto } from './vote/dto/voteDto';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
@@ -38,15 +38,21 @@ export class TrialsService {
     @InjectQueue('trial-queue') private trialQueue: Queue,
   ) {}
   // 재판 생성
-  async createTrial(userId: number, createTrialDto: CreateTrialDto) {
+  /**
+   * 
+   * @param userId 유저 번호
+   * @param createTrialDto 제목, 컨텐츠 받아오는 Dto
+   * @param voteTrialDto title1 vs title 하는 Dto
+   * @returns 
+   */
+  async createTrial(userId: number, createTrialDto: CreateTrialDto, voteTitleDto: VoteTitleDto) {
     const queryRunner = this.dataSource.createQueryRunner();
-
     await queryRunner.connect();
-
     await queryRunner.startTransaction();
     try {
       // 1. Dto에서 title, content 뽑아내기
       const { title, content, trialTime } = createTrialDto;
+      const { title1, title2 } = voteTitleDto
 
       // 2. 객체에 넣기
       const data = {
@@ -55,15 +61,23 @@ export class TrialsService {
         userId,
         is_time_over: false,
       };
-
       // 3. 재판 생성
       const newTrial = queryRunner.manager.create(Trials, data);
-
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial);
-
+      const trialId = savedTrial.id
+      
+      const vote = {
+        title1,
+        title2,
+        trialId
+      }
+      const newVote = queryRunner.manager.create(Votes, vote)
+      
+      const savedVote = await queryRunner.manager.save(Votes, newVote);
+      const trialDate = new Date(trialTime)
       // 5. 불 큐로 지연시간 후 찍어줌
-      const delay = trialTime - Date.now();
+      const delay = trialDate.getTime() - Date.now();
       console.log(delay);
       // 6. 제한 시간끝나면 불큐로 비동기 처리
       await this.trialQueue.add(
@@ -71,16 +85,13 @@ export class TrialsService {
         { trialId: savedTrial.id },
         { delay: delay },
       );
-
       // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
 
-      return savedTrial;
+      return { savedTrial, savedVote} ;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
       console.log('재판 생성 에러:', error);
-
       throw new InternalServerErrorException(
         '재판 생성 중 오류가 발생했습니다.',
       );
@@ -121,6 +132,7 @@ export class TrialsService {
   async findOneByTrialsId(id: number) {
     // 1. id에 대한 재판 조회
     const OneTrials = await this.trialsRepository.findOneBy({ id });
+    const vote = await this.votesRepository.findOneBy({ id });
 
     // 2. 없으면 404
     if (!OneTrials) {
@@ -128,7 +140,7 @@ export class TrialsService {
     }
 
     // 있으면 리턴
-    return OneTrials;
+    return { OneTrials, vote };
   }
 
   // 내 재판 업데이트
@@ -146,7 +158,7 @@ export class TrialsService {
       const existTrial = await this.findOneByTrialsId(trialsId);
 
       // 2. 내 재판이 맞는지 유효성 검사
-      if (existTrial.userId !== userId) {
+      if (existTrial.OneTrials.userId !== userId) {
         throw new NotAcceptableException(
           '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
         );
@@ -255,7 +267,7 @@ export class TrialsService {
   }
 
   // 투표 vs 만들기 매서드
-  async createSubject(trialId: number, voteDto: VoteDto) {
+  async createSubject(trialId: number, voteDto: VoteTitleDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

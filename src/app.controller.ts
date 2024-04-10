@@ -3,11 +3,12 @@ import { AppService } from './app.service';
 import { HumorsService } from './humors/humors.service';
 import { Request } from 'express';
 
+
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly humorService: HumorsService,
+    // private readonly humorService: HumorsService,
   ) {}
 
   @Get('')
