@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -10,7 +11,7 @@ import {
 } from 'typeorm';
 import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
+
 import { OnlineBoardLike } from './online_board_like.entity';
 
 @Entity()
@@ -27,11 +28,7 @@ export class OnlineBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-<<<<<<< HEAD
   @Column({ type: 'int', nullable: false, default: 1 })
-=======
-  @Column({ type: 'int', nullable: false, default: 0 })
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   view: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
@@ -47,7 +44,10 @@ export class OnlineBoards {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deleted_at: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
   @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])

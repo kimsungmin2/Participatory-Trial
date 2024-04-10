@@ -24,7 +24,6 @@ import {
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
 import { UserInfos } from 'src/users/entities/user-info.entity';
-import { MyTrialsGuard } from './guards/myTrials.guard';
 import { VoteTitleDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
@@ -73,6 +72,7 @@ export class TrialsController {
     @Body() voteTitleDto: VoteTitleDto
   ) {
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
+
     const user = req.user;
     const data = await this.trialsService.createTrial(user.id, createTrialDto, voteTitleDto);
 
@@ -214,7 +214,8 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
+  @UseGuards(AuthGuard('jwt'))
+  // @UseGuards(MyTrialsGuard)
   @Patch(':trialsId')
   async update(
     @Param('trialsId') trialsId: number,
@@ -243,7 +244,7 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'), MyTrialsGuard)
+  @UseGuards()
   @Delete(':trialsId')
   async remove(@Param('trialsId') id: string) {
     await this.trialsService.deleteTrials(+id);
@@ -311,7 +312,7 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'), MyTrialsGuard, IsActiveGuard)
+  @UseGuards(AuthGuard('jwt'), IsActiveGuard)
   @Post(':trialId')
   async voteOfSubject(
     @Param('trialId') trialId: number,
@@ -351,7 +352,7 @@ export class TrialsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
-  @UseGuards(MyTrialsGuard)
+  @UseGuards()
   @UseGuards(IsActiveGuard)
   @Patch(':trialId/vote/:voteId')
   async patchOfVote(
@@ -383,7 +384,7 @@ export class TrialsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
-  @UseGuards(MyTrialsGuard)
+  @UseGuards()
   @UseGuards(IsActiveGuard)
   @Delete(':trialId/vote/:voteId')
   async deleteVote(

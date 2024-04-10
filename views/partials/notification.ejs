@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/layout.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="1">이거누르면 올라옴</button>
+    <div id="notification" class="notification hidden">
+      <p id="notificationMessage">여기에 알림 메시지가 표시됩니다.</p>
+    </div>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const button = document.getElementById('1');
+      const notification = document.getElementById('notification');
+      button.addEventListener('click', function () {
+        notification.classList.remove('hidden');
+        setTimeout(() => notification.classList.add('show'), 0);
+      });
+    });
+  </script>
+</html>

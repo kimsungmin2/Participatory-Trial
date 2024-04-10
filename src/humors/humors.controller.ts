@@ -13,7 +13,6 @@ import {
   UploadedFiles,
   Query,
   Render,
-  Render,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -46,6 +45,15 @@ export class HumorsController {
     private readonly humorHallOfFameService: HumorHallOfFameService
   ) {}
 
+  //글쓰기 페이지
+  @ApiOperation({ summary: '유머 게시판 게시물 생성 페이지' })
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage() {
+    return { boardType: BoardType.Humor };
+  }
+
+  //게시물 생성
   @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '유머 게시판 게시물 생성' })

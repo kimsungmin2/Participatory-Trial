@@ -10,6 +10,8 @@ import { winstonLogger } from './utils/winston';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { WinstonLogger } from 'nest-winston';
 import { HttpExceptionFilter } from './utils/filter/exception.filter';
+import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
+import expressLayout from 'express-ejs-layouts';
 
 async function bootstrap() {
   const logger = winstonLogger;
@@ -23,6 +25,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(new CheckLoggedIn().use);
   app.useGlobalFilters(new HttpExceptionFilter());
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');

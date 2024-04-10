@@ -26,7 +26,7 @@ form.addEventListener('submit', (event) => {
     })
     .then((data) => {
       alert('가입을 완료하였습니다. 해당 이메일로 인증코드를 전송하였습니다.');
-      window.location.href = 'http://localhost:3000/email-verification';
+      window.location.href = 'http://localhost:3000/verification';
     })
     .catch((error) => {
       alert(error);

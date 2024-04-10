@@ -30,7 +30,7 @@ const mockPolticalDebate = {
   content: '기존 컨텐츠',
   view: 1,
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updated_at: new Date(),
 } as PolticalDebateBoards;
 
 const mockComment = {
@@ -125,7 +125,7 @@ describe('PolticalDebateCommentsService', () => {
         content: '기존 컨텐츠',
         view: 1,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updated_at: new Date(),
       } as PolticalDebateBoards;
 
       jest

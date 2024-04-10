@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
@@ -38,7 +38,32 @@ export class PolticalDebatesController {
     private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
   ) {}
 
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage() {
+    return { boardType: BoardType.PolticalDebate };
+  }
 
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '정치토론 게시판 게시물 생성' })
+  @ApiBody({
+    description: '정치토론 게시판 게시물 생성',
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        content: { type: 'string' },
+        files: {
+          type: 'array',
+          items: {
+            format: 'binary',
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
   /**
    * 
    * @param userInfo 유저 정보 받아오는 데코레이터

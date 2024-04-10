@@ -73,3 +73,24 @@ services:
         'setup.kibana.host=kibana:5601',
       ]
     restart: always
+<<<<<<< HEAD
+=======
+  # metricbeat:
+  #   image: docker.elastic.co/beats/metricbeat:7.9.3
+  #   user: root
+  #   volumes:
+  #     - ./metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   depends_on:
+  #     - elasticsearch
+  #   command:
+  #     [
+  #       'metricbeat',
+  #       '-e',
+  #       '-E',
+  #       "output.elasticsearch.hosts=['elasticsearch:9200']",
+  #       '-E',
+  #       'setup.kibana.host=kibana:5601',
+  #     ]
+  #   restart: always
+>>>>>>> be7ba7c218ea74fbac787d034e098bcf6e9c6069

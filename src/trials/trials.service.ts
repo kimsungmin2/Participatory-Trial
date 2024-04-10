@@ -224,14 +224,14 @@ export class TrialsService {
 
   // 내 재판인지 찾기 매서드
   async isMyTrials(userId: number, trialsId: number) {
-    return await this.trialsRepository.findOne({
+    return !!(await this.trialsRepository.findOne({
       where: {
         id: trialsId,
         user: {
           id: userId,
         },
       },
-    });
+    }));
   }
 
   // 모든 판례 조회 매서드

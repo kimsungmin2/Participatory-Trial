@@ -20,11 +20,12 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
 import { BoardOwnerGuard } from './guards/online_boards.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('자유 게시판')
 @UseGuards(AuthGuard('jwt'))
@@ -34,9 +35,20 @@ export class OnlineBoardsController {
     private readonly onlineBoardsService: OnlineBoardsService,
     private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService
     ) {}
-  
   @ApiOperation({ summary: '자유 게시판 생성 API' })
   @ApiBearerAuth('access-token')
+
+  //글쓰기 페이지
+  @UseGuards(AuthGuard('jwt'))
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage() {
+    return { boardType: BoardType.OnlineBoard };
+  }
+  //게시글 생성
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: '자유 게시판 게시물 생성' })
   @ApiBody({
     description: '자유 게시판 게시물 생성',
     schema: {

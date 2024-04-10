@@ -248,8 +248,9 @@ export class PolticalDebatesService {
       throw new UnauthorizedException('게시판를 삭제할 권한이 없습니다.');
     }
 
-    const deleteBoard =
-      await this.polticalDebateRepository.remove(politicalDebateBoard);
+    const deleteBoard = await this.polticalDebateRepository.softDelete(
+      politicalDebateBoard.id,
+    );
 
     return deleteBoard;
   }
