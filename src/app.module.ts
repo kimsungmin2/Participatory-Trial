@@ -12,28 +12,21 @@ import { OnlineBoardCommentModule } from './online_board_comment/online_board_co
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
-import { LikeModule } from './like/like.module';;
+import { LikeModule } from './like/like.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
-import { Users } from './users/entities/user.entity';
-import { UserInfos } from './users/entities/user-info.entity';
-import { Trials } from './trials/entities/trial.entity';
-import { Votes } from './trials/entities/vote.entity';
-import { OnlineBoards } from './online_boards/entities/online_board.entity';
-import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
-import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { CacheModule } from '@nestjs/cache-manager';
-import { CacheConfigService } from './cache/cache.config';
 import { RedisModule } from '@nestjs-modules/ioredis';
+import { CacheConfigService } from './cache/config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 
-
-
+console.log(1, process.env.DB_NAME);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -49,8 +42,7 @@ export const typeOrmModuleOptions = {
   }),
   inject: [ConfigService],
 };
-
-
+console.log(typeOrmModuleOptions);
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -65,6 +57,9 @@ export const typeOrmModuleOptions = {
         DB_SYNC: Joi.boolean().required(),
       }),
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
     RedisModule.forRootAsync({
       useFactory: () => ({
         type: 'single',
@@ -74,7 +69,7 @@ export const typeOrmModuleOptions = {
     ScheduleModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
-      useClass: CacheConfigService
+      useClass: CacheConfigService,
     }),
     BullModule.forRoot({
       redis: {
@@ -97,6 +92,7 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    OnlineBoardCommentModule,
     OnlineBoardCommentModule,
   ],
   controllers: [AppController],

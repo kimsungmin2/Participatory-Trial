@@ -12,16 +12,30 @@ import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
+<<<<<<< HEAD
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { UpdateVoteDto } from 'src/trials/vote/dto/updateDto';
+=======
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { S3Service } from '../s3/s3.service';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { BoardType } from '../s3/board-type';
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 
 @Injectable()
 export class PolticalDebatesService {
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
+<<<<<<< HEAD
     private readonly dataSource: DataSource
+=======
+    private s3Service: S3Service,
+    @InjectRedis()
+    private readonly redis: Redis,
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   ) {}
 
   /** 
@@ -32,21 +46,35 @@ export class PolticalDebatesService {
   async create(
     userInfo: UserInfos,
     createPolticalDebateDto: CreatePolticalDebateDto,
+    files: Express.Multer.File[],
   ) {
-    const { title, content } = createPolticalDebateDto;
-
-    const defaultViewCount = 1;
-
-    const createdPolticalDebate = this.polticalDebateRepository.create({
-      title,
-      content,
-      view: defaultViewCount,
-      userId: userInfo.id,
-    });
-
-    return this.polticalDebateRepository.save(createdPolticalDebate);
+    let uploadResult: string[] = [];
+    if (files.length !== 0) {
+      const uploadResults = await this.s3Service.saveImages(
+        files,
+        BoardType.PolticalDebate,
+      );
+      for (let i = 0; i < uploadResults.length; i++) {
+        uploadResult.push(uploadResults[i].imageUrl);
+      }
+    }
+    const imageUrl =
+      uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
+    try {
+      const createdBoard = await this.polticalDebateRepository.save({
+        userId: userInfo.id,
+        ...createPolticalDebateDto,
+        imageUrl,
+      });
+      return createdBoard;
+    } catch {
+      throw new InternalServerErrorException(
+        '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+      );
+    }
   }
 
+<<<<<<< HEAD
 
   
   /**
@@ -117,6 +145,34 @@ export class PolticalDebatesService {
     );
 
     return findAllPolticalDebateBoard;
+=======
+  async findAll(paginationQueryDto: PaginationQueryDto) {
+    let polticalDebateBoards: PolticalDebateBoards[];
+    const totalItems = await this.polticalDebateRepository.count();
+    try {
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      polticalDebateBoards = await this.polticalDebateRepository.find({
+        skip,
+        take: limit,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+    } catch (err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '게시물을 불러오는 도중 오류가 발생했습니다.',
+      );
+    }
+    if (polticalDebateBoards.length === 0) {
+      throw new NotFoundException('더이상 게시물이 없습니다!');
+    }
+    return {
+      polticalDebateBoards,
+      totalItems,
+    };
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   }
 
   async findMyBoards(userId: number) {
@@ -127,16 +183,28 @@ export class PolticalDebatesService {
   }
 
   async findOne(id: number) {
-    const findOnePolticalDebateBoard =
-      await this.polticalDebateRepository.findOne({
+    const findPolticalDebateBoard = await this.polticalDebateRepository.findOne(
+      {
         where: { id },
-      });
-
-    if (!findOnePolticalDebateBoard) {
-      throw new BadRequestException('정치 토론 게시판을 찾을 수 없습니다.');
+        relations: ['polticalDebateComments'],
+      },
+    );
+    if (!findPolticalDebateBoard) {
+      throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
+    }
+    let cachedView: number;
+    try {
+      cachedView = await this.redis.incr(`poticalDebate:${id}:view`);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '요청을 처리하는 도중 오류가 발생했습니다.',
+      );
     }
 
-    return findOnePolticalDebateBoard;
+    return {
+      ...findPolticalDebateBoard,
+      view: findPolticalDebateBoard.view + cachedView,
+    };
   }
 
   async update(

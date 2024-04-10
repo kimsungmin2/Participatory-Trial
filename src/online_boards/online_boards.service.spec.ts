@@ -9,6 +9,9 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { ForbiddenException } from '@nestjs/common';
+import { Users } from '../users/entities/user.entity';
+import { UserInfo } from 'os';
+import { NotFoundException } from '@nestjs/common';
 
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
@@ -65,11 +68,12 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
@@ -85,7 +89,7 @@ describe('OnlineBoardsService', () => {
       keyword: 'string',
     };
 
-    const expectedResult = [
+    const expectedResult: OnlineBoards[] = [
       {
         id: 1,
         userId: 1,
@@ -93,13 +97,14 @@ describe('OnlineBoardsService', () => {
         content: 'content',
         view: 1,
         like: 1,
-        top_comments: 'string',
+        topComments: 'string',
         createdAt: new Date('2024-03-24T02:05:02.602Z'),
         updatedAt: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
         OnlineBoardComment: null,
+        onlineBoardLike: null,
       },
-    ];
+    ] as OnlineBoards[];
 
     jest.spyOn(repository, 'find').mockResolvedValue(expectedResult);
 
@@ -110,18 +115,19 @@ describe('OnlineBoardsService', () => {
   it('should get a board', async () => {
     const id: number = 1;
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
@@ -159,25 +165,27 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
-    const expectedResult = {
+    const expectedResult: OnlineBoards = {
       id,
       userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
@@ -186,74 +194,13 @@ describe('OnlineBoardsService', () => {
 
     jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
 
-    const result = await service.updateBoard(
-      id,
-      updateOnlineBoardDto,
-      userInfo,
-    );
+    const result = await service.updateBoard(id, updateOnlineBoardDto);
 
     expect(result).toEqual(expectedResult);
   });
-  // 보드 업데이트 예외 처리
-  it('updateBoard 에외 처리', async () => {
-    const id = 2;
 
-    const updateOnlineBoardDto: UpdateOnlineBoardDto = {
-      title: 'title',
-      content: 'content',
-    };
+  // 게시 삭제
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
-    const foundUser: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
-    const foundBoard: OnlineBoards = {
-      id,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
-      top_comments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-      OnlineBoardComment: null,
-    };
-
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
-
-    jest.spyOn(service, 'findBoardId').mockResolvedValue(foundBoard);
-
-    await expect(
-      service.updateBoard(id, updateOnlineBoardDto, userInfo),
-    ).rejects.toThrow(ForbiddenException);
-  });
-  // 여기가 게시 삭제
   it('should remove a board', async () => {
     const id = 2;
 
@@ -292,71 +239,55 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
     jest.spyOn(service, 'findBoardId').mockResolvedValue(foundBoard);
     jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
-    const result = await service.removeBoard(id, userInfo);
+    const result = await service.removeBoard(id);
 
     expect(result).toEqual(`This action removes a #${id} onlineBoard`);
   });
-  // 게시 삭제 예외 처리
-  it('remove 예외처리', async () => {
-    const id = 1;
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
 
-    const foundUser: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
+  // 게시판 찾기
+  it('should find a board and verify board owner', async () => {
+    const boardId: number = 1;
 
-    const onlineBoard: OnlineBoards = {
-      id,
-      userId: 2,
+    const expectedValue: OnlineBoards = {
+      id: boardId,
+      userId: 1,
       title: 'title',
       content: 'content',
       view: 1,
       like: 1,
-      top_comments: 'string',
+      topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
+      onlineBoardLike: null,
     };
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
+    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
+    const result = await service.findBoardId(boardId);
 
-    jest.spyOn(service, 'findBoardId').mockResolvedValue(onlineBoard);
+    expect(result).toEqual(expectedValue);
+  });
 
-    await expect(service.removeBoard(id, userInfo)).rejects.toThrow(
-      ForbiddenException,
+  it('should throw Not Found Exception', async () => {
+    const boardId = 1;
+    const expectedValue = null;
+
+    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
+
+    await expect(service.findBoardId(boardId)).rejects.toThrow(
+      new NotFoundException('해당 게시물이 존재하지 않습니다.'),
     );
   });
 });

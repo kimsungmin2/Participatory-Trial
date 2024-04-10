@@ -10,6 +10,10 @@ import {
   Patch,
   NotFoundException,
   BadRequestException,
+  Render,
+  UseInterceptors,
+  UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
@@ -19,8 +23,14 @@ import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
+<<<<<<< HEAD
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
+=======
+import { BoardType } from '../s3/board-type';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -30,6 +40,7 @@ export class PolticalDebatesController {
     private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
   ) {}
 
+<<<<<<< HEAD
 
   /**
    * 
@@ -53,19 +64,37 @@ export class PolticalDebatesController {
       },
     },
   })
+=======
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage() {
+    return { boardType: BoardType.PolticalDebate };
+  }
+
+  @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
+  @UseInterceptors(FilesInterceptor('files'))
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @UserInfo() userInfo: UserInfos,
     @Body() createPolticalDebateDto: CreatePolticalDebateDto,
+<<<<<<< HEAD
     @Body() voteTitleDto: VoteTitleDto
 
+=======
+    @UploadedFiles() files: Express.Multer.File[],
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   ) {
     const userId = userInfo.id
     const data = await this.polticalDebatesService.createBothBoardandVote(
       userId,
       createPolticalDebateDto,
+<<<<<<< HEAD
       voteTitleDto,
+=======
+      files,
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
     );
 
     return {
@@ -81,13 +110,20 @@ export class PolticalDebatesController {
     description: '전체 조회',
   })
   @Get()
-  async findAll() {
-    const data = await this.polticalDebatesService.findAll();
-
+  @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
+  async findAll(
+    @Query() paginationQueryDto: PaginationQueryDto,
+  ): Promise<HumorBoardReturnValue> {
+    const { polticalDebateBoards, totalItems } =
+      await this.polticalDebatesService.findAll(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
     return {
       statusCode: HttpStatus.OK,
-      message: '모든 정치 토론 조회에 성공했습니다.',
-      data,
+      message: '게시물 조회 성공',
+      data: polticalDebateBoards,
+      boardType: BoardType.PolticalDebate,
+      pageCount,
+      currentPage: paginationQueryDto.page,
     };
   }
 
@@ -122,13 +158,15 @@ export class PolticalDebatesController {
     type: Number,
   })
   @Get(':polticalDebateId')
-  async findOne(@Param('polticalDebateId') id: string) {
+  @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async findOne(@Param('polticalDebateId') id: number) {
     try {
-      const data = await this.polticalDebatesService.findOne(+id);
+      const data = await this.polticalDebatesService.findOne(id);
       return {
         statusCode: HttpStatus.OK,
         message: '정치 토론 상세 조회에 성공했습니다.',
         data,
+        boardType: BoardType.PolticalDebate,
       };
     } catch (error) {
       throw new NotFoundException('존재하지 않는 정치 토론방입니다.');

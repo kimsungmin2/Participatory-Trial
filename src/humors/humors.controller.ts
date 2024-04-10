@@ -12,6 +12,7 @@ import {
   UploadedFile,
   UploadedFiles,
   Query,
+  Render,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -150,21 +151,26 @@ export class HumorsController {
     example: 10,
   })
   @Get()
+  @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
   async getAllHumorBoards(
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<HumorBoardReturnValue> {
-    const HumorBoards: HumorBoards[] =
+    const { humorBoards, totalItems } =
       await this.humorsService.getAllHumorBoards(paginationQueryDto);
-
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
-      data: HumorBoards,
+      data: humorBoards,
+      boardType: BoardType.Humor,
+      pageCount,
+      currentPage: paginationQueryDto.page,
     };
   }
-
+  //단건 게시물 조회
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
-  @Get('humor-board-id/:id')
+  @Get('humor-board/:id')
+  @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
   @ApiParam({
     name: 'id',
     required: true,
@@ -180,11 +186,12 @@ export class HumorsController {
       statusCode: HttpStatus.OK,
       message: `${id}번 게시물 조회 성공`,
       data: findHumorBoard,
+      boardType: BoardType.Humor,
     };
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
   @UseGuards(AuthGuard('jwt'))
-  @Patch('humor-board-id/:humorBoardId')
+  @Patch('humor-board/:humorBoardId')
   @ApiBody({
     description: '유머 게시물 수정',
     schema: {
@@ -219,7 +226,7 @@ export class HumorsController {
     };
   }
   @ApiOperation({ summary: '유머 게시물 삭제' })
-  @Delete('humor-board-id/:humorBoardId')
+  @Delete('humor-board/:humorBoardId')
   @ApiParam({
     name: 'humorBoardId',
     required: true,
@@ -256,7 +263,7 @@ export class HumorsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
-  @Post('/humor-board-id/:humorBoardId/like')
+  @Post('/humor-board/:humorBoardId/like')
   async like(
     @Param('humorBoardId') humorBoardId: number,
     @UserInfo() user: Users,

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/css/board-style.css" />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav"></ul>
+          <ul class="navbar-nav mx-auto">
+            <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
+            <li class="nav-item">
+              <a class="nav-link" href="/online-boards"
+                >자유게시판</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/trials">재판</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/humors">유머</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/poltical-debates">정치 토론</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
+            <li class="nav-item">
+              <a class="nav-link" href="#">로그인</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <header>
+      
+      <div class="board_title">
+        <% if (boardType === 'humor') { %>
+          <span>유머 게시판</span>
+        <% } else if (boardType === 'onlineBoard') { %>
+          <span>자유 게시판</span>
+        <% } else if (boardType === 'polticalDebate') { %>
+          <span>정치토론 게시판</span>
+        <% } else if (boardType === 'trial') { %>
+          <span>재판 게시판</span>
+        <% } %>
+      </div>
+      <hr width="70%" color="black" size="2" style="margin-left: 30px" />
+      
+      <div class="cards-container">
+        <% for (let i = 0; i < data.length; i++) {  %>
+        <div class="card">
+          <% if (boardType === 'humor') { %>
+            <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'onlineBoard') { %>
+            <div class="card-header" ><a href="http://localhost:3000/online-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'polticalDebate') { %>
+            <div class="card-header" ><a href="http://localhost:3000/poltical-debates/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } else if (boardType === 'trial') { %>
+            <div class="card-header" ><a href="http://localhost:3000/trials/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <% } %>
+        
+          
+          <div class="card-stats">
+            <div>조회 : <%= data[i].view %></div>
+            <% if (boardType !== 'poltical-debates') { %>
+            <div>좋아요 : <%= data[i].like %></div>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+      </div>
+      <div class="pagination">
+        <% for(let i =  1; i <= pageCount; i++) {%>
+          <% if (i === currentPage) {%>
+            <span class="current-page-number"><%= i %></span>
+            <% } else { %>
+              <% if (boardType === 'humor') { %>
+                <a href="/humors?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'onlineBoard') { %>
+                <a href="/online-boards?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'polticalDebate') { %>
+                <a href="/poltical-debates?page=<%= i %>"><%= i  %></a>
+              <% } else if (boardType === 'trial') { %>
+                <a href="/trials?page=<%= i %>"><%= i  %></a>
+              <% } %>
+              
+              <% } %>
+        <% } %>
+      </div>
+      <% if (boardType === 'humor') { %>
+        <a class="submit-button" href="/humors/create">글쓰기</a>
+      <% } else if (boardType === 'onlineBoard') { %>
+        <a class="submit-button" href="/online-boards/create">글쓰기</a>
+      <% } else if (boardType === 'polticalDebate') { %>
+        <a class="submit-button" href="/poltical-debates/create">글쓰기</a>
+      <% } else if (boardType === 'trial') { %>
+        <a class="submit-button" href="/trials/create">글쓰기</a>
+      <% } %>
+      <div class="search-container">
+        <form action="/search" method="get">
+          <input type="text" placeholder="검색..." name="search" />
+          <button type="submit">검색</button>
+        </form>
+      </div>
+      
+    </header>
+    <p><%= statusCode %></p>
+  </body>
+</html>

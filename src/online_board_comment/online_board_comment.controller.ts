@@ -15,18 +15,22 @@ import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.d
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
+<<<<<<< HEAD
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 import { ApiTags } from '@nestjs/swagger';
+=======
+import { CommentOwnerGuard } from './guards/online_board_comment.guard';
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 
 @ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
-@Controller('comments/:onlineBoardId')
+@Controller('comments')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
 
-  @Post()
+  @Post(':onlineBoardId')
   async create(
     @Param() onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
@@ -45,7 +49,7 @@ export class OnlineBoardCommentController {
     };
   }
 
-  @Get()
+  @Get(':onlineBoardId')
   async findAll(@Param() onlineBoardId: number) {
     const comments =
       await this.onlineBoardCommentService.findAllComments(onlineBoardId);
@@ -57,16 +61,15 @@ export class OnlineBoardCommentController {
     };
   }
 
+  @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
-    @Param() paramOnlineBoardComment: ParamOnlineBoardComment,
+    @Param() commentId,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
-    @UserInfo() userInfo: UserInfos,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
-      paramOnlineBoardComment,
+      commentId,
       updateOnlineBoardCommentDto,
-      userInfo,
     );
 
     return {
@@ -76,15 +79,10 @@ export class OnlineBoardCommentController {
     };
   }
 
+  @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
-  async remove(
-    @Param() paramOnlineBoardComment: ParamOnlineBoardComment,
-    @UserInfo() userInfo: UserInfos,
-  ) {
-    this.onlineBoardCommentService.removeComment(
-      paramOnlineBoardComment,
-      userInfo,
-    );
+  async remove(@Param() commentId: number) {
+    this.onlineBoardCommentService.removeComment(commentId);
 
     return {
       statusCode: HttpStatus.OK,

@@ -21,7 +21,7 @@ import { forbidden } from 'joi';
 import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
 import { Redis } from 'ioredis';
-import { OnlineBoardComments } from 'src/online_board_comment/entities/online_board_comment.entity';
+import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
 
 const mockedUser: Users = {
   id: 1,

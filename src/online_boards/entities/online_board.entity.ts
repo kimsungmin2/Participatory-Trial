@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { OnlineBoardLike } from './online_board_like.entity';
-import { OnlineBoardComments } from 'src/online_board_comment/entities/online_board_comment.entity';
 
 @Entity()
 export class OnlineBoards {
@@ -20,20 +20,27 @@ export class OnlineBoards {
   @Column({ type: 'int' })
   userId: number;
 
-  @Column({ type: 'varchar', unique: true, nullable: false })
+  @Column({ type: 'varchar', unique: false, nullable: false })
   title: string;
 
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
+<<<<<<< HEAD
   @Column({ type: 'int', nullable: false, default: 1 })
+=======
+  @Column({ type: 'int', nullable: false, default: 0 })
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   view: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  imageUrl: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

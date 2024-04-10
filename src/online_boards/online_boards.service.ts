@@ -1,6 +1,6 @@
 import {
   Injectable,
-  ForbiddenException,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
@@ -11,6 +11,11 @@ import { Like, Repository } from 'typeorm';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { UsersService } from '../users/users.service';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
+import { S3Service } from '../s3/s3.service';
+import { BoardType } from '../s3/board-type';
 
 @Injectable()
 export class OnlineBoardsService {
@@ -18,22 +23,41 @@ export class OnlineBoardsService {
     @InjectRepository(OnlineBoards)
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
     private readonly usersService: UsersService,
+    private s3Service: S3Service,
+    @InjectRedis()
+    private readonly redis: Redis,
   ) {}
 
-  // 자유게시판 작성
+  // 자유게시판 게시글 작성
   async createBoard(
     createOnlineBoardDto: CreateOnlineBoardDto,
     userInfo: UserInfos,
-  ) {
-    const { title, content } = createOnlineBoardDto;
-
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
-
-    return await this.onlineBoardsRepository.save({
-      userId: foundUser.id,
-      title,
-      content,
-    });
+    files: Express.Multer.File[],
+  ): Promise<OnlineBoards> {
+    let uploadResult: string[] = [];
+    if (files.length !== 0) {
+      const uploadResults = await this.s3Service.saveImages(
+        files,
+        BoardType.OnlineBoard,
+      );
+      for (let i = 0; i < uploadResults.length; i++) {
+        uploadResult.push(uploadResults[i].imageUrl);
+      }
+    }
+    const imageUrl =
+      uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
+    try {
+      const createdBoard = await this.onlineBoardsRepository.save({
+        userId: userInfo.id,
+        ...createOnlineBoardDto,
+        imageUrl,
+      });
+      return createdBoard;
+    } catch {
+      throw new InternalServerErrorException(
+        '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+      );
+    }
   }
   // 게시판 모두/키워드만 조회
   async findAllBoard(keyword: string) {
@@ -54,6 +78,35 @@ export class OnlineBoardsService {
     return boards;
   }
 
+  //게시판 모두 조회(페이지네이션)
+  async getPaginateBoards(paginationQueryDto: PaginationQueryDto) {
+    let onlineBoards: OnlineBoards[];
+    const totalItems: number = await this.onlineBoardsRepository.count();
+    try {
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      onlineBoards = await this.onlineBoardsRepository.find({
+        skip,
+        take: limit,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+    } catch (err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '게시물을 불러오는 도중 오류가 발생했습니다.',
+      );
+    }
+    if (onlineBoards.length === 0) {
+      throw new NotFoundException('더이상 게시물이 없습니다!');
+    }
+    return {
+      onlineBoards,
+      totalItems,
+    };
+  }
+
   // 자유게시판 단건 조회
   async findBoard(id: number) {
     const board = await this.onlineBoardsRepository.findOne({
@@ -63,46 +116,67 @@ export class OnlineBoardsService {
     return board;
   }
 
-  // 자유게시판 수정
-  async updateBoard(
-    id: number,
-    updateOnlineBoardDto: UpdateOnlineBoardDto,
-    userInfo: UserInfos,
-  ) {
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
-    const foundBoard = await this.findBoardId(id);
-
-    if (foundBoard.userId !== foundUser.id) {
-      throw new ForbiddenException('접근 권한이 없습니다.');
+  //조회수를 증가시키고 데이터를 반환
+  async findOneOnlineBoardWithIncreaseView(id: number): Promise<OnlineBoards> {
+    const findHumorBoard: OnlineBoards =
+      await this.onlineBoardsRepository.findOne({
+        where: { id },
+        relations: ['OnlineBoardComment'],
+      });
+    if (!findHumorBoard) {
+      throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
+    let cachedView: number;
+    try {
+      cachedView = await this.redis.incr(`online:${id}:view`);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '요청을 처리하는 도중 오류가 발생했습니다.',
+      );
+    }
+
+    return {
+      ...findHumorBoard,
+      view: findHumorBoard.view + cachedView,
+    };
+  }
+
+  // 자유게시판 수정
+  async updateBoard(id: number, updateOnlineBoardDto: UpdateOnlineBoardDto) {
+    const foundBoard = await this.findBoardId(id);
 
     const { title, content } = updateOnlineBoardDto;
     const board = await this.onlineBoardsRepository.save({
-      id,
+      id: foundBoard.id,
       title,
       content,
     });
+
     return board;
   }
 
   // 자유게시판 삭제
-  async removeBoard(id: number, userInfo: UserInfos) {
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
+  async removeBoard(id: number) {
     const foundBoard = await this.findBoardId(id);
 
+<<<<<<< HEAD
     if (foundBoard.userId !== foundUser.id) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
 
     await this.onlineBoardsRepository.delete({ id });
+=======
+    await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
+>>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
 
     return `This action removes a #${id} onlineBoard`;
   }
 
   // 자유게시판 아이디 조회
-  async findBoardId(id: number) {
-    const foundBoard = await this.onlineBoardsRepository.findOneBy({
-      id,
+  async findBoardId(boardId: number) {
+    // console.log('boardId: ', boardId);
+    const foundBoard = await this.onlineBoardsRepository.findOne({
+      where: { id: boardId },
     });
 
     if (!foundBoard) {
@@ -110,5 +184,11 @@ export class OnlineBoardsService {
     }
 
     return foundBoard;
+  }
+
+  async verifyBoardOwner(userId: number, boardId: number) {
+    return await this.onlineBoardsRepository.findOne({
+      where: { userId, id: boardId },
+    });
   }
 }

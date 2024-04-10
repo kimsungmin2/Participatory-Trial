@@ -28,10 +28,10 @@ export class HumorBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })

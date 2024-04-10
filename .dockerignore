@@ -9,3 +9,4 @@ postgres-data/*
 *.md
 *.sh
 scripts
+*.yaml

@@ -27,7 +27,7 @@ export class PolticalDebateBoards {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
   @CreateDateColumn({ type: 'timestamp' })
