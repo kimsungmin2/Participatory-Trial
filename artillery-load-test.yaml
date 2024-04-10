@@ -15,6 +15,8 @@ config:
       name: Spike phase
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions
+  processor:
+    - './artillery/generate-data.js'
   ensure:
     thresholds:
       - http.response_time.p99: 100
@@ -23,11 +25,19 @@ config:
     ensure: {}
     apdex: {}
     metrics-by-endpoint: {}
-  processor: './dist/create-dummy-one.js'
 scenarios:
-  - name: 'GET request online board'
+  - name: 'online board flow'
     flow:
       - get:
           url: 'http://localhost:3000/online-boards'
+      - get:
+          url: 'http://localhost:3000/online-boards/1'
+      - get:
+          url: 'http://localhost:3000/online-boards/comments/1'
+      - function: 'generateRandomData'
+      - post:
+          url: 'http://localhost:3000/online-boards/comments/1'
+          json:
+            content: '{{ content }}'
 # ./node_modules/.bin/artillery run ./asciiart-load-test.yaml
 # ./node_modules/.bin/artillery run --output report.json ./asciiart-load-test.yaml

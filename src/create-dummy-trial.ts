@@ -44,26 +44,43 @@ const AppDataSource = new DataSource({
   logging: false,
 });
 
+async function getRandomUserId() {
+  const userRepository = AppDataSource.getRepository(Users);
+  const users = await userRepository.find();
+  const randomIndex = Math.floor(Math.random() * users.length);
+  return users[randomIndex].id; // 무작위로 하나의 사용자 ID 반환
+}
+
 async function createDummyData() {
   await AppDataSource.initialize()
     .then(async () => {
       console.log(`==========[ Dummy Data Creater Started ]==========`);
       // 자유게시판 생성
       for (let i = 0; i < 3; i++) {
-        const onlineBoard = new OnlineBoards();
-        onlineBoard.title = faker.company.catchPhrase();
-        onlineBoard.content = faker.lorem.text();
-        onlineBoard.userId = faker.number.int({ min: 1, max: 200 });
-        await AppDataSource.manager.save(onlineBoard);
+        const userId = await getRandomUserId();
+
+        const trial = new Trials();
+        trial.title = faker.company.catchPhrase();
+        trial.content = faker.lorem.text();
+        trial.userId = userId;
+        await AppDataSource.manager.save(trial);
+
+        const vote = new Votes();
+        vote.title1 = faker.lorem.lines(1);
+        vote.title2 = faker.lorem.lines(1);
+        vote.trialId = trial.id;
+        await AppDataSource.manager.save(vote);
 
         // 해당 자유게시판에 속하는 댓글 생성
         for (let j = 0; j < 5; j++) {
-          const onlineBoardComment = new OnlineBoardComments();
-          onlineBoardComment.content = faker.lorem.sentence(1);
-          onlineBoardComment.onlineBoard = onlineBoard;
-          await AppDataSource.manager.save(onlineBoardComment);
+          const userId = await getRandomUserId();
+          const eachVote = new EachVote();
+          eachVote.voteId = vote.id;
+          eachVote.userId = userId;
+          eachVote.voteFor = true;
+          await AppDataSource.manager.save(eachVote);
         }
-        `${i}-th Dummy Online Boards & Comments data creation complete.`;
+        `${i}-th Dummy Trials and Votes data creation complete.`;
       }
     })
     .catch((error) => console.log(error));

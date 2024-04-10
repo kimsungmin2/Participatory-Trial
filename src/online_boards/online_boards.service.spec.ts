@@ -8,27 +8,46 @@ import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
-import { ForbiddenException } from '@nestjs/common';
-import { Users } from '../users/entities/user.entity';
-import { UserInfo } from 'os';
 import { NotFoundException } from '@nestjs/common';
+import { S3Module } from '../s3/s3.module';
+import { OnlineBoardsModule } from './online_boards.module';
+import { UsersModule } from '../users/users.module';
+import { Users } from '../users/entities/user.entity';
 
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
   let usersService: UsersService;
   let repository: Repository<OnlineBoards>;
+  let userInfosRepository: Repository<UserInfos>;
+  let usersRepository: Repository<Users>;
+  const userInfo: UserInfos = {
+    id: 1,
+    email: 'example@example.com',
+    password: 'password123',
+    nickName: 'JohnDoe',
+    birth: '1990-01-01',
+    provider: 'local',
+    emailVerified: false,
+    createdAt: new Date('2024-03-24T02:05:02.602Z'),
+    updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+    user: null,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [S3Module, UsersModule],
       providers: [
         OnlineBoardsService,
-        UsersService,
         {
           provide: getRepositoryToken(OnlineBoards),
           useClass: Repository,
         },
         {
           provide: getRepositoryToken(UserInfos),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Users),
           useClass: Repository,
         },
       ],
@@ -47,19 +66,7 @@ describe('OnlineBoardsService', () => {
       content: 'Test content',
     };
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null, // 이 필드는 Users와의 관계를 가지므로, 테스트에서는 일반적으로 사용되지 않습니다.
-    };
+    const files: Express.Multer.File[] = [];
 
     const expectedResult: OnlineBoards = {
       id: 1,
@@ -68,9 +75,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -80,7 +89,7 @@ describe('OnlineBoardsService', () => {
 
     jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
 
-    const result = await service.createBoard(dto, userInfo);
+    const result = await service.createBoard(dto, userInfo, files);
     expect(result).toEqual(expectedResult);
   });
 
@@ -122,9 +131,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -144,20 +155,6 @@ describe('OnlineBoardsService', () => {
       content: 'content',
     };
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
     const onlineBoard: OnlineBoards = {
       id,
       userId: 1,
@@ -165,9 +162,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -180,9 +179,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -204,20 +205,6 @@ describe('OnlineBoardsService', () => {
   it('should remove a board', async () => {
     const id = 2;
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      verifiCationCode: 1,
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
     const foundUser: UserInfos = {
       id: 1,
       email: 'example@example.com',
@@ -225,7 +212,6 @@ describe('OnlineBoardsService', () => {
       nickName: 'JohnDoe',
       birth: '1990-01-01',
       provider: 'local',
-      verifiCationCode: 1,
       emailVerified: false,
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
@@ -239,9 +225,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -266,9 +254,11 @@ describe('OnlineBoardsService', () => {
       content: 'content',
       view: 1,
       like: 1,
+      imageUrl: 'string',
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,

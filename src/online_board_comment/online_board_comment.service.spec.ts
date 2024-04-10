@@ -4,34 +4,64 @@ import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { UsersService } from '../users/users.service';
 import { Repository, UpdateResult } from 'typeorm';
 import { OnlineBoardComments } from './entities/online_board_comment.entity';
-import { getRepositoryToken } from '@nestjs/typeorm';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
+import { OnlineBoardsModule } from '../online_boards/online_boards.module';
+import { UsersModule } from '../users/users.module';
+import { S3Module } from '../s3/s3.module';
+import { Users } from '../users/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 describe('OnlineBoardCommentService', () => {
   let service: OnlineBoardCommentService;
   let onlineBoardsService: OnlineBoardsService;
   let usersService: UsersService;
   let repository: Repository<OnlineBoardComments>;
+  const userInfo: UserInfos = {
+    id: 1,
+    email: 'example@example.com',
+    password: 'password123',
+    nickName: 'JohnDoe',
+    birth: '1990-01-01',
+    provider: 'local',
+    emailVerified: false,
+    createdAt: new Date('2024-03-24T02:05:02.602Z'),
+    updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+    user: null,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [
+        TypeOrmModule.forRoot({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: [UserInfos, OnlineBoards],
+          synchronize: true,
+        }),
+        OnlineBoardsModule,
+        UsersModule,
+        S3Module,
+      ],
       providers: [
         OnlineBoardCommentService,
-        OnlineBoardsService,
-        UsersService,
+        JwtService,
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(() => 'mockedToken'),
+            // 기타 사용하는 JwtService 메소드 목킹
+          },
+        },
         {
           provide: getRepositoryToken(OnlineBoardComments),
           useClass: Repository,
         },
         {
           provide: getRepositoryToken(OnlineBoards),
-          useClass: Repository,
-        },
-        {
-          provide: getRepositoryToken(UserInfos),
           useClass: Repository,
         },
       ],
@@ -52,19 +82,6 @@ describe('OnlineBoardCommentService', () => {
       content: '내용',
     };
 
-    const userInfo: UserInfos = {
-      id: 1,
-      email: 'example@example.com',
-      password: 'password123',
-      nickName: 'JohnDoe',
-      birth: '1990-01-01',
-      provider: 'local',
-      emailVerified: false,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-    };
-
     const onlineBoard: OnlineBoards = {
       id: onlineBoardId,
       userId: 1,
@@ -75,6 +92,7 @@ describe('OnlineBoardCommentService', () => {
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -88,6 +106,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -122,6 +141,7 @@ describe('OnlineBoardCommentService', () => {
       topComments: 'string',
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
@@ -136,6 +156,7 @@ describe('OnlineBoardCommentService', () => {
         userId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
         onlineBoard: null,
       },
@@ -162,11 +183,11 @@ describe('OnlineBoardCommentService', () => {
     const foundComment: OnlineBoardComments = {
       id: commentId,
       onlineBoardId: 1,
-
       content: 'content',
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -198,6 +219,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -222,6 +244,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };

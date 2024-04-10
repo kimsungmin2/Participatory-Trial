@@ -16,9 +16,10 @@ import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.d
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { CommentOwnerGuard } from './guards/online_board_comment.guard';
+import { BoardIdValidationPipe } from '../online_boards/pipes/exist-board.pipe';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('comments')
+@Controller('online-boards/comments')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
@@ -26,7 +27,7 @@ export class OnlineBoardCommentController {
 
   @Post(':onlineBoardId')
   async create(
-    @Param() onlineBoardId: number,
+    @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
@@ -44,7 +45,9 @@ export class OnlineBoardCommentController {
   }
 
   @Get(':onlineBoardId')
-  async findAll(@Param() onlineBoardId: number) {
+  async findAll(
+    @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
+  ) {
     const comments =
       await this.onlineBoardCommentService.findAllComments(onlineBoardId);
 
@@ -58,7 +61,7 @@ export class OnlineBoardCommentController {
   @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
-    @Param() commentId,
+    @Param() commentId: number,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
