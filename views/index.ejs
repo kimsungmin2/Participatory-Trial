@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/css/main-style.css" />
   </head>
   <body>
+    <%- include('partials/notification') %>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">CPT</a>
@@ -54,7 +55,11 @@
           <ul class="navbar-nav ms-auto">
             <!-- 우측에 배치하기 위해 ms-auto 사용 -->
             <li class="nav-item">
-              <a class="nav-link" href="/sign-up">로그인</a>
+              <% if (isLoggedIn)  {%>
+              <a class="nav-link" href="/logout">로그아웃</a>
+              <% } else { %>
+                <a class="nav-link" href="/sign-up">로그인</a>
+                <% } %>
             </li>
           </ul>
         </div>

@@ -5,29 +5,31 @@ import { Users } from '../users/entities/user.entity';
 import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
 import { OnlineBoards } from './entities/online_board.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from 'src/users/users.module';
+import { LikeModule } from 'src/like/like.module';
 import { OnlineBoardLike } from './entities/online_board_like.entity';
-import { S3Module } from '../s3/s3.module';
-import { UserInfos } from '../users/entities/user-info.entity';
-import { S3Service } from '../s3/s3.service';
-import { BoardOwnerGuard } from './guards/online_boards.guard';
-import { BoardIdValidationPipe } from './pipes/exist-board.pipe';
+import { OnlineBoardLikeHallOfFames } from './entities/online_boardLike_of_fame.entity';
+import { OnlineBoardViewHallOfFames } from './entities/online_boardVIew_of_fame.entity';
+import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
+import { S3Module } from 'src/s3/s3.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       OnlineBoards,
       Users,
-      UserInfos,
-      OnlineBoardComments,
       OnlineBoardLike,
+      OnlineBoardLikeHallOfFames,
+      OnlineBoardViewHallOfFames,
     ]),
     UsersModule,
+    LikeModule,
     S3Module,
   ],
   controllers: [OnlineBoardsController],
   providers: [
     OnlineBoardsService,
+    OnlineBoardHallOfFameService,
     BoardOwnerGuard,
     BoardIdValidationPipe,
     S3Service,

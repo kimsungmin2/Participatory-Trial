@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+
 import { setupSwagger } from './utils/swagger';
 import { LoggingInterceptor } from './utils/logging.interceptor';
 import { join } from 'path';
@@ -10,6 +11,8 @@ import { winstonLogger } from './utils/winston';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { WinstonLogger } from 'nest-winston';
 import { HttpExceptionFilter } from './utils/filter/exception.filter';
+import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
+import expressLayout from 'express-ejs-layouts';
 
 async function bootstrap() {
   const logger = winstonLogger;
@@ -23,6 +26,7 @@ async function bootstrap() {
       },
     }),
   );
+  app.use(new CheckLoggedIn().use);
   app.useGlobalFilters(new HttpExceptionFilter());
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
@@ -33,3 +37,4 @@ async function bootstrap() {
   logger.verbose(`${port}번 포트에서 어플리케이션 실행`);
 }
 bootstrap();
+

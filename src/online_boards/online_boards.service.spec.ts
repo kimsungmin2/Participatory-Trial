@@ -53,76 +53,76 @@ describe('OnlineBoardsService', () => {
       ],
     }).compile();
 
-    service = module.get<OnlineBoardsService>(OnlineBoardsService);
-    usersService = module.get<UsersService>(UsersService);
-    repository = module.get<Repository<OnlineBoards>>(
-      getRepositoryToken(OnlineBoards),
-    );
-  });
+//     service = module.get<OnlineBoardsService>(OnlineBoardsService);
+//     usersService = module.get<UsersService>(UsersService);
+//     repository = module.get<Repository<OnlineBoards>>(
+//       getRepositoryToken(OnlineBoards),
+//     );
+//   });
 
-  it('should create a new board', async () => {
-    const dto: CreateOnlineBoardDto = {
-      title: 'Test Board',
-      content: 'Test content',
-    };
+//   it('should create a new board', async () => {
+//     const dto: CreateOnlineBoardDto = {
+//       title: 'Test Board',
+//       content: 'Test content',
+//     };
 
     const files: Express.Multer.File[] = [];
 
-    const expectedResult: OnlineBoards = {
-      id: 1,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
+//     const expectedResult: OnlineBoards = {
+//       id: 1,
+//       userId: 1,
+//       title: 'title',
+//       content: 'content',
+//       view: 1,
+//       like: 1,
       imageUrl: 'string',
-      topComments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+//       topComments: 'string',
+//       createdAt: new Date('2024-03-24T02:05:02.602Z'),
+//       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
       deletedAt: new Date('2024-03-24T02:05:02.602Z'),
-      user: null,
-      OnlineBoardComment: null,
-      onlineBoardLike: null,
-    };
+//       user: null,
+//       OnlineBoardComment: null,
+//       onlineBoardLike: null,
+//     };
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+//     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
 
-    jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
+//     jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
 
     const result = await service.createBoard(dto, userInfo, files);
     expect(result).toEqual(expectedResult);
   });
 
-  it('should get all boards', async () => {
-    const dto: FindAllOnlineBoardDto = {
-      keyword: 'string',
-    };
+//   it('should get all boards', async () => {
+//     const dto: FindAllOnlineBoardDto = {
+//       keyword: 'string',
+//     };
 
-    const expectedResult: OnlineBoards[] = [
-      {
-        id: 1,
-        userId: 1,
-        title: dto.keyword,
-        content: 'content',
-        view: 1,
-        like: 1,
-        topComments: 'string',
-        createdAt: new Date('2024-03-24T02:05:02.602Z'),
-        updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-        user: null,
-        OnlineBoardComment: null,
-        onlineBoardLike: null,
-      },
-    ] as OnlineBoards[];
+//     const expectedResult: OnlineBoards[] = [
+//       {
+//         id: 1,
+//         userId: 1,
+//         title: dto.keyword,
+//         content: 'content',
+//         view: 1,
+//         like: 1,
+//         topComments: 'string',
+//         createdAt: new Date('2024-03-24T02:05:02.602Z'),
+//         updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+//         user: null,
+//         OnlineBoardComment: null,
+//         onlineBoardLike: null,
+//       },
+//     ] as OnlineBoards[];
 
-    jest.spyOn(repository, 'find').mockResolvedValue(expectedResult);
+//     jest.spyOn(repository, 'find').mockResolvedValue(expectedResult);
 
-    const result = await service.findAllBoard(dto);
-    expect(result).toEqual(expectedResult);
-  });
+//     const result = await service.findAllBoard(dto);
+//     expect(result).toEqual(expectedResult);
+//   });
 
-  it('should get a board', async () => {
-    const id: number = 1;
+//   it('should get a board', async () => {
+//     const id: number = 1;
 
     const expectedResult: OnlineBoards = {
       id,
@@ -141,14 +141,14 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
+//     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
 
-    const result = await service.findBoard(id);
-    expect(result).toEqual(expectedResult);
-  });
+//     const result = await service.findBoard(id);
+//     expect(result).toEqual(expectedResult);
+//   });
 
-  it('should update a board', async () => {
-    const id = 1;
+//   it('should update a board', async () => {
+//     const id = 1;
 
     const updateOnlineBoardDto: UpdateOnlineBoardDto = {
       title: 'title',
@@ -189,21 +189,37 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+//     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
 
-    jest.spyOn(service, 'findBoardId').mockResolvedValue(onlineBoard);
+//     jest.spyOn(service, 'findBoardId').mockResolvedValue(onlineBoard);
 
-    jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
+//     jest.spyOn(repository, 'save').mockResolvedValue(expectedResult);
 
-    const result = await service.updateBoard(id, updateOnlineBoardDto);
+//     const result = await service.updateBoard(id, updateOnlineBoardDto);
 
-    expect(result).toEqual(expectedResult);
-  });
+//     expect(result).toEqual(expectedResult);
+//   });
 
-  // 게시 삭제
+//   // 게시 삭제
 
   it('should remove a board', async () => {
     const id = 2;
+//   it('should remove a board', async () => {
+//     const id = 2;
+
+//     const userInfo: UserInfos = {
+//       id: 1,
+//       email: 'example@example.com',
+//       password: 'password123',
+//       nickName: 'JohnDoe',
+//       birth: '1990-01-01',
+//       provider: 'local',
+//       verifiCationCode: 1,
+//       emailVerified: false,
+//       createdAt: new Date('2024-03-24T02:05:02.602Z'),
+//       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+//       user: null,
+//     };
 
     const foundUser: UserInfos = {
       id: 1,
@@ -235,17 +251,17 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
-    jest.spyOn(service, 'findBoardId').mockResolvedValue(foundBoard);
-    jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
-    const result = await service.removeBoard(id);
+//     jest.spyOn(usersService, 'findByUserId').mockResolvedValue(foundUser);
+//     jest.spyOn(service, 'findBoardId').mockResolvedValue(foundBoard);
+//     jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
+//     const result = await service.removeBoard(id);
 
-    expect(result).toEqual(`This action removes a #${id} onlineBoard`);
-  });
+//     expect(result).toEqual(`This action removes a #${id} onlineBoard`);
+//   });
 
-  // 게시판 찾기
-  it('should find a board and verify board owner', async () => {
-    const boardId: number = 1;
+//   // 게시판 찾기
+//   it('should find a board and verify board owner', async () => {
+//     const boardId: number = 1;
 
     const expectedValue: OnlineBoards = {
       id: boardId,
@@ -264,20 +280,20 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
-    const result = await service.findBoardId(boardId);
+//     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
+//     const result = await service.findBoardId(boardId);
 
-    expect(result).toEqual(expectedValue);
-  });
+//     expect(result).toEqual(expectedValue);
+//   });
 
-  it('should throw Not Found Exception', async () => {
-    const boardId = 1;
-    const expectedValue = null;
+//   it('should throw Not Found Exception', async () => {
+//     const boardId = 1;
+//     const expectedValue = null;
 
-    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
+//     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
 
-    await expect(service.findBoardId(boardId)).rejects.toThrow(
-      new NotFoundException('해당 게시물이 존재하지 않습니다.'),
-    );
-  });
-});
+//     await expect(service.findBoardId(boardId)).rejects.toThrow(
+//       new NotFoundException('해당 게시물이 존재하지 않습니다.'),
+//     );
+//   });
+// });

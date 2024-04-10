@@ -1,3 +1,4 @@
+import { CacheConfigService } from './cache/cache.config';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,27 +9,31 @@ import { HumorsModule } from './humors/humors.module';
 import { PolticalDebatesModule } from './poltical_debates/poltical_debates.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { S3Module } from './s3/s3.module';
 import { LikeModule } from './like/like.module';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { HumorsService } from './humors/humors.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { CacheConfigService } from './cache/config';
-import { CacheModule } from '@nestjs/cache-manager';
-import { WinstonModule } from 'nest-winston';
+import { EventsModule } from './events/events.module';
+import { ChatsModule } from './chats/chats.module';
+
+import { WinstonModule } from "nest-winston"
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
-
+import { SearchModule } from './search/search.module';
+import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
+console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -38,14 +43,19 @@ export const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
+    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
   }),
   inject: [ConfigService],
 };
+
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.IS_TEST === 'true' ? `.env.test` : `.env`,
@@ -61,14 +71,6 @@ export const typeOrmModuleOptions = {
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),
-    RedisModule.forRootAsync({
-      useFactory: () => ({
-        type: 'single',
-        url: process.env.REDIS_URL,
-        options: {},
-      }),
-    }),
-    ScheduleModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       useClass: CacheConfigService,
@@ -79,6 +81,18 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
+
+    RedisModule.forRootAsync({
+      useFactory: () => ({
+        type: 'single',
+        url: process.env.REDIS_URL,
+        options: {},
+      }),
+    }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
     OnlineBoardsModule,
@@ -94,16 +108,19 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    EventsModule,
+    ChatsModule,
     OnlineBoardCommentModule,
     WinstonModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: HttpLoggingInterceptor,
+    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

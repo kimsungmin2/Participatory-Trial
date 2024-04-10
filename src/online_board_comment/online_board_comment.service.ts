@@ -26,7 +26,7 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = await this.usersService.findByUserId(userInfo.id);
+    const foundUser = await this.usersService.findByMyId(userInfo.id);
 
     const { content } = createOnlineBoardCommentDto;
 

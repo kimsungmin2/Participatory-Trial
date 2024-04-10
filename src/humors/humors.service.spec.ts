@@ -9,7 +9,7 @@ import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
 import {
   ForbiddenException,
@@ -47,7 +47,8 @@ const mockBoard = {
   like: 1,
   view: 1,
   createdAt: new Date(),
-  updatedAt: new Date(),
+  updated_at: new Date(),
+  deleted_at: new Date(),
 } as HumorBoards;
 
 describe('HumorsService', () => {
@@ -75,6 +76,8 @@ describe('HumorsService', () => {
             merge: jest.fn(),
             delete: jest.fn(),
             find: jest.fn(),
+            count: jest.fn(),
+            softDelete: jest.fn(),
           },
         },
         {
@@ -131,12 +134,20 @@ describe('HumorsService', () => {
     });
   });
   describe('getAllHumorBoards', () => {
-    const mockBoardArray: HumorBoards[] = [
+    const count: number = 3;
+    const result = {
+      humorBoards: [
+        {
+          id: 1,
+        },
+      ],
+      totalItems: count,
+    };
+    const mockBoardArray = [
       {
         id: 1,
       },
     ] as HumorBoards[];
-
     const PaginationQueryDto = {
       limit: 1,
       page: 1,
@@ -145,10 +156,11 @@ describe('HumorsService', () => {
       jest
         .spyOn(humorBoardRepository, 'find')
         .mockResolvedValue(mockBoardArray);
+      jest.spyOn(humorBoardRepository, 'count').mockResolvedValue(count);
       const createdBoard =
         await humorService.getAllHumorBoards(PaginationQueryDto);
       expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
-      expect(createdBoard).toEqual(mockBoardArray);
+      expect(createdBoard).toEqual(result);
     });
     it('must be find is failed', async () => {
       expect.assertions(3);
@@ -255,20 +267,18 @@ describe('HumorsService', () => {
     });
   });
   describe('deleteHumorBoard', () => {
-    const deletedResult: DeleteResult = {
-      raw: {},
+    const deletedResult: UpdateResult = {
       affected: 1,
-    };
-    const failedDeletedResult: DeleteResult = {
-      raw: {},
+    } as UpdateResult;
+    const failedDeletedResult: UpdateResult = {
       affected: 0,
-    };
+    } as UpdateResult;
     it('must be success', async () => {
       jest
         .spyOn(humorService, 'findOneHumorBoard')
         .mockResolvedValue(mockBoard);
       jest
-        .spyOn(humorBoardRepository, 'delete')
+        .spyOn(humorBoardRepository, 'softDelete')
         .mockResolvedValue(deletedResult);
 
       const deletedBoard = await humorService.deleteHumorBoard(
@@ -276,7 +286,7 @@ describe('HumorsService', () => {
         mockedUser,
       );
       expect(humorService.findOneHumorBoard).toHaveBeenCalledTimes(1);
-      expect(humorBoardRepository.delete).toHaveBeenCalledTimes(1);
+      expect(humorBoardRepository.softDelete).toHaveBeenCalledTimes(1);
       expect(deletedBoard).toEqual(deletedResult);
     });
     it('must be failed by ForbiddenException', async () => {
@@ -301,7 +311,7 @@ describe('HumorsService', () => {
         .spyOn(humorService, 'findOneHumorBoard')
         .mockResolvedValue(mockBoard);
       jest
-        .spyOn(humorBoardRepository, 'delete')
+        .spyOn(humorBoardRepository, 'softDelete')
         .mockResolvedValue(failedDeletedResult);
 
       try {
@@ -310,7 +320,7 @@ describe('HumorsService', () => {
         expect(err).toBeInstanceOf(InternalServerErrorException);
       }
       expect(humorService.findOneHumorBoard).toHaveBeenCalledTimes(1);
-      expect(humorBoardRepository.delete).toHaveBeenCalledTimes(1);
+      expect(humorBoardRepository.softDelete).toHaveBeenCalledTimes(1);
     });
   });
 });

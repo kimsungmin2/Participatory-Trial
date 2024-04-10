@@ -41,7 +41,7 @@ export class AuthService {
     const userEmail = await this.usersService.findByEmail(email);
 
     const refreshTokenCacheKey = `loginId:${userEmail.id}`;
-    const payload = { email, sub: userEmail.id };
+    const payload = { sub: userEmail.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
@@ -170,12 +170,10 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    console.log(email);
     const user = await this.usersInfoRepository.findOne({
       select: ['id', 'email', 'password', 'emailVerified'],
       where: { email: email },
     });
-    console.log(user);
 
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');
@@ -187,7 +185,7 @@ export class AuthService {
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
-    const payload = { email, sub: user.id };
+    const payload = { sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,

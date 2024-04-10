@@ -15,9 +15,12 @@ import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.d
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
+import { ApiTags } from '@nestjs/swagger';
 import { CommentOwnerGuard } from './guards/online_board_comment.guard';
 import { BoardIdValidationPipe } from '../online_boards/pipes/exist-board.pipe';
 
+@ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
 @Controller('online-boards/comments')
 export class OnlineBoardCommentController {

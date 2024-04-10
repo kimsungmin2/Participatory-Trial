@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -12,6 +13,7 @@ import {
 import { Users } from '../../users/entities/user.entity';
 import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
 import { HumorLike } from './humor_like.entity';
+import { HumorVotes } from './HumorVote.entity';
 
 @Entity()
 export class HumorBoards {
@@ -43,7 +45,10 @@ export class HumorBoards {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deleted_at: Date;
 
   @ManyToOne(() => Users, (user) => user.humorBoard)
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
@@ -58,4 +63,7 @@ export class HumorBoards {
     cascade: true,
   })
   humorLike: HumorLike[];
+
+  @OneToOne(() => HumorVotes, (humorVotes) => humorVotes.humorBoards)
+  humorVotes: HumorVotes
 }

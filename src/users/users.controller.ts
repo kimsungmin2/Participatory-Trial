@@ -8,7 +8,6 @@ import {
   UseGuards,
   HttpStatus,
   Get,
-  Render,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -59,12 +58,13 @@ export class UsersController {
   @ApiOperation({ summary: '유저 정보' })
   @UseGuards(AuthGuard('jwt'))
   @Get('')
-  @Render('my-page.ejs')
-  getUser(@UserInfo() user: UserInfos) {
+  async getUser(@Req() req) {
+    const { id } = req.user;
+    const data = await this.usersService.findByMyId(id);
     return {
       statusCode: HttpStatus.OK,
       message: '회원 정보입니다.',
-      data: user,
+      data: data,
     };
   }
 }
