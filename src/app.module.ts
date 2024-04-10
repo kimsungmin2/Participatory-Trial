@@ -27,7 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
 
-import { WinstonModule } from "nest-winston"
+import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
 import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
@@ -117,10 +117,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: HttpLoggingInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

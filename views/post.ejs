@@ -25,20 +25,38 @@
         <span><%= data.title  %></span>
         <div>
           <span>조회수:<%= data.view  %></span>
+          <% if (boardType !== 'polticalDebate') { %>
           <span>좋아요:<%= data.like  %></span>
+          <% } %>
         </div>
       </div>
       <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
+      <!--게시글 내용-->
       <div class="post_content">
         <span><%= data.content  %></span>
-        
+        <% if (data.imageUrl) { %>
+          <div class="post_image">
+            <% for (let i = 0; i < JSON.parse(data.imageUrl).length; i++) {  %>
+            <img src="<%=JSON.parse(data.imageUrl)[i] %>" alt="Post Image" >
+            <% } %>
+            
+          </div>
+          <% } %>
       </div>
+      <!--게시글 좋아요-->;
+      <% if (boardType !== 'polticalDebate') { %>
+      <div class="like_button">
+        <button id="like" href="/<% data.id %>">좋아요</button>
+      </div>
+      <% } %>
+      <!--게시글 댓글-->
       <div>
         <% if (boardType === 'humor') { %>
           <p style="font-size: 30px;">댓글: <%= data.humorComment.length  %>개</p>
           <div class="content_container">
             <% for (let i = 0; i < data.humorComment.length; i++)  {%>
               <div class="content">
+                
               <p>작성자: <%= data.humorComment[i].userId %></p>
               <p><%= data.humorComment[i].content %></p>
               <p>작성일: <%= data.humorComment[i].createdAt %></p>
@@ -76,22 +94,38 @@
         <% } %>
         
       </div>
-      <% if (data.imageUrl) { %>
-      <div class="post_image">
-        <% for (let i = 0; i < JSON.parse(data.imageUrl).length; i++) {  %>
-        <img src="<%=JSON.parse(data.imageUrl)[i] %>" alt="Post Image" >
-        <% } %>
-        
-      </div>
-      <% } %>
+      
       
     
     </header>
     <script>
         let boardType;
         boardType = "<%= boardType %>";
+        let id;
+        id = "<%= data.id %>"
 
-      if (boardType === 'humor') { 
+    
+
+        document.getElementById('like').addEventListener('click', function() {
+
+  // fetch를 사용하여 POST 요청을 보냅니다.
+  fetch(`/like/${id}`, {
+    method: 'POST', // HTTP 메소드 지정
+    headers: {
+      'Content-Type': 'application/json', // 콘텐츠 타입 헤더 설정
+    },
+    body: JSON.stringify({ // 요청 바디
+      boardType: boardType, // boardType을 요청 바디에 포함
+    }),
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json(); // 응답을 JSON 형태로 파싱
+    }
+    throw new Error('Network response was not ok.');
+  })
+  .then(data => {
+    if (boardType === 'humor') { 
           boardType = 'humors'
         } else if (boardType === 'onlineBoard') { 
           boardType = 'online-boards'
@@ -100,6 +134,12 @@
         } else if (boardType === 'trial') { 
           boardType = 'trials'
         } 
+    window.location.href = `/${boardType}/${id}`
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+});
     </script>
   </body>
 </html>
