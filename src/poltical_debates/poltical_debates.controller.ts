@@ -14,10 +14,18 @@ import {
   UseInterceptors,
   UploadedFiles,
   Query,
+  Req,
 } from '@nestjs/common';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiTags,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
@@ -29,19 +37,21 @@ import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
-
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
 export class PolticalDebatesController {
   constructor(
     private readonly polticalDebatesService: PolticalDebatesService,
-    private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
+    private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService,
   ) {}
 
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getCreatePostPage() {
-    return { boardType: BoardType.PolticalDebate };
+  async getCreatePostPage(@Req() req: Request) {
+    return {
+      boardType: BoardType.PolticalDebate,
+      isLoggedIn: req['isLoggedIn'],
+    };
   }
 
   @UseInterceptors(FilesInterceptor('files'))
@@ -65,11 +75,11 @@ export class PolticalDebatesController {
     },
   })
   /**
-   * 
+   *
    * @param userInfo 유저 정보 받아오는 데코레이터
    * @param createPolticalDebateDto 제목, 컨텐츠 받아오는 Dto
    * @param voteTitleDto  title1 vs title 하는 Dto
-   * @returns 
+   * @returns
    */
   @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
   @ApiBearerAuth('access-token')
@@ -91,10 +101,9 @@ export class PolticalDebatesController {
   async create(
     @UserInfo() userInfo: UserInfos,
     @Body() createPolticalDebateDto: CreatePolticalDebateDto,
-    @Body() voteTitleDto: VoteTitleDto
-
+    @Body() voteTitleDto: VoteTitleDto,
   ) {
-    const userId = userInfo.id
+    const userId = userInfo.id;
     const data = await this.polticalDebatesService.createBothBoardandVote(
       userId,
       createPolticalDebateDto,
@@ -117,9 +126,12 @@ export class PolticalDebatesController {
   @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
   async findAll(
     @Query() paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoardReturnValue> {
+    @Req() req: Request,
+  ) {
     const { polticalDebateBoards, totalItems } =
-      await this.polticalDebatesService.findAllWithPaginateBoard(paginationQueryDto);
+      await this.polticalDebatesService.findAllWithPaginateBoard(
+        paginationQueryDto,
+      );
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
     return {
       statusCode: HttpStatus.OK,
@@ -128,6 +140,7 @@ export class PolticalDebatesController {
       boardType: BoardType.PolticalDebate,
       pageCount,
       currentPage: paginationQueryDto.page,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
@@ -163,7 +176,7 @@ export class PolticalDebatesController {
   })
   @Get(':polticalDebateId')
   @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async findOne(@Param('polticalDebateId') id: number) {
+  async findOne(@Param('polticalDebateId') id: number, @Req() req: Request) {
     try {
       const data = await this.polticalDebatesService.findOne(id);
       return {
@@ -171,6 +184,7 @@ export class PolticalDebatesController {
         message: '정치 토론 상세 조회에 성공했습니다.',
         data,
         boardType: BoardType.PolticalDebate,
+        isLoggedIn: req['isLoggedIn'],
       };
     } catch (error) {
       throw new NotFoundException('존재하지 않는 정치 토론방입니다.');
@@ -228,27 +242,27 @@ export class PolticalDebatesController {
     };
   }
 
-   // 정치 게시판 명예의 전당 조회하기 API(투표 수)
-   @ApiOperation({ summary: ' 정치 게시판 명예의 전당 조회하기 API(투표 수)' })
-   @Get('HallofFame/votes')
-   async getRecentHallOfFame() {
-     const recentHallofFame =
-       await this.polticalDabateHallOfFameService.getRecentHallOfFame();
-     if (!recentHallofFame) {
-       return {
-         statusCode: HttpStatus.NOT_FOUND,
-         message: '정치 게시판 명예의 전당 정보가 없습니다.',
-       };
-     }
- 
-     return {
-       statusCode: HttpStatus.OK,
-       message: '정치 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
-       recentHallofFame,
-     };
-   }
+  // 정치 게시판 명예의 전당 조회하기 API(투표 수)
+  @ApiOperation({ summary: ' 정치 게시판 명예의 전당 조회하기 API(투표 수)' })
+  @Get('HallofFame/votes')
+  async getRecentHallOfFame() {
+    const recentHallofFame =
+      await this.polticalDabateHallOfFameService.getRecentHallOfFame();
+    if (!recentHallofFame) {
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: '정치 게시판 명예의 전당 정보가 없습니다.',
+      };
+    }
 
-   // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
+    return {
+      statusCode: HttpStatus.OK,
+      message: '정치 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
+      recentHallofFame,
+    };
+  }
+
+  // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
   @ApiOperation({ summary: '정치 게시판 명예의 전당 조회하기 API(조회수 수)' })
   @Get('HallofFame/views')
   async getRecentViewHallOfFame() {

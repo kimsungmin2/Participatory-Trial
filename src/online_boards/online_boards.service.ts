@@ -123,6 +123,7 @@ export class OnlineBoardsService {
         where: { id },
         relations: ['OnlineBoardComment'],
       });
+    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
@@ -160,7 +161,6 @@ export class OnlineBoardsService {
     const foundBoard = await this.findBoardId(id);
 
     await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
-
 
     return `This action removes a #${id} onlineBoard`;
   }

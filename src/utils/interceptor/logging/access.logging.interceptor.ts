@@ -19,7 +19,7 @@ export class HttpLoggingInterceptor implements NestInterceptor {
     const httpContext = context.switchToHttp();
     const now = Date.now();
     const request = httpContext.getRequest();
-    const response: HumorBoardReturnValue = httpContext.getResponse();
+    const response = httpContext.getResponse();
     const clientIp = request.headers['x-forwarded-for'] || request.ip;
     const referer = request.headers['referer'] || request.headers['referrer'];
     const userAgent = request.headers['user-agent'];

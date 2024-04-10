@@ -12,6 +12,7 @@ import {
   Render,
   UseInterceptors,
   UploadedFiles,
+  Req,
 } from '@nestjs/common';
 import { OnlineBoardsService } from './online_boards.service';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
@@ -20,21 +21,29 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
 import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @ApiTags('자유 게시판')
-@UseGuards(AuthGuard('jwt'))
 @Controller('online-boards')
 export class OnlineBoardsController {
   constructor(
     private readonly onlineBoardsService: OnlineBoardsService,
-    private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService
-    ) {}
+    private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService,
+  ) {}
   @ApiOperation({ summary: '자유 게시판 생성 API' })
   @ApiBearerAuth('access-token')
 
@@ -42,8 +51,8 @@ export class OnlineBoardsController {
   @UseGuards(AuthGuard('jwt'))
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getCreatePostPage() {
-    return { boardType: BoardType.OnlineBoard };
+  async getCreatePostPage(@Req() req: Request) {
+    return { boardType: BoardType.OnlineBoard, isLoggedIn: req['isLoggedIn'] };
   }
   //게시글 생성
   @UseInterceptors(FilesInterceptor('files'))
@@ -60,6 +69,7 @@ export class OnlineBoardsController {
     },
   })
   @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @Body() createOnlineBoardDto: CreateOnlineBoardDto,
@@ -80,7 +90,6 @@ export class OnlineBoardsController {
   }
   //전체조회
 
-
   // 모든 자유 게시판 검색어 조회 API
   @ApiOperation({ summary: '모든 자유 게시판 검색어 조회 API' })
   @ApiBearerAuth('access-token')
@@ -91,13 +100,12 @@ export class OnlineBoardsController {
     type: String,
     example: '은가누',
   })
-
   @Get('')
   @Render('board.ejs')
   async paginateBoards(
     @Query() paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoardReturnValue> 
-  {
+    @Req() req: Request,
+  ) {
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
@@ -108,9 +116,10 @@ export class OnlineBoardsController {
       boardType: BoardType.OnlineBoard,
       pageCount,
       currentPage: paginationQueryDto.page,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
-  
+
   //검색 API
   @Get('search')
   async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
@@ -137,7 +146,7 @@ export class OnlineBoardsController {
   })
   @Get(':id')
   @Render('post.ejs')
-  async findOne(@Param('id') id: number) {
+  async findOne(@Param('id') id: number, @Req() req: Request) {
     const board =
       await this.onlineBoardsService.findOneOnlineBoardWithIncreaseView(id);
     return {
@@ -145,6 +154,7 @@ export class OnlineBoardsController {
       message: '게시글을 조회합니다.',
       data: board,
       boardType: BoardType.OnlineBoard,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
@@ -168,7 +178,6 @@ export class OnlineBoardsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
-
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -186,7 +195,6 @@ export class OnlineBoardsController {
     };
   }
 
-  
   // 내 자유 게시물 삭제 API
   @ApiOperation({ summary: ' 내 자유 게시물 삭제 API' })
   @ApiBearerAuth('access-token')

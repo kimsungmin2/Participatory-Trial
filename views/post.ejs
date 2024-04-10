@@ -16,60 +16,10 @@
     <link rel="stylesheet" href="/css/board-style.css" />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav"></ul>
-          <ul class="navbar-nav mx-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/online-boards"
-                >자유게시판</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/trials">재판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/humors">유머</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/poltical-debates">정치 토론</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">로그인</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('partials/nav') %>
 
     <header>
-      <div class="board_title">
-        <% if (boardType === 'humor') { %>
-          <span>유머 게시판</span>
-        <% } else if (boardType === 'online') { %>
-          <span>자유 게시판</span>
-        <% } else if (boardType === '정치토론') { %>
-          <span>정치토론 게시판</span>
-        <% } else if (boardType === '재판') { %>
-          <span>재판 게시판</span>
-        <% } %>
-      </div>
+      <%- include('partials/board-title') %>
       <hr width="70%" color="lightskyblue" size="2" style="margin-left: 30px; height: 3px;" />
       <div class="post_title">
         <span><%= data.title  %></span>
@@ -81,15 +31,75 @@
       <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
       <div class="post_content">
         <span><%= data.content  %></span>
+        
+      </div>
+      <div>
+        <% if (boardType === 'humor') { %>
+          <p style="font-size: 30px;">댓글: <%= data.humorComment.length  %>개</p>
+          <div class="content_container">
+            <% for (let i = 0; i < data.humorComment.length; i++)  {%>
+              <div class="content">
+              <p>작성자: <%= data.humorComment[i].userId %></p>
+              <p><%= data.humorComment[i].content %></p>
+              <p>작성일: <%= data.humorComment[i].createdAt %></p>
+              <button class="modify">수정</button>
+              <button>삭제</button>
+              </div>
+              <% } %>
+          </div>
+        <% } else if (boardType === 'onlineBoard') { %>
+          <p style="font-size: 30px;">댓글: <%= data.OnlineBoardComment.length  %>개</p>
+          <div class="content_container">
+            <% for (let i = 0; i < data.OnlineBoardComment.length; i++)  {%>
+              <div class="content">
+              <p>작성자: <%= data.OnlineBoardComment[i].userId %></p>
+              <p><%= data.OnlineBoardComment[i].content %></p>
+              <p>작성일: <%= data.OnlineBoardComment[i].createdAt %></p>
+              <button class="modify">수정</button>
+              <button>삭제</button>
+              </div>
+              <% } %>
+          </div>
+        <% } else if (boardType === 'polticalDebate') { %>
+          <p style="font-size: 30px;">댓글: <%= data.polticalDebateComments.length  %>개</p>
+          <div class="content_container">
+            <% for (let i = 0; i < data.polticalDebateComments.length; i++)  {%>
+              <div class="content">
+              <p>작성자: <%= data.polticalDebateComments[i].userId %></p>
+              <p><%= data.polticalDebateComments[i].content %></p>
+              <p>작성일: <%= data.polticalDebateComments[i].createdAt %></p>
+              <button class="modify">수정</button>
+              <button>삭제</button>
+              </div>
+              <% } %>
+          </div>
+        <% } %>
+        
       </div>
       <% if (data.imageUrl) { %>
       <div class="post_image">
         <% for (let i = 0; i < JSON.parse(data.imageUrl).length; i++) {  %>
         <img src="<%=JSON.parse(data.imageUrl)[i] %>" alt="Post Image" >
         <% } %>
+        
       </div>
       <% } %>
+      
     
     </header>
+    <script>
+        let boardType;
+        boardType = "<%= boardType %>";
+
+      if (boardType === 'humor') { 
+          boardType = 'humors'
+        } else if (boardType === 'onlineBoard') { 
+          boardType = 'online-boards'
+        } else if (boardType === 'polticalDebate') { 
+          boardType = 'poltical-debates'
+        } else if (boardType === 'trial') { 
+          boardType = 'trials'
+        } 
+    </script>
   </body>
 </html>

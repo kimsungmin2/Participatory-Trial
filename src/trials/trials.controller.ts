@@ -11,12 +11,14 @@ import {
   Query,
   Req,
   Render,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -35,6 +37,10 @@ import { LikeInputDto } from 'src/like/dto/create-like.dto';
 import { LikeService } from 'src/like/like.service';
 import { Users } from 'src/users/entities/user.entity';
 import { CreateTrialDto } from './dto/create-trial.dto';
+import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { Request } from 'express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('재판')
 @Controller('trials')
@@ -42,14 +48,26 @@ export class TrialsController {
   constructor(
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
-    private readonly likeServise: LikeService
+    private readonly likeServise: LikeService,
   ) {}
   // 모든 API는 비동기 처리
 
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
-  // 어쓰 가드 필요
+  // 어쓰 가드 필요\
+
+  // 글쓰기 페이지 이동
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage(@Req() req: Request) {
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
   // 재판 생성 API
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiOperation({ summary: '재판 생성 API' })
+  @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('access-token')
   @ApiBody({
     description: '재판 게시물 생성',
@@ -67,15 +85,29 @@ export class TrialsController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
-    // @UserInfo() userInfo: UserInfos,
-    @Req() req,
     @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
-    @Body() voteTitleDto: VoteTitleDto
+    @Body() voteTitleDto: VoteTitleDto,
+    @Req() req,
   ) {
+    console.log(createTrialDto);
+    console.log(voteTitleDto);
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
+    // const voteTitleDto = {
+    //   title1: 'ss',
+    //   title2: 'ss',
+    // };
+    // const createTrialDto = {
+    //   title: '22',
+    //   content: '22',
+    //   trialTime: new Date(),
+    // };
 
     const user = req.user;
-    const data = await this.trialsService.createTrial(user.id, createTrialDto, voteTitleDto);
+    const data = await this.trialsService.createTrial(
+      user.id,
+      createTrialDto,
+      voteTitleDto,
+    );
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -165,14 +197,23 @@ export class TrialsController {
 
   // 모든 재판 조회 API(회원/비회원 구분 없음)
   @ApiOperation({ summary: ' 모든 게시판 조회 재판 게시물 API' })
-  @Get('/AllTrials')
-  async findAllTrials() {
-    const data = await this.trialsService.findAllTrials();
-
+  @Get('')
+  @Render('board.ejs')
+  async findAllTrials(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request,
+  ): Promise<ReturnValue> {
+    const { allTrials, totalItems } =
+      await this.trialsService.findAllTrials(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
     return {
       statusCode: HttpStatus.OK,
-      message: '모든 조회에 성공하였습니다.',
-      data,
+      message: '게시물 조회 성공',
+      data: allTrials,
+      boardType: BoardType.Trial,
+      pageCount,
+      currentPage: paginationQueryDto.page,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
@@ -186,13 +227,14 @@ export class TrialsController {
     type: Number,
   })
   @Get(':trialsId')
-  async findOneByTrialsId(@Param('trialsId') id: number) {
+  async findOneByTrialsId(@Param('trialsId') id: number, @Req() req: Request) {
     const data = await this.trialsService.findOneByTrialsId(+id);
-
+    console.log(data);
     return {
       statusCode: HttpStatus.OK,
       message: '재판 검색에 성공하였습니다.',
       data,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
@@ -256,7 +298,6 @@ export class TrialsController {
     };
   }
 
-
   // 재판 게시물 좋아요 API
   @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
   @ApiBody({
@@ -280,12 +321,8 @@ export class TrialsController {
     @Param('trialId') trialId: number,
     @UserInfo() user: Users,
     @Body() likeInputDto: LikeInputDto,
-  ): Promise<HumorBoardReturnValue> {
-    const result = await this.likeServise.like(
-      likeInputDto,
-      user,
-      trialId,
-    );
+  ) {
+    const result = await this.likeServise.like(likeInputDto, user, trialId);
 
     return {
       statusCode: HttpStatus.OK,
