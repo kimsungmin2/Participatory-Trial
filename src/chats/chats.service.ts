@@ -14,17 +14,6 @@ import { UserInfos } from '../users/entities/user-info.entity';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
-  // private redisDataClient: Redis;
-  // private redisSubClient: Redis;
-  // this.redisDataClient = new Redis({
-  //   host: process.env.REDIS_HOST,
-  //   port: Number(process.env.REDIS_PORT),
-  // });
-
-  // this.redisSubClient = new Redis({
-  //   host: process.env.REDIS_HOST,
-  //   port: Number(process.env.REDIS_PORT),
-  // });
   constructor(
     @InjectRepository(UserInfos)
     private usersInfoRepository: Repository<UserInfos>,

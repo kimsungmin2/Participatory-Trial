@@ -15,6 +15,7 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Redis } from 'ioredis';
+import { createAdapter } from 'socket.io-redis';
 
 @WebSocketGateway({
   namespace: '',
@@ -38,12 +39,24 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async onModuleInit() {
-    await this.redisSubClient.subscribe('notifications');
-    this.redisSubClient.on('message', (channel, message) => {
-      if (channel === 'notifications') {
-        this.server.emit('notification', message);
-      }
+    const pubClient = new Redis({
+      host: process.env.REDIS_HOST,
+      port: Number(process.env.REDIS_PORT),
     });
+    const subClient = pubClient.duplicate();
+    this.server.adapter(createAdapter(pubClient as any, subClient as any));
+
+    await this.redisSubClient.subscribe('notifications');
+    this.redisSubClient.on(
+      'message',
+      this.handleNotificationMessage.bind(this),
+    );
+  }
+
+  handleNotificationMessage(channel: string, message: string) {
+    if (channel === 'notifications') {
+      this.server.emit('notification', message);
+    }
   }
 
   @SubscribeMessage('join')
