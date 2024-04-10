@@ -6,7 +6,6 @@ import { PolticalDebateCommentsService } from './poltical_debate_comments.servic
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { PolticalDebateCommentsController } from './poltical_debate_comments.controller';
-<<<<<<< HEAD
 import { PolticalDebateHallOfFame } from './entities/poltical_hall_of_fame.entity';
 import { PolticalDebateBoardsViewHallOfFames } from './entities/polticalView_hall_of_fame.entity';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
@@ -18,14 +17,6 @@ import { PolticalDebatesVoteModule } from './poltical_debates_vote/poltical_deba
   imports: [
     TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments, PolticalDebateHallOfFame, PolticalDebateBoardsViewHallOfFames, PolticalDebateVotes, EachPolticalVote]),
     PolticalDebatesVoteModule,
-=======
-import { S3Module } from '../s3/s3.module';
-
-@Module({
-  imports: [
-    TypeOrmModule.forFeature([PolticalDebateBoards, PolticalDebateComments]),
-    S3Module,
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   ],
   controllers: [PolticalDebatesController, PolticalDebateCommentsController],
   providers: [PolticalDebatesService, PolticalDebateCommentsService, PolticalDabateHallOfFameService],

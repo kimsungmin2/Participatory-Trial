@@ -7,35 +7,31 @@ import {
 } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from '../users/entities/user.entity';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
-<<<<<<< HEAD
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { UpdateVoteDto } from 'src/trials/vote/dto/updateDto';
-=======
-import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
-import { S3Service } from '../s3/s3.service';
 import { InjectRedis } from '@nestjs-modules/ioredis';
+import { S3Service } from 'src/s3/s3.service';
 import Redis from 'ioredis';
-import { BoardType } from '../s3/board-type';
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+import { BoardType } from 'src/s3/board-type';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
+
+
 
 @Injectable()
 export class PolticalDebatesService {
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
-<<<<<<< HEAD
-    private readonly dataSource: DataSource
-=======
+    private readonly dataSource: DataSource,
     private s3Service: S3Service,
     @InjectRedis()
     private readonly redis: Redis,
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+
   ) {}
 
   /** 
@@ -73,8 +69,6 @@ export class PolticalDebatesService {
       );
     }
   }
-
-<<<<<<< HEAD
 
   
   /**
@@ -145,8 +139,9 @@ export class PolticalDebatesService {
     );
 
     return findAllPolticalDebateBoard;
-=======
-  async findAll(paginationQueryDto: PaginationQueryDto) {
+  }
+
+  async findAllWithPaginateBoard(paginationQueryDto: PaginationQueryDto) {
     let polticalDebateBoards: PolticalDebateBoards[];
     const totalItems = await this.polticalDebateRepository.count();
     try {
@@ -172,7 +167,6 @@ export class PolticalDebatesService {
       polticalDebateBoards,
       totalItems,
     };
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   }
 
   async findMyBoards(userId: number) {

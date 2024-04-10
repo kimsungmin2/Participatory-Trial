@@ -23,14 +23,12 @@ import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-<<<<<<< HEAD
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
-=======
-import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
+import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
+
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -40,7 +38,6 @@ export class PolticalDebatesController {
     private readonly polticalDabateHallOfFameService: PolticalDabateHallOfFameService
   ) {}
 
-<<<<<<< HEAD
 
   /**
    * 
@@ -64,37 +61,19 @@ export class PolticalDebatesController {
       },
     },
   })
-=======
-  @Get('create')
-  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getCreatePostPage() {
-    return { boardType: BoardType.PolticalDebate };
-  }
-
-  @ApiOperation({ summary: '정치 토론 게시판 생성', description: '생성' })
-  @UseInterceptors(FilesInterceptor('files'))
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
     @UserInfo() userInfo: UserInfos,
     @Body() createPolticalDebateDto: CreatePolticalDebateDto,
-<<<<<<< HEAD
     @Body() voteTitleDto: VoteTitleDto
 
-=======
-    @UploadedFiles() files: Express.Multer.File[],
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
   ) {
     const userId = userInfo.id
     const data = await this.polticalDebatesService.createBothBoardandVote(
       userId,
       createPolticalDebateDto,
-<<<<<<< HEAD
       voteTitleDto,
-=======
-      files,
->>>>>>> 34602244a3eebb81cb9e123a3922b52e3fb21519
     );
 
     return {
@@ -115,7 +94,7 @@ export class PolticalDebatesController {
     @Query() paginationQueryDto: PaginationQueryDto,
   ): Promise<HumorBoardReturnValue> {
     const { polticalDebateBoards, totalItems } =
-      await this.polticalDebatesService.findAll(paginationQueryDto);
+      await this.polticalDebatesService.findAllWithPaginateBoard(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
     return {
       statusCode: HttpStatus.OK,

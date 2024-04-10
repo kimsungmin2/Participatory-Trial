@@ -13,6 +13,7 @@ import {
   UploadedFiles,
   Query,
   Render,
+  Render,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';

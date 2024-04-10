@@ -6,8 +6,13 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+<<<<<<< HEAD
 import { Votes } from './vote.entity';
 import { Users } from '../../users/entities/user.entity';
+=======
+import { Users } from '../../users/entities/user.entity';
+import { Votes } from './vote.entity';
+>>>>>>> fed3506408778a8af6d235abfd28ddb73bf4a3d2
 
 @Entity()
 export class EachVote {
