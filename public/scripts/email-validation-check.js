@@ -10,7 +10,7 @@ form.addEventListener('submit', (event) => {
     code: document.getElementById('code').value,
   };
 
-  fetch('http://localhost:3000/email-verification', {
+  fetch('http://localhost:3000/sign-up/verification', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

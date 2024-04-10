@@ -170,12 +170,10 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    console.log(email);
     const user = await this.usersInfoRepository.findOne({
       select: ['id', 'email', 'password', 'emailVerified'],
       where: { email: email },
     });
-    console.log(user);
 
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');

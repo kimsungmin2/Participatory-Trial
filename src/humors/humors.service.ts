@@ -153,6 +153,7 @@ export class HumorsService {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     return findHumorBoard;
   }
+
   //조회수를 증가시키고 데이터를 반환
   async findOneHumorBoardWithIncreaseView(id: number): Promise<HumorBoards> {
     const findHumorBoard: HumorBoards = await this.HumorBoardRepository.findOne(
@@ -211,9 +212,7 @@ export class HumorsService {
     if (findHumorBoard.userId !== user.id) {
       throw new ForbiddenException('해당 게시물을 삭제할 권한이 없습니다.');
     }
-    const deletedHumorBoard = await this.HumorBoardRepository.delete({
-      id,
-    });
+    const deletedHumorBoard = await this.HumorBoardRepository.softDelete(id);
     if (deletedHumorBoard.affected !== 1) {
       throw new InternalServerErrorException(
         '예기지 못한 오류로 삭제에 실패했습니다. 다시 시도해주십시오.',

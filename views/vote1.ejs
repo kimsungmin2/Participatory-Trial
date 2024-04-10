@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/css/vote.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">CPT</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav"></ul>
+          <ul class="navbar-nav mx-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">자유게시판</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">재판</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">유머</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">정치 토론</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">로그인</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="realtime-voting-container">
+        <div class="container-info">
+          <span class="title"><%= data.title %></span>
+          <span class="user"><%= data.userId %></span>
+        </div>
+        <div class="progress">
+          <div
+            id="vote1Progress"
+            class="progress-bar"
+            role="progressbar"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span id="vote1Result">Vote 1: 0%</span>
+          </div>
+          <div
+            id="vote2Progress"
+            class="progress-bar bg-success"
+            role="progressbar"
+            aria-valuenow="0"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            <span id="vote2Result">Vote 2: 0%</span>
+          </div>
+        </div>
+      </div>
+      <div class="chat-container" ,id="chat-container">
+        <div class="poll-results mt-3"></div>
+        <div class="chat-messages" , id="chat-messages">
+          <div class="message me"><strong>User 2:</strong> 토론시작</div>
+        </div>
+      </div>
+      <div class="input-group mt-3">
+        <input
+          type="text"
+          class="form-control chat-input comment-input"
+          placeholder="채팅을 입력하세요."
+        />
+        <button class="send-btn btn-primary">Send</button>
+      </div>
+      <div class="info-container mt-3">
+        <span class="like-count">좋아요: <span id="like-count">0</span></span
+        >&nbsp&nbsp&nbsp&nbsp
+        <span class="view-count"
+          >조회수: <span id="view-count"><%= data.view %></span></span
+        >
+      </div>
+      <div class="btn-container mt-3">
+        <button class="btn btn-success agree-btn">찬성</button>
+        <button class="btn btn-danger disagree-btn">반대</button>
+      </div>
+    </div>
+    <div
+      class="modal fade"
+      id="notificationModal"
+      tabindex="-1"
+      aria-labelledby="notificationModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notificationModalLabel">새 알림</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const socket = io('http://localhost:3000');
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        const extractedChannelType = segments[1];
+        const roomId = segments[2];
+        const chatInput = document.querySelector('.chat-input');
+        const chatMessages = document.querySelector('.chat-messages');
+        const sendButton = document.querySelector('.send-btn');
+        const agreeBtn = document.querySelector('.agree-btn');
+        const disagreeBtn = document.querySelector('.disagree-btn');
+        const btnContainer = document.querySelector('.btn-container');
+        const ChannelType = {
+          trials: 'trials',
+          humors: 'humors',
+          polticals: 'polticals',
+        };
+        let channelType;
+        if (Object.values(ChannelType).includes(extractedChannelType)) {
+          channelType = extractedChannelType;
+        } else {
+          console.error('Invalid channel type');
+        }
+        socket.on('channelsResponse', function (response) {
+          const chats = response.chats;
+          chats.forEach((chat) => {
+            displayMessage(chat.message);
+          });
+          const votes = response.votes;
+          displayVotes(votes);
+        });
+        function displayVotes(votes) {
+          const vote1ResultElement = document.getElementById('vote1Result');
+          const vote2ResultElement = document.getElementById('vote2Result');
+          vote1ResultElement.textContent = `Vote 1: ${votes.vote1Percentage}%`;
+          vote2ResultElement.textContent = `Vote 2: ${votes.vote2Percentage}%`;
+          setProgressBarWidth('vote1Progress', votes.vote1Percentage);
+          setProgressBarWidth('vote2Progress', votes.vote2Percentage);
+        }
+        function setProgressBarWidth(progressBarId, percentage) {
+          const progressBar = document.getElementById(progressBarId);
+          progressBar.style.setProperty('--progress-width', `${percentage}%`);
+          progressBar.setAttribute('aria-valuenow', percentage);
+        }
+        function displayMessage(message) {
+          const messageElement = document.createElement('div');
+          messageElement.textContent = message;
+          chatMessages.appendChild(messageElement);
+        }
+        sendButton.addEventListener('click', function () {
+          const message = chatInput.value.trim();
+          if (message) {
+            socket.emit('createChat', {
+              channelType,
+              message: message,
+              roomId: roomId,
+            });
+            addChatMessage(message, true);
+            chatInput.value = '';
+          }
+        });
+        socket.on('connect', () => {
+          socket.emit('subscribeToNotifications', { userId: socket.id });
+          socket.on('updateUserCode', (userCode) => {
+            document.cookie = `user-code=${userCode}; path=/; max-age=${60 * 60 * 24 * 365}`;
+          });
+        });
+        socket.on('notification', (message) => {
+          const notification = JSON.parse(message);
+          displayNotification(notification.title, notification.body);
+        });
+        function displayNotification(title, body) {
+          const modalTitle = document.getElementById('notificationModalLabel');
+          const modalBody = document.querySelector(
+            '#notificationModal .modal-body',
+          );
+          modalTitle.textContent = title;
+          modalBody.textContent = body;
+          $('#notificationModal').modal('show');
+        }
+        chatInput.addEventListener('keypress', function (event) {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            sendButton.click();
+          }
+        });
+        agreeBtn.addEventListener('click', function () {
+          socket.emit('createVote', {
+            channelType,
+            roomId: roomId,
+            voteFor: true,
+          });
+        });
+        disagreeBtn.addEventListener('click', function () {
+          socket.emit('createVote', {
+            channelType,
+            roomId: roomId,
+            voteFor: false,
+          });
+        });
+        function joinRoom() {
+          socket.emit('join', { channelType, roomId });
+          requestChannel();
+        }
+        function requestChannel() {
+          socket.emit('requestChannel', {
+            channelTypes: extractedChannelType,
+            roomId,
+          });
+        }
+        socket.on('message', function (data) {
+          displayMessage(data.message);
+        });
+        socket.on('vote', function (data) {
+          displayVotes(data.votes);
+        });
+        joinRoom();
+      });
+    </script>
+  </body>
+</html>
