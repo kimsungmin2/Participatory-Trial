@@ -126,19 +126,27 @@ export class HumorsController {
     const { humorBoards, totalItems } =
       await this.humorsService.getAllHumorBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: humorBoards,
       boardType: BoardType.Humor,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }
   //단건 게시물 조회
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
-  @Get('humor-board/:id')
+  @Get('/:id')
   @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
   @ApiParam({
     name: 'id',

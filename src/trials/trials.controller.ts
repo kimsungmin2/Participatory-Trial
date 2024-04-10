@@ -202,17 +202,25 @@ export class TrialsController {
   async findAllTrials(
     @Query() paginationQueryDto: PaginationQueryDto,
     @Req() req: Request,
-  ): Promise<ReturnValue> {
+  ) {
     const { allTrials, totalItems } =
       await this.trialsService.findAllTrials(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: allTrials,
       boardType: BoardType.Trial,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }

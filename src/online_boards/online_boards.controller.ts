@@ -36,6 +36,7 @@ import { BoardType } from 'src/s3/board-type';
 import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
+import { start } from 'repl';
 
 @ApiTags('자유 게시판')
 @Controller('online-boards')
@@ -109,13 +110,21 @@ export class OnlineBoardsController {
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.FOUND,
       message: '게시글을 조회합니다.',
       data: onlineBoards,
       boardType: BoardType.OnlineBoard,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }

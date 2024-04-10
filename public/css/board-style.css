@@ -234,6 +234,6 @@ button[type='submit'] {
   width: 100%;
 }
 
-.modify {
-  
+.like_button {
+  text-align: center;
 }

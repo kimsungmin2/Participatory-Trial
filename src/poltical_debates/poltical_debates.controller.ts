@@ -36,6 +36,7 @@ import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { start } from 'repl';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -133,13 +134,21 @@ export class PolticalDebatesController {
         paginationQueryDto,
       );
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: polticalDebateBoards,
       boardType: BoardType.PolticalDebate,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }

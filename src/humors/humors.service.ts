@@ -119,14 +119,7 @@ export class HumorsService {
 
   async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     let humorBoards: HumorBoards[];
-    let cursor = '0';
-    let keysBatch = [];
-    do {
-      const reply = await this.redis.scan(cursor, 'MATCH', 'humors:*:view');
-      cursor = reply[0];
-      const keys = reply[1];
-      keysBatch = keysBatch.concat(keys);
-    } while (cursor !== '0');
+
     const totalItems = await this.HumorBoardRepository.count();
     try {
       const { page, limit } = paginationQueryDto;

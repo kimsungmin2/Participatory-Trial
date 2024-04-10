@@ -27,7 +27,7 @@
         <% for (let i = 0; i < data.length; i++) {  %>
         <div class="card">
           <% if (boardType === 'humor') { %>
-            <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+            <div class="card-header" ><a href="http://localhost:3000/humors/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'onlineBoard') { %>
             <div class="card-header" ><a href="http://localhost:3000/online-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'polticalDebate') { %>
@@ -47,23 +47,45 @@
         <% } %>
       </div>
       <div class="pagination">
-        <% for(let i =  1; i <= pageCount; i++) {%>
-          <% if (i === currentPage) {%>
-            <span class="current-page-number"><%= i %></span>
-            <% } else { %>
-              <% if (boardType === 'humor') { %>
-                <a href="/humors?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'onlineBoard') { %>
-                <a href="/online-boards?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'polticalDebate') { %>
-                <a href="/poltical-debates?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'trial') { %>
-                <a href="/trials?page=<%= i %>"><%= i  %></a>
-              <% } %>
-              
-              <% } %>
+
+        <%
+        // 페이지 링크를 위한 기본 URL 설정
+        let baseUrl = '';
+        switch (boardType) {
+          case 'humor':
+            baseUrl = '/humors?page=';
+            break;
+          case 'onlineBoard':
+            baseUrl = '/online-boards?page=';
+            break;
+          case 'polticalDebate':
+            baseUrl = '/poltical-debates?page=';
+            break;
+          case 'trial':
+            baseUrl = '/trials?page=';
+            break;
+        }
+        const prevGroupPage = startPage > 1 ? startPage - 1 : null;
+        const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
+        %>
+        <% if (prevGroupPage) { %>
+          <a href="<%= baseUrl + (prevGroupPage - 9) %>">« 이전</a>
         <% } %>
+        
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <% if (i === currentPage) { %>
+            <span class="current-page-number">[<%= i %>]</span>
+          <% } else { %>
+            <a href="<%= baseUrl + i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+        
+        <% if (nextGroupPage) { %>
+          <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
+        <% } %>
+        
       </div>
+
       <% if (boardType === 'humor') { %>
         <a class="submit-button" href="/humors/create">글쓰기</a>
       <% } else if (boardType === 'onlineBoard') { %>
