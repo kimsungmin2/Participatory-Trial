@@ -13,6 +13,7 @@ import {
   UploadedFiles,
   Query,
   Render,
+  Req,
 } from '@nestjs/common';
 import { HumorsService } from './humors.service';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
@@ -36,64 +37,22 @@ import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
+import { Request } from 'express';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
   constructor(
     private readonly humorsService: HumorsService,
     private readonly likeService: LikeService,
-    private readonly humorHallOfFameService: HumorHallOfFameService
+    private readonly humorHallOfFameService: HumorHallOfFameService,
   ) {}
 
   //글쓰기 페이지
   @ApiOperation({ summary: '유머 게시판 게시물 생성 페이지' })
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getCreatePostPage() {
-    return { boardType: BoardType.Humor };
-  }
-
-  //게시물 생성
-  @UseInterceptors(FilesInterceptor('files'))
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: '유머 게시판 게시물 생성' })
-  @ApiBody({
-    description: '유머 게시물 생성',
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string' },
-        content: { type: 'string' },
-        title1: { type: 'string'},
-        title2: { type: 'string'},
-        files: {
-          type: 'array',
-          items: {
-            format: 'binary',
-            type: 'string',
-          },
-        },
-      },
-    },
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Post()
-  async createHumorBoard(
-    @Body() createHumorBoardDto: CreateHumorBoardDto,
-    @UserInfo() user: Users,
-    @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<HumorBoardReturnValue> {
-    const createdBoard = await this.humorsService.createHumorBoard(
-      createHumorBoardDto,
-      user,
-      files,
-    );
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      message: '게시물 생성에 성공하였습니다.',
-      data: createdBoard,
-    };
+  async getCreatePostPage(@Req() req: Request) {
+    return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'] };
   }
 
   @UseInterceptors(FilesInterceptor('files'))
@@ -106,8 +65,8 @@ export class HumorsController {
       properties: {
         title: { type: 'string' },
         content: { type: 'string' },
-        title1: { type: 'string'},
-        title2: { type: 'string'},
+        title1: { type: 'string' },
+        title2: { type: 'string' },
         files: {
           type: 'array',
           items: {
@@ -128,7 +87,7 @@ export class HumorsController {
     @Body() voteTitleDto: VoteTitleDto,
     @UserInfo() user: Users,
     @UploadedFiles() files: Express.Multer.File[],
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const createdBoard = await this.humorsService.createHumorBoardAndVotes(
       createHumorBoardDto,
       voteTitleDto,
@@ -142,7 +101,6 @@ export class HumorsController {
       data: createdBoard,
     };
   }
-
 
   @ApiOperation({ summary: '모든 유머 게시물 조회' })
   @ApiQuery({
@@ -163,7 +121,8 @@ export class HumorsController {
   @Render('board.ejs') // index.ejs 파일을 렌더링하여 응답
   async getAllHumorBoards(
     @Query() paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoardReturnValue> {
+    @Req() req: Request,
+  ) {
     const { humorBoards, totalItems } =
       await this.humorsService.getAllHumorBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
@@ -174,6 +133,7 @@ export class HumorsController {
       boardType: BoardType.Humor,
       pageCount,
       currentPage: paginationQueryDto.page,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
   //단건 게시물 조회
@@ -186,9 +146,7 @@ export class HumorsController {
     description: '유머 게시물 ID',
     type: Number,
   })
-  async findOneHumorBoard(
-    @Param('id') id: number,
-  ): Promise<HumorBoardReturnValue> {
+  async findOneHumorBoard(@Param('id') id: number, @Req() req: Request) {
     const findHumorBoard: HumorBoards =
       await this.humorsService.findOneHumorBoardWithIncreaseView(id);
     return {
@@ -196,6 +154,7 @@ export class HumorsController {
       message: `${id}번 게시물 조회 성공`,
       data: findHumorBoard,
       boardType: BoardType.Humor,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
@@ -222,7 +181,7 @@ export class HumorsController {
     @Param('humorBoardId') humorBoardId: number,
     @Body() updateHumorDto: UpdateHumorDto,
     @UserInfo() user: Users,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const updatedHumorBoard = await this.humorsService.updateHumorBoard(
       humorBoardId,
       updateHumorDto,
@@ -246,7 +205,7 @@ export class HumorsController {
   async removeHumorBoard(
     @Param('humorBoardId') humorBoardId: number,
     @UserInfo() user: Users,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     await this.humorsService.deleteHumorBoard(humorBoardId, user);
 
     return {
@@ -277,7 +236,7 @@ export class HumorsController {
     @Param('humorBoardId') humorBoardId: number,
     @UserInfo() user: Users,
     @Body() likeInputDto: LikeInputDto,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const result = await this.likeService.like(
       likeInputDto,
       user,
@@ -289,7 +248,6 @@ export class HumorsController {
       message: result,
     };
   }
-
 
   // 유머 게시판 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 유머 게시판 명예의 전당 조회하기 API(투표 수)' })

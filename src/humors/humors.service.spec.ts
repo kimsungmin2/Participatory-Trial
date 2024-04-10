@@ -39,6 +39,9 @@ const mockedUser: Users = {
   humorLike: [],
   onlineBoardLike: [],
   eachVote: [],
+  eachHumorVote: [],
+  eachPolticalVote: [],
+  trialsChat: [],
 };
 const mockBoard = {
   id: 1,

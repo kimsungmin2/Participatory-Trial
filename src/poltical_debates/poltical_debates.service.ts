@@ -20,8 +20,6 @@ import Redis from 'ioredis';
 import { BoardType } from 'src/s3/board-type';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 
-
-
 @Injectable()
 export class PolticalDebatesService {
   constructor(
@@ -31,13 +29,12 @@ export class PolticalDebatesService {
     private s3Service: S3Service,
     @InjectRedis()
     private readonly redis: Redis,
-
   ) {}
 
-  /** 
+  /**
    * 투표 정치 게시물 생성 함수
    * @deprecated 이제 이거 안씀니다.... 투표 기능 한번에 합쳐야 해요!
-   * 
+   *
    */
   async create(
     userInfo: UserInfos,
@@ -70,16 +67,16 @@ export class PolticalDebatesService {
     }
   }
 
-  
   /**
    * 정치 게시판 게시물과 투표 동시에 생성해주는 함수
-   * @param userId 
+   * @param userId
    * @param createPolticalDebateDto title, content
    * @param voteTitleDto title1, title2
-   * @returns 
+   * @returns
    */
-  async createBothBoardandVote(userId: number, 
-    createPolticalDebateDto: CreatePolticalDebateDto, 
+  async createBothBoardandVote(
+    userId: number,
+    createPolticalDebateDto: CreatePolticalDebateDto,
     voteTitleDto: VoteTitleDto,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -87,49 +84,52 @@ export class PolticalDebatesService {
     await queryRunner.connect();
 
     await queryRunner.startTransaction();
-    try{
-    const { title, content } = createPolticalDebateDto;
-    const { title1, title2 } = voteTitleDto
+    try {
+      const { title, content } = createPolticalDebateDto;
+      const { title1, title2 } = voteTitleDto;
 
-    const data = {
-      title,
-      content,
-      userId,
+      const data = {
+        title,
+        content,
+        userId,
+      };
+
+      const newBoard = queryRunner.manager.create(PolticalDebateBoards, data);
+
+      const savedBoard = await queryRunner.manager.save(
+        PolticalDebateBoards,
+        newBoard,
+      );
+      const polticalId = savedBoard.id;
+
+      const vote = {
+        title1,
+        title2,
+        polticalId,
+      };
+
+      const newVote = queryRunner.manager.create(PolticalDebateVotes, vote);
+
+      const savedVote = await queryRunner.manager.save(
+        PolticalDebateVotes,
+        newVote,
+      );
+
+      await queryRunner.commitTransaction();
+
+      return { newVote, savedVote };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      console.log('정치 게시물 생성 에러:', error);
+
+      throw new InternalServerErrorException(
+        '정치 게시물 중 오류가 발생했습니다.',
+      );
+    } finally {
+      await queryRunner.release();
     }
-
-    const newBoard = queryRunner.manager.create(PolticalDebateBoards, data);
-
-    const savedBoard = await queryRunner.manager.save(PolticalDebateBoards, newBoard)
-    const polticalId = savedBoard.id
-
-    const vote = {
-      title1,
-      title2,
-      polticalId
-    }
-
-    const newVote = queryRunner.manager.create(PolticalDebateVotes, vote)
-
-    const savedVote = await queryRunner.manager.save(PolticalDebateVotes, newVote)
-
-    await queryRunner.commitTransaction();
-
-    return { newVote, savedVote }
-
-
-  } catch (error) {
-    await queryRunner.rollbackTransaction();
-
-    console.log('정치 게시물 생성 에러:', error);
-
-    throw new InternalServerErrorException(
-      '정치 게시물 중 오류가 발생했습니다.',
-    );
-  } finally {
-    await queryRunner.release();
   }
-}
-  
 
   async findAll() {
     const findAllPolticalDebateBoard = await this.polticalDebateRepository.find(
@@ -160,9 +160,6 @@ export class PolticalDebatesService {
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    if (polticalDebateBoards.length === 0) {
-      throw new NotFoundException('더이상 게시물이 없습니다!');
-    }
     return {
       polticalDebateBoards,
       totalItems,
@@ -180,7 +177,7 @@ export class PolticalDebatesService {
     const findPolticalDebateBoard = await this.polticalDebateRepository.findOne(
       {
         where: { id },
-        relations: ['polticalDebateComments'],
+        relations: ['polticalDebateComments', 'polticalDebateVotes'],
       },
     );
     if (!findPolticalDebateBoard) {
@@ -336,9 +333,12 @@ export class PolticalDebatesService {
     await queryRunner.startTransaction();
     try {
       // 1. 재판 삭제(일반적으로 remove보다 delete가 더 빠르다.)
-      const deleteResult = await queryRunner.manager.delete(PolticalDebateVotes, {
-        id: polticalVoteId,
-      });
+      const deleteResult = await queryRunner.manager.delete(
+        PolticalDebateVotes,
+        {
+          id: polticalVoteId,
+        },
+      );
 
       // 2. 없으면 404
       if (deleteResult.affected === 0) {

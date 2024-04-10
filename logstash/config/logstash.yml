@@ -1,2 +1,7 @@
-http.host: "0.0.0.0"
-xpack.monitoring.elasticsearch.hosts: [ "http://elasticsearch:9200" ]
+http.host: '0.0.0.0'
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ['http://elasticsearch:9200']
+pipeline.workers: 4
+pipeline.batch.size: 125
+dead_letter_queue.enable: true
+# log.level: debug
