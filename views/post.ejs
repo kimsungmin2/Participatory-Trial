@@ -47,11 +47,11 @@
           <% } %>
       </div>
       <% if (boardType !== 'trial') { %>
-    <%- include('chat') %>
-   
-    <%} else {%>
-      <%- include('chat') %>
+        <%- include('vote') %>
+      <% } else { %>
+        <%- include('chat') %> 
       <% } %>
+      
       </div>
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>

@@ -101,14 +101,13 @@ export class HumorsService {
         imageUrl,
       });
 
-      const vote = await this.HumorVotesRepository.save({
+      const createdVotes = await this.HumorVotesRepository.save({
         humorId: createdBoard.id,
         ...voteTitleDto,
       });
+      console.log(createdVotes);
 
-      const data = { ...createdBoard, vote: vote };
-
-      return data;
+      return createdBoard;
     } catch {
       throw new InternalServerErrorException(
         '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
@@ -173,7 +172,6 @@ export class HumorsService {
         '요청을 처리하는 도중 오류가 발생했습니다.',
       );
     }
-    console.log(findHumorBoard);
 
     return {
       ...findHumorBoard,

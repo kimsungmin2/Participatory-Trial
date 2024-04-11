@@ -99,7 +99,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
+  // @UseGuards(WsJwtGuard)
   @SubscribeMessage('createVote')
   async handleCreateVote(
     @MessageBody()
@@ -151,6 +151,20 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const votes = await this.votesService.getUserVoteCounts(data.roomId);
       socket.emit('channelsResponse', { chats, votes });
+    } catch (error) {
+      console.error('채팅 메시지 조회 과정에서 오류가 발생했습니다:', error);
+      socket.emit('error', '채팅 메시지 조회에 실패하였습니다.');
+    }
+  }
+
+  @SubscribeMessage('requestVotes')
+  async handleRequestVotes(
+    @MessageBody() data: { channelTypes: string; roomId: number },
+    @ConnectedSocket() socket: Socket,
+  ) {
+    try {
+      const votes = await this.votesService.getUserVoteCounts(data.roomId);
+      socket.emit('channelsVotes', votes);
     } catch (error) {
       console.error('채팅 메시지 조회 과정에서 오류가 발생했습니다:', error);
       socket.emit('error', '채팅 메시지 조회에 실패하였습니다.');
