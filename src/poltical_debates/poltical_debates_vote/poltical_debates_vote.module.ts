@@ -8,8 +8,16 @@ import { PolticalVotesController } from './poltical_debates_vote.controller';
 import { PolticalVotesService } from './poltical_debates_vote.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PolticalDebateBoards, PanryeInfo, EachPolticalVote, PolticalDebateVotes])],
+  imports: [
+    TypeOrmModule.forFeature([
+      PolticalDebateBoards,
+      PanryeInfo,
+      EachPolticalVote,
+      PolticalDebateVotes,
+    ]),
+  ],
   controllers: [PolticalVotesController],
   providers: [PolticalVotesService],
+  exports: [PolticalVotesService],
 })
 export class PolticalDebatesVoteModule {}

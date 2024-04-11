@@ -117,10 +117,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: HttpLoggingInterceptor,
+    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

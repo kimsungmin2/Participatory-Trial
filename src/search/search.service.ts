@@ -10,9 +10,7 @@ export class SearchService {
   async searchHumorBoard(q: string) {
     const data = await this.esService.search({
       index: 'humor_boards', // 검색할 인덱스 지정
-      body : {
-        
-      }
+      body: {},
     });
     console.log(data);
 

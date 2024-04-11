@@ -15,6 +15,8 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
 import { Redis } from 'ioredis';
 import { createAdapter } from 'socket.io-redis';
+import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
+import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
 
 @WebSocketGateway({
   namespace: '',
@@ -30,6 +32,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly chatsService: ChatsService,
     private readonly votesService: VotesService,
+    private readonly humorVotesService: HumorVotesService,
+    private readonly polticalVotesService: PolticalVotesService,
   ) {
     this.redisSubClient = new Redis({
       host: process.env.REDIS_HOST,
@@ -99,7 +103,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  // @UseGuards(WsJwtGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('createVote')
   async handleCreateVote(
     @MessageBody()
@@ -114,22 +118,61 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = socket.userId;
     const { channelType, roomId, voteFor } = data;
     try {
-      await this.votesService.addVoteUserorNanUser(
-        userCode,
-        userId,
-        roomId,
-        voteFor,
-      );
-      const votes = await this.votesService.getUserVoteCounts(roomId);
+      console.log(channelType);
+      if (channelType === 'trials') {
+        await this.votesService.addVoteUserorNanUser(
+          userCode,
+          userId,
+          roomId,
+          voteFor,
+        );
+        const votes = await this.votesService.getUserVoteCounts(roomId);
 
-      this.server.to(`${channelType}:${roomId}`).emit('vote', {
-        userId,
-        votes: votes,
-      });
+        this.server.to(`${channelType}:${roomId}`).emit('vote', {
+          userId,
+          votes: votes,
+        });
 
-      if (votes.totalVotes >= 1) {
-        const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-        this.chatsService.publishNotification(notificationMessage);
+        if (votes.totalVotes >= 1) {
+          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
+          this.chatsService.publishNotification(notificationMessage);
+        }
+      } else if (channelType === 'humors') {
+        await this.humorVotesService.addHumorVoteUserorNanUser(
+          userCode,
+          userId,
+          roomId,
+          voteFor,
+        );
+        const votes = await this.humorVotesService.getUserVoteCounts(roomId);
+
+        this.server.to(`${channelType}:${roomId}`).emit('vote', {
+          userId,
+          votes: votes,
+        });
+
+        if (votes.totalVotes >= 1) {
+          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
+          this.chatsService.publishNotification(notificationMessage);
+        }
+      } else if (channelType === 'poltical-debates') {
+        await this.polticalVotesService.addPolticalVoteUserorNanUser(
+          userCode,
+          userId,
+          roomId,
+          voteFor,
+        );
+        const votes = await this.humorVotesService.getUserVoteCounts(roomId);
+
+        this.server.to(`${channelType}:${roomId}`).emit('vote', {
+          userId,
+          votes: votes,
+        });
+
+        if (votes.totalVotes >= 1) {
+          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
+          this.chatsService.publishNotification(notificationMessage);
+        }
       }
     } catch (error) {
       console.error('투표 생성 과정에서 오류가 발생했습니다:', error);
@@ -143,28 +186,28 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: Socket,
   ) {
     try {
-      const chats = await this.chatsService.getChannel(
-        data.channelTypes,
-        data.roomId,
-        data.page,
-      );
+      const { channelTypes, roomId, page } = data;
 
-      const votes = await this.votesService.getUserVoteCounts(data.roomId);
-      socket.emit('channelsResponse', { chats, votes });
-    } catch (error) {
-      console.error('채팅 메시지 조회 과정에서 오류가 발생했습니다:', error);
-      socket.emit('error', '채팅 메시지 조회에 실패하였습니다.');
-    }
-  }
+      if (channelTypes === 'trials') {
+        const chats = await this.chatsService.getChannel(
+          channelTypes,
+          roomId,
+          page,
+        );
 
-  @SubscribeMessage('requestVotes')
-  async handleRequestVotes(
-    @MessageBody() data: { channelTypes: string; roomId: number },
-    @ConnectedSocket() socket: Socket,
-  ) {
-    try {
-      const votes = await this.votesService.getUserVoteCounts(data.roomId);
-      socket.emit('channelsVotes', votes);
+        const votes = await this.votesService.getUserVoteCounts(data.roomId);
+        socket.emit('channelsResponse', { chats, votes });
+      } else if (channelTypes === 'humors') {
+        const votes = await this.humorVotesService.getUserVoteCounts(
+          data.roomId,
+        );
+        socket.emit('votesResponse', votes);
+      } else if (channelTypes === 'poltical-debates') {
+        const votes = await this.polticalVotesService.getUserVoteCounts(
+          data.roomId,
+        );
+        socket.emit('votesResponse', votes);
+      }
     } catch (error) {
       console.error('채팅 메시지 조회 과정에서 오류가 발생했습니다:', error);
       socket.emit('error', '채팅 메시지 조회에 실패하였습니다.');

@@ -40,7 +40,6 @@ export class VotesService {
     return userCode;
   }
 
-  
   // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
   private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
     if (userId) {

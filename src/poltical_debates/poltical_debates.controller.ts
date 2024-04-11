@@ -188,6 +188,7 @@ export class PolticalDebatesController {
   async findOne(@Param('polticalDebateId') id: number, @Req() req: Request) {
     try {
       const data = await this.polticalDebatesService.findOne(id);
+
       return {
         statusCode: HttpStatus.OK,
         message: '정치 토론 상세 조회에 성공했습니다.',

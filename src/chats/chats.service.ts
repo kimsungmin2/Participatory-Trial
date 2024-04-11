@@ -238,7 +238,7 @@ export class ChatsService implements OnModuleInit {
           case 'humors':
             channelChatsRepository = this.humorsChatRepository;
             break;
-          case 'polticals':
+          case 'poltical-debates':
             channelChatsRepository = this.polticalsChatRepository;
             break;
         }

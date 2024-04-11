@@ -19,8 +19,8 @@
     <div class="container">
       <div class="realtime-voting-container">
         <div class="container-info">
-          <span class="title"><%= data.humorVotes.title1 %></span>
-          <span class="user"><%= data.humorVotes.title2 %></span>
+          <span class="title"><%= data.polticalDebateVotes.title1 %></span>
+          <span class="user"><%= data.polticalDebateVotes.title2 %></span>
         </div>
 
         <div class="progress">
@@ -33,7 +33,9 @@
             aria-valuemin="0"
             aria-valuemax="100"
           >
-            <span id="vote1Result"><%= data.humorVotes.title1 %> %></span>
+            <span id="vote1Result"
+              ><%= data.polticalDebateVotes.title1 %> %></span
+            >
           </div>
 
           <div
@@ -45,7 +47,7 @@
             aria-valuemin="0"
             aria-valuemax="100"
           >
-            <span id="vote2Result"><%= data.humorVotes.title2 %></span>
+            <span id="vote2Result"><%= data.polticalDebateVotes.title2 %></span>
           </div>
         </div>
       </div>
@@ -69,7 +71,7 @@
         const ChannelType = {
           trials: 'trials',
           humors: 'humors',
-          polticals: 'polticals',
+          polticals: 'poltical-debates',
         };
 
         let channelType;
@@ -85,7 +87,6 @@
           if (vote1Progress) {
             updateProgressBarWidth(vote1Progress, votes.vote1Percentage);
           }
-
           // 투표 2 프로그레스바 업데이트
           const vote2Progress = document.getElementById('vote2Progress');
           if (vote2Progress) {
@@ -94,7 +95,7 @@
         }
 
         function updateProgressBarWidth(progressBarElement, percentage) {
-          progressBarElement.style.width = `${percentage}`; // 퍼센티지에 '%'를 명시적으로 추가
+          progressBarElement.style.width = `${percentage}`;
           progressBarElement.setAttribute('aria-valuenow', percentage);
 
           const resultSpan = progressBarElement.querySelector('span');
@@ -117,8 +118,7 @@
           }
         }
 
-        socket.on('channelsResponse', function (response) {
-          const votes = response.votes;
+        socket.on('channelsResponse', function (votes) {
           displayVotes(votes);
         });
 

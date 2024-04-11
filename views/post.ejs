@@ -46,12 +46,13 @@
           
           <% } %>
       </div>
-      <% if (boardType !== 'trial') { %>
-        <%- include('vote') %>
-      <% } else { %>
-        <%- include('chat') %> 
-      <% } %>
-      
+      <% if (boardType === 'humor') { %>
+        <%- include('humorVote') %>
+      <% } else if (boardType === 'polticalDebate') { %>
+        <%- include('polticalVote') %>
+      <% } else if (boardType === 'trial') { %>
+      <%- include('chat') %> 
+        <% } %>
       </div>
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
