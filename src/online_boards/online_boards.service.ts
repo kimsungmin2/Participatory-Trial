@@ -69,7 +69,7 @@ export class OnlineBoardsService {
         title: true,
         view: true,
         like: true,
-        createdAt: true,
+        created_at: true,
       },
     });
 
@@ -87,7 +87,7 @@ export class OnlineBoardsService {
         skip,
         take: limit,
         order: {
-          createdAt: 'DESC',
+          created_at: 'DESC',
         },
       });
     } catch (err) {
@@ -158,7 +158,6 @@ export class OnlineBoardsService {
     const foundBoard = await this.findBoardId(id);
 
     await this.onlineBoardsRepository.softDelete({ id: foundBoard.id });
-
 
     return `This action removes a #${id} onlineBoard`;
   }

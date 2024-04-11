@@ -89,7 +89,7 @@ export class OnlineBoardCommentService {
     const foundCommentOwner = await this.onlineBoardCommentRepository.findOne({
       where: { userId, id: commentId },
     });
-    console.log(foundCommentOwner);
+
     if (!foundCommentOwner) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }

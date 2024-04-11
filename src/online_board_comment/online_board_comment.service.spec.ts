@@ -114,9 +114,9 @@ describe('OnlineBoardCommentService', () => {
       OnlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+      created_at: new Date('2024-03-24T02:05:02.602Z'),
+      updated_at: new Date('2024-03-24T02:05:02.602Z'),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedValue: OnlineBoardComments = {
@@ -126,7 +126,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -149,24 +149,7 @@ describe('OnlineBoardCommentService', () => {
   it('should find all board comments', async () => {
     const onlineBoardId = 1;
 
-    const onlineBoard: OnlineBoards = {
-      id: onlineBoardId,
-      userId: 1,
-      title: 'title',
-      content: 'content',
-      view: 1,
-      like: 1,
-      topComments: 'string',
-      user: null,
-      OnlineBoardComment: null,
-      onlineBoardLike: null,
-      imageUrl: null,
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
-    };
-
-    const expectedValue = [
+    const expectedValue: OnlineBoardComments[] = [
       {
         id: 1,
         onlineBoardId: onlineBoardId,
@@ -174,15 +157,11 @@ describe('OnlineBoardCommentService', () => {
         userId: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
-        deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+        deleted_at: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
         onlineBoard: null,
       },
     ];
-
-    jest
-      .spyOn(onlineBoardsService, 'findBoardId')
-      .mockResolvedValue(onlineBoard);
 
     jest.spyOn(repository, 'findBy').mockResolvedValue(expectedValue);
 
@@ -205,7 +184,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -237,7 +216,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
@@ -262,7 +241,7 @@ describe('OnlineBoardCommentService', () => {
       userId: 1,
       createdAt: new Date(),
       updatedAt: new Date(),
-      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
     };
