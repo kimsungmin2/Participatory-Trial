@@ -21,7 +21,7 @@ import { CommentOwnerGuard } from './guards/online_board_comment.guard';
 
 @ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
-@Controller('comments')
+@Controller('online-boards/:onlineBoardId/comments')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,

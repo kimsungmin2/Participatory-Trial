@@ -31,6 +31,7 @@
         </div>
       </div>
       <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
+      
       <!--게시글 내용-->
       <div class="post_content">
         <span><%= data.content  %></span>
@@ -43,7 +44,7 @@
           </div>
           <% } %>
       </div>
-      <!--게시글 좋아요-->;
+      <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
       <div class="like_button">
         <button id="like" href="/<% data.id %>">좋아요</button>
