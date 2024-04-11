@@ -26,9 +26,9 @@ export class HumorsHallOfFame {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'varchar'})
+  @Column({ type: 'varchar' })
   totalVotes: number;
-  
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

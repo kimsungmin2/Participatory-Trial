@@ -17,7 +17,6 @@ export class OnlineBoardCommentService {
   constructor(
     @InjectRepository(OnlineBoardComments)
     private readonly onlineBoardCommentRepository: Repository<OnlineBoardComments>,
-    private readonly usersService: UsersService,
   ) {}
 
   // 자유게시판 댓글 생성
@@ -26,13 +25,11 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = await this.usersService.findByMyId(userInfo.id);
-
     const { content } = createOnlineBoardCommentDto;
 
     const board = await this.onlineBoardCommentRepository.save({
       onlineBoardId,
-      userId: foundUser.id,
+      userId: userInfo.id,
       content,
     });
 
@@ -54,12 +51,10 @@ export class OnlineBoardCommentService {
     updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const foundComment = await this.findCommentById(commentId);
-
-    const { content } = updateOnlineBoardCommentDto;
     const comment = await this.onlineBoardCommentRepository.update(
       { id: foundComment.id },
       {
-        content,
+        content: updateOnlineBoardCommentDto.content,
       },
     );
 
@@ -94,7 +89,7 @@ export class OnlineBoardCommentService {
     const foundCommentOwner = await this.onlineBoardCommentRepository.findOne({
       where: { userId, id: commentId },
     });
-
+    console.log(foundCommentOwner);
     if (!foundCommentOwner) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }

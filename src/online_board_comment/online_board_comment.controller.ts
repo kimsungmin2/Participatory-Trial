@@ -22,13 +22,13 @@ import { BoardIdValidationPipe } from '../online_boards/pipes/exist-board.pipe';
 
 @ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
-@Controller('online-boards/comments')
+@Controller('online-boards/:onlineBoardId/comments')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
 
-  @Post(':onlineBoardId')
+  @Post()
   async create(
     @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
@@ -47,7 +47,7 @@ export class OnlineBoardCommentController {
     };
   }
 
-  @Get(':onlineBoardId')
+  @Get()
   async findAll(
     @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
   ) {
@@ -64,7 +64,7 @@ export class OnlineBoardCommentController {
   @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
-    @Param() commentId: number,
+    @Param('commentId') commentId: number,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
@@ -81,7 +81,7 @@ export class OnlineBoardCommentController {
 
   @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
-  async remove(@Param() commentId: number) {
+  async remove(@Param('commentId') commentId: number) {
     this.onlineBoardCommentService.removeComment(commentId);
 
     return {

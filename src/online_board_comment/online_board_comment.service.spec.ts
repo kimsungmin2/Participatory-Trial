@@ -110,13 +110,13 @@ describe('OnlineBoardCommentService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
-      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedValue: OnlineBoardComments = {
@@ -130,8 +130,6 @@ describe('OnlineBoardCommentService', () => {
       user: null,
       onlineBoard: null,
     };
-
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
 
     jest
       .spyOn(onlineBoardsService, 'findBoardId')
@@ -159,13 +157,13 @@ describe('OnlineBoardCommentService', () => {
       view: 1,
       like: 1,
       topComments: 'string',
-      createdAt: new Date('2024-03-24T02:05:02.602Z'),
-      updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       OnlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
-      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
+      createdAt: new Date('2024-03-24T02:05:02.602Z'),
+      updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+      deletedAt: new Date('2024-03-24T02:05:02.602Z'),
     };
 
     const expectedValue = [

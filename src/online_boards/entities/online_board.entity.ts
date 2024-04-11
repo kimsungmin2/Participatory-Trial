@@ -41,16 +41,13 @@ export class OnlineBoards {
   topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deleted_at: Date;
-
-  @DeleteDateColumn({ type: 'timestamp' })
-  deletedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
   @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])

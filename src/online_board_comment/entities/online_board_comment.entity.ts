@@ -32,7 +32,7 @@ export class OnlineBoardComments {
   updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp' })
-  deletedAt: Date;
+  deleted_at: Date;
 
   @ManyToOne(
     () => OnlineBoards,
