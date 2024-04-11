@@ -13,7 +13,6 @@ import { WsJwtGuard } from '../utils/guard/ws.guard';
 import { ChatsService } from '../chats/chats.service';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
-import { v4 as uuidv4 } from 'uuid';
 import { Redis } from 'ioredis';
 import { createAdapter } from 'socket.io-redis';
 

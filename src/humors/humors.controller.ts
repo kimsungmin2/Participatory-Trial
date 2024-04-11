@@ -155,12 +155,12 @@ export class HumorsController {
     type: Number,
   })
   async findOneHumorBoard(@Param('id') id: number, @Req() req: Request) {
-    const findHumorBoard: HumorBoards =
-      await this.humorsService.findOneHumorBoardWithIncreaseView(id);
+    const data = await this.humorsService.findOneHumorBoardWithIncreaseView(id);
+    console.log(data);
     return {
       statusCode: HttpStatus.OK,
       message: `${id}번 게시물 조회 성공`,
-      data: findHumorBoard,
+      data,
       boardType: BoardType.Humor,
       isLoggedIn: req['isLoggedIn'],
     };

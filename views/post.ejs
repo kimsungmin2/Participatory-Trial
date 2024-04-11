@@ -12,6 +12,8 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <link rel="stylesheet" href="/vote.css" />
 
     <link rel="stylesheet" href="/css/board-style.css" />
   </head>
@@ -41,9 +43,17 @@
             <% } %>
             
           </div>
+          
           <% } %>
       </div>
-      <!--게시글 좋아요-->;
+      <% if (boardType !== 'trial') { %>
+    <%- include('chat') %>
+   
+    <%} else {%>
+      <%- include('chat') %>
+      <% } %>
+      </div>
+      <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
       <div class="like_button">
         <button id="like" href="/<% data.id %>">좋아요</button>
@@ -141,5 +151,6 @@
   });
 });
     </script>
+    <!-- <script src="/js/vote.js"></script> -->
   </body>
 </html>

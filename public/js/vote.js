@@ -1,0 +1,195 @@
+document.addEventListener('DOMContentLoaded', function () {
+  const socket = io('http://localhost:3000');
+  const path = window.location.pathname;
+  const segments = path.split('/');
+  const extractedChannelType = segments[1];
+  const roomId = segments[2];
+  const chatInput = document.querySelector('.chat-input');
+  const chatMessages = document.querySelector('.chat-messages');
+  const sendButton = document.querySelector('.send-btn');
+  const agreeBtn = document.querySelector('.agree-btn');
+  const disagreeBtn = document.querySelector('.disagree-btn');
+  const btnContainer = document.querySelector('.btn-container');
+
+  const ChannelType = {
+    trials: 'trials',
+    humors: 'humors',
+    polticals: 'polticals',
+  };
+
+  let channelType;
+  if (Object.values(ChannelType).includes(extractedChannelType)) {
+    channelType = extractedChannelType;
+  } else {
+    console.error('Invalid channel type');
+  }
+
+  function displayVotes(votes) {
+    // 투표 1 프로그레스바 업데이트
+    const vote1Progress = document.getElementById('vote1Progress');
+    if (vote1Progress) {
+      updateProgressBarWidth(vote1Progress, votes.vote1Percentage);
+    }
+
+    // 투표 2 프로그레스바 업데이트
+    const vote2Progress = document.getElementById('vote2Progress');
+    if (vote2Progress) {
+      updateProgressBarWidth(vote2Progress, votes.vote2Percentage);
+    }
+  }
+
+  function updateProgressBarWidth(progressBarElement, percentage) {
+    progressBarElement.style.width = `${percentage}`; // 퍼센티지에 '%'를 명시적으로 추가
+    progressBarElement.setAttribute('aria-valuenow', percentage);
+
+    const resultSpan = progressBarElement.querySelector('span');
+    if (resultSpan) {
+      // 'data-original-title' 속성이 없으면 초기화하기 (처음 한 번만 설정됨)
+      if (!resultSpan.hasAttribute('data-original-title')) {
+        resultSpan.setAttribute('data-original-title', resultSpan.textContent);
+      }
+
+      // 원본 타이틀 가져오기
+      const originalTitle = resultSpan.getAttribute('data-original-title');
+
+      // 원본 타이틀에 새로운 퍼센티지 값을 붙여서 텍스트 업데이트
+      resultSpan.textContent = `${originalTitle}: ${percentage}`;
+    }
+  }
+
+  function displayMessageAtTop(data) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message-row');
+
+    // 사용자 이름을 표시하는 요소 생성
+    const userNameSpan = document.createElement('span');
+    userNameSpan.textContent = data.userName + ': ';
+    userNameSpan.classList.add('user-name');
+
+    // 메시지 내용을 표시하는 요소 생성
+    const messageContentSpan = document.createElement('span');
+    messageContentSpan.textContent = data.message;
+    messageContentSpan.classList.add('message-content');
+
+    // 메시지 요소에 사용자 이름과 메시지 내용 요소를 추가
+    messageElement.appendChild(userNameSpan);
+    messageElement.appendChild(messageContentSpan);
+
+    const firstMessage = chatMessages.firstChild;
+    if (firstMessage) {
+      // 첫 번째 메시지가 있으면 그 앞에 새 메시지 삽입
+      chatMessages.insertBefore(messageElement, firstMessage);
+    } else {
+      // 메시지가 없으면 새 메시지를 컨테이너에 추가
+      chatMessages.appendChild(messageElement);
+    }
+  }
+
+  function displayMessageAtBottom(data) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message-row');
+
+    // 사용자 이름을 표시하는 요소 생성
+    const userNameSpan = document.createElement('span');
+    userNameSpan.textContent = data.userName + ': ';
+    userNameSpan.classList.add('user-name');
+
+    // 메시지 내용을 표시하는 요소 생성
+    const messageContentSpan = document.createElement('span');
+    messageContentSpan.textContent = data.message;
+    messageContentSpan.classList.add('message-content');
+
+    // 메시지 요소에 사용자 이름과 메시지 내용 요소를 추가
+    messageElement.appendChild(userNameSpan);
+    messageElement.appendChild(messageContentSpan);
+
+    // 최종적으로 메시지 요소를 chat-messages 컨테이너에 추가
+    chatMessages.appendChild(messageElement);
+  }
+
+  socket.on('channelsResponse', function (response) {
+    const chats = response.chats;
+    chats.reverse().forEach((chat) => {
+      displayMessageAtTop(chat);
+    });
+
+    const votes = response.votes;
+    displayVotes(votes);
+  });
+
+  let currentPage = 0;
+  const loadMoreButton = document.getElementById('loadMoreButton');
+  loadMoreButton.addEventListener('click', function () {
+    currentPage++;
+    socket.emit('requestChannel', {
+      channelTypes: extractedChannelType,
+      roomId: roomId,
+      page: currentPage,
+    });
+  });
+
+  socket.on('connect', () => {
+    socket.emit('subscribeToNotifications', { userId: socket.id });
+    socket.on('updateUserCode', (userCode) => {
+      document.cookie = `user-code=${userCode}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    });
+  });
+
+  chatInput.addEventListener('keypress', function (event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      sendButton.click();
+    }
+  });
+
+  agreeBtn.addEventListener('click', function () {
+    socket.emit('createVote', {
+      channelType,
+      roomId: roomId,
+      voteFor: true,
+    });
+  });
+
+  sendButton.addEventListener('click', function () {
+    const message = chatInput.value.trim();
+    if (message) {
+      socket.emit('createChat', {
+        channelType,
+        message: message,
+        roomId: roomId,
+      });
+      // displayMessageAtBottom(message);
+      chatInput.value = '';
+    }
+  });
+
+  disagreeBtn.addEventListener('click', function () {
+    socket.emit('createVote', {
+      channelType,
+      roomId: roomId,
+      voteFor: false,
+    });
+  });
+
+  function joinRoom() {
+    socket.emit('join', { channelType, roomId });
+    requestChannel();
+  }
+
+  function requestChannel() {
+    socket.emit('requestChannel', {
+      channelTypes: extractedChannelType,
+      roomId,
+    });
+  }
+
+  socket.on('message', function (data) {
+    displayMessageAtBottom(data);
+  });
+
+  socket.on('vote', function (data) {
+    displayVotes(data.votes);
+  });
+
+  joinRoom();
+});

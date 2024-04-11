@@ -226,7 +226,7 @@ export class TrialsController {
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
-  @Render('vote.ejs')
+  @Render('post.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
     name: 'trialsId',
@@ -237,11 +237,12 @@ export class TrialsController {
   @Get(':trialsId')
   async findOneByTrialsId(@Param('trialsId') id: number, @Req() req: Request) {
     const data = await this.trialsService.findOneByTrialsId(+id);
-    console.log(data);
+
     return {
       statusCode: HttpStatus.OK,
       message: '재판 검색에 성공하였습니다.',
       data,
+      boardType: BoardType.Trial,
       isLoggedIn: req['isLoggedIn'],
     };
   }
