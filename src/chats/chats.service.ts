@@ -229,7 +229,6 @@ export class ChatsService implements OnModuleInit {
         }
       }
 
-      // 레디스에 채팅이 충분하지 않거나, '더 보기' 요청인 경우 데이터베이스에서 채팅 조회
       if (redisMessageCount < limit || page > 0) {
         let channelChatsRepository: Repository<any>;
         switch (channelType) {
@@ -239,7 +238,7 @@ export class ChatsService implements OnModuleInit {
           case 'humors':
             channelChatsRepository = this.humorsChatRepository;
             break;
-          case 'polticals':
+          case 'poltical-debates':
             channelChatsRepository = this.polticalsChatRepository;
             break;
         }
