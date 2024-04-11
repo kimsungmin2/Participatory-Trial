@@ -6,6 +6,7 @@ import { WsJwtGuard } from '../utils/guard/ws.guard';
 import { VoteModule } from '../trials/vote/vote.module';
 import { HumorsVotesModule } from '../humors/humors_votes/humors_votes.module';
 import { PolticalDebatesVoteModule } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.module';
+import { LikeModule } from '../like/like.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { PolticalDebatesVoteModule } from '../poltical_debates/poltical_debates_
     VoteModule,
     HumorsVotesModule,
     PolticalDebatesVoteModule,
+    LikeModule,
   ],
   providers: [EventsGateway, WsJwtGuard],
   exports: [EventsGateway],

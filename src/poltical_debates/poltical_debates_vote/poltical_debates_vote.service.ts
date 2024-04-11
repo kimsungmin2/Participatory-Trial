@@ -84,6 +84,7 @@ export class PolticalVotesService {
           userCode,
           polticalVoteId,
         });
+
     // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
       if (isExistingVote.voteFor === voteFor) {

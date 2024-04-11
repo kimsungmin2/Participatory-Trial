@@ -9,51 +9,24 @@
 .navbar-brand {
   font-size: 24px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .realtime-voting-container {
   background-color: #f8f9fa;
   padding: 20px;
   border-radius: 5px;
   margin-top: 20px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .title {
   font-size: 30px;
   font-weight: bold;
 }
 .user {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: bold;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .container-info {
   display: flex;
   justify-content: space-between;
 }
-<<<<<<< HEAD
-
-.progress {
-  height: 40px;
-}
-
-.progress-bar {
-  font-size: 18px;
-}
-
-.info-container {
-  display: flex;
-}
-
-=======
 .progress {
   display: flex; /* Flexbox를 사용하여 내용을 표시 */
   height: 3rem; /* 프로그레스바의 높이 */
@@ -75,7 +48,6 @@
 .info-container {
   display: flex;
 }
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .like-count {
   font-size: 16px;
 }
@@ -83,28 +55,11 @@
   font-size: 16px;
   margin-left: 15px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 #like-count,
 #view-count {
   font-weight: bold;
   margin-left: 5px;
 }
-<<<<<<< HEAD
-
-.btn-container {
-  text-align: center;
-}
-
-.bg-success {
-  background-color: #28a745 !important;
-}
-
-.chat-container {
-  position: relative;
-=======
 .btn-container {
   text-align: center;
 }
@@ -113,55 +68,32 @@
 }
 .chat-container {
   /* position: relative; */
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
   height: 500px;
   overflow-y: auto;
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px;
   display: flex;
-<<<<<<< HEAD
-  flex-direction: column;
-}
-
-.chat-messages {
-  padding: 10px;
-}
-
-=======
   flex-direction: column-reverse;
 }
 .chat-messages {
   padding: 10px;
 }
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .message {
   padding: 10px;
   border-radius: 10px;
   margin-bottom: 10px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .me {
   background-color: #007bff;
   color: #fff;
   text-align: right;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .other-user {
   background-color: #e2e3e5;
   color: #000;
   text-align: left;
 }
-<<<<<<< HEAD
-
-.input-group {
-=======
 /* .input-group {
     position: absolute;
     bottom: 0;
@@ -173,72 +105,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   padding: 10px;
-<<<<<<< HEAD
-}
-
-.btn {
-  display: inline-block;
-}
-
-.btn-container {
-  text-align: center;
-}
-
-/* .comment-container {
-  display: flex;
-  align-items: center;
-  margin-top: 50px;
-  margin-bottom: 100px;
-}
-
-/* .comment-title {
-  display: inline-block;
-} */
-
-/* .comment-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  resize: none;
-  font-size: 16px;
-}
-
-.comment-btn {
-  margin-left: 10px;
-  padding: 10px 20px;
-}  */
-
-/* .comment-container {
-  position: relative;
-  margin-top: 20px;
-}
-
-.comment-title {
-  position: absolute;
-  top: -20px;
-}
-
-.comment-input {
-  width: 100%;
-  height: 100px;
-}
-
-.comment-btn {
-  margin-top: 10px;
-} */
-
-.comments-section {
-  margin-top: 20px;
-}
-
-=======
   background-color: #f0f0f0;
   border-top: 1px solid #ddd;
 }
@@ -266,15 +137,10 @@
 .comments-section {
   margin-top: 20px;
 }
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .comments-section h3 {
   font-size: 18px;
   margin-bottom: 10px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .comment-list {
   border: 1px solid #ccc;
   padding: 10px;
@@ -282,17 +148,6 @@
   max-height: 200px;
   overflow-y: auto;
 }
-<<<<<<< HEAD
-
-.comment {
-  background-color: orange;
-}
-
-.comment-container {
-  margin-top: 50px;
-}
-
-=======
 .comment {
   margin-bottom: 10px;
 }
@@ -300,32 +155,18 @@
   margin-top: 50px;
   margin-bottom: 50px;
 }
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .comment-title {
   top: -20px;
   font-weight: bold;
   font-size: 18px;
   margin-top: 20px;
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539
 .comment-input {
   width: 100%;
   height: 100px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-<<<<<<< HEAD
-  resize: none; /* Prevent resizing */
-  margin-top: 20px;
-}
-
-.comment-btn {
-  margin-top: 10px;
-}
-=======
   resize: none;
   margin-top: 20px;
 }
@@ -382,4 +223,3 @@
   align-items: center; /* 세로 방향 중앙 정렬 */
   height: 100vh; /* 컨테이너 높이를 뷰포트 높이와 동일하게 설정 */
 }
->>>>>>> f89bee390fd2577a5eb74d7f944e2c5b42fa8539

@@ -36,15 +36,14 @@ export class LikeService {
     @InjectRepository(TrialLike)
     private trialsLikeRepository: Repository<TrialLike>,
   ) {}
+
   async like(
-    likeInputDto: LikeInputDto,
-    user: Users,
     boardId: number,
+    userId: number,
+    boardType: string,
   ): Promise<string> {
     //boardId 아이디
     //boardType 어떤 게시판
-    const { boardType } = likeInputDto;
-    const { id } = user;
 
     let boardRepository;
     let likeRepository;
@@ -52,20 +51,21 @@ export class LikeService {
 
     //타입 별 의존성 주입
     switch (boardType) {
-      case BoardType.Humor:
+      case 'humors':
         boardRepository = this.humorBoardRepository;
         likeRepository = this.humorLikeRepository;
         entityKey = `humorBoardId`;
         break;
-      case BoardType.OnlineBoard:
+      case 'onlineBoards':
         boardRepository = this.onlineBoardRepository;
         likeRepository = this.onlineLikeRepository;
         entityKey = `onlineBoardId`;
         break;
-      case BoardType.Trial:
+      case 'trials':
         boardRepository = this.trialsRepository;
         likeRepository = this.trialsLikeRepository;
         entityKey = 'trialId';
+        break;
       default:
         throw new NotFoundException(`${boardType}은 현재 지원되지 않습니다.`);
     }
@@ -78,25 +78,25 @@ export class LikeService {
       await likeRepository.findOne({
         where: {
           [entityKey]: boardId,
-          userId: id,
+          userId,
         },
       });
 
     if (!isLikeExist) {
-      console.log(boardId);
-      console.log(id);
       const like = {
         [entityKey]: boardId,
-        userId: id,
+        userId,
       } as DeepPartial<LikeEntity>;
 
       await likeRepository.save(like);
       await boardRepository.increment({ id: boardId }, 'like', 1);
-      return '좋아요 성공';
     } else {
       await likeRepository.remove(isLikeExist);
       await boardRepository.decrement({ id: boardId }, 'like', 1);
-      return '좋아요 취소 성공';
     }
+    const updatedBoard = await boardRepository.findOneBy({ id: boardId });
+    const currentLikes = updatedBoard ? updatedBoard.like : 0;
+
+    return currentLikes;
   }
 }

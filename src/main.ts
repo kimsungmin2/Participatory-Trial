@@ -12,7 +12,6 @@ import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.loggi
 import { WinstonLogger } from 'nest-winston';
 import { HttpExceptionFilter } from './utils/filter/exception.filter';
 import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
-import expressLayout from 'express-ejs-layouts';
 
 async function bootstrap() {
   const logger = winstonLogger;
@@ -37,4 +36,3 @@ async function bootstrap() {
   logger.verbose(`${port}번 포트에서 어플리케이션 실행`);
 }
 bootstrap();
-

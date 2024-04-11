@@ -24,33 +24,33 @@ import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 export class LikeController {
   constructor(private readonly likeService: LikeService) {}
 
-  @ApiBody({
-    description: '좋아요',
-    schema: {
-      type: 'object',
-      properties: {
-        boardType: { type: 'string' },
-      },
-    },
-  })
-  @ApiParam({
-    name: 'boardId',
-    required: true,
-    description: '유머 게시물 ID',
-    type: Number,
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Post('/:boardId')
-  async create(
-    @Body() likeInputDto: LikeInputDto,
-    @UserInfo() user: Users,
-    @Param('boardId') boardId: number,
-  ) {
-    const result = await this.likeService.like(likeInputDto, user, boardId);
+  // @ApiBody({
+  //   description: '좋아요',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       boardType: { type: 'string' },
+  //     },
+  //   },
+  // })
+  // @ApiParam({
+  //   name: 'boardId',
+  //   required: true,
+  //   description: '유머 게시물 ID',
+  //   type: Number,
+  // })
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('/:boardId')
+  // async create(
+  //   @Body() likeInputDto: LikeInputDto,
+  //   @UserInfo() user: Users,
+  //   @Param('boardId') boardId: number,
+  // ) {
+  //   const result = await this.likeService.like(likeInputDto, user, boardId);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: result,
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: result,
+  //   };
+  // }
 }
