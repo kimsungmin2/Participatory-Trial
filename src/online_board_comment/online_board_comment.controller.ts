@@ -64,10 +64,12 @@ export class OnlineBoardCommentController {
   @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
+    @Param('onlineBoardId') onlineBoardId: number,
     @Param('commentId') commentId: number,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
+      onlineBoardId,
       commentId,
       updateOnlineBoardCommentDto,
     );
@@ -81,8 +83,11 @@ export class OnlineBoardCommentController {
 
   @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
-  async remove(@Param('commentId') commentId: number) {
-    this.onlineBoardCommentService.removeComment(commentId);
+  async remove(
+    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    this.onlineBoardCommentService.removeComment(onlineBoardId, commentId);
 
     return {
       statusCode: HttpStatus.OK,

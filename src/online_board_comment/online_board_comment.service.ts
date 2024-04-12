@@ -47,12 +47,13 @@ export class OnlineBoardCommentService {
 
   // 자유게시판 수정
   async updateComment(
+    onlineBoardId: number,
     commentId: number,
     updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const foundComment = await this.findCommentById(commentId);
     const comment = await this.onlineBoardCommentRepository.update(
-      { id: foundComment.id },
+      { id: foundComment.id, onlineBoardId },
       {
         content: updateOnlineBoardCommentDto.content,
       },
@@ -62,11 +63,12 @@ export class OnlineBoardCommentService {
   }
 
   // 자유게시판 삭제
-  async removeComment(commentId: number) {
+  async removeComment(onlineBoardId: number, commentId: number) {
     const foundComment = await this.findCommentById(commentId);
 
     await this.onlineBoardCommentRepository.softDelete({
       id: foundComment.id,
+      onlineBoardId,
     });
 
     return `This action removes a #${commentId} onlineBoard`;
