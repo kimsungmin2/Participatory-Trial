@@ -14,10 +14,18 @@ import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service
 import { S3Module } from 'src/s3/s3.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([OnlineBoards, Users, OnlineBoardLike,OnlineBoardLikeHallOfFames, OnlineBoardViewHallOfFames])
-  , UsersModule,
-  LikeModule,
-  S3Module],
+  imports: [
+    TypeOrmModule.forFeature([
+      OnlineBoards,
+      Users,
+      OnlineBoardLike,
+      OnlineBoardLikeHallOfFames,
+      OnlineBoardViewHallOfFames,
+    ]),
+    UsersModule,
+    LikeModule,
+    S3Module,
+  ],
   controllers: [OnlineBoardsController],
   providers: [OnlineBoardsService, OnlineBoardHallOfFameService],
 })

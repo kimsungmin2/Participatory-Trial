@@ -11,68 +11,68 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-  redis:
-    image: redis:latest
-    restart: always
-    ports:
-      - '6379:6379'
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
-    user: '1000:1000'
-    volumes:
-      - type: bind
-        source: ./elasticsearch/data
-        target: /usr/share/elasticsearch/data
-    ports:
-      - '9200:9200'
-      - '9300:9300'
-    environment:
-      - 'discovery.type=single-node'
-      - 'ELASTIC_PASSWORD=0000'
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.9.3
-    restart: always
-    depends_on:
-      - elasticsearch
-    ports:
-      - '5601:5601'
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.9.3
-    restart: always
-    depends_on:
-      - elasticsearch
-    volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./drivers:/usr/share/logstash/drivers
-      - ./logs:/usr/share/logstash/logs
+  # redis:
+  #   image: redis:latest
+  #   restart: always
+  #   ports:
+  #     - '6379:6379'
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+  #   user: '1000:1000'
+  #   volumes:
+  #     - type: bind
+  #       source: ./elasticsearch/data
+  #       target: /usr/share/elasticsearch/data
+  #   ports:
+  #     - '9200:9200'
+  #     - '9300:9300'
+  #   environment:
+  #     - 'discovery.type=single-node'
+  #     - 'ELASTIC_PASSWORD=0000'
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:7.9.3
+  #   restart: always
+  #   depends_on:
+  #     - elasticsearch
+  #   ports:
+  #     - '5601:5601'
+  # logstash:
+  #   image: docker.elastic.co/logstash/logstash:7.9.3
+  #   restart: always
+  #   depends_on:
+  #     - elasticsearch
+  #   volumes:
+  #     - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+  #     - ./logstash/pipeline:/usr/share/logstash/pipeline
+  #     - ./drivers:/usr/share/logstash/drivers
+  #     - ./logs:/usr/share/logstash/logs
 
-    ports:
-      - '5044:5044'
-    environment:
-      LS_JAVA_OPTS: '-Xmx256m -Xms256m'
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.9.3
-    user: root # 필요한 경우 root 권한으로 실행
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro # 파일비트 구성 파일
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro # 도커 컨테이너 로그에 접근하기 위함
-      - /var/run/docker.sock:/var/run/docker.sock:ro # 도커 정보에 접근하기 위함
-      - ./logs:/usr/share/filebeat/logs:ro
-    depends_on:
-      - elasticsearch
-      - logstash
-    command:
-      [
-        'filebeat',
-        '-e',
-        '-strict.perms=false',
-        '-E',
-        "output.logstash.hosts=['logstash:5044']",
-        '-E',
-        'setup.kibana.host=kibana:5601',
-      ]
-    restart: always
+  #   ports:
+  #     - '5044:5044'
+  #   environment:
+  #     LS_JAVA_OPTS: '-Xmx256m -Xms256m'
+  # filebeat:
+  #   image: docker.elastic.co/beats/filebeat:7.9.3
+  #   user: root # 필요한 경우 root 권한으로 실행
+  #   volumes:
+  #     - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro # 파일비트 구성 파일
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro # 도커 컨테이너 로그에 접근하기 위함
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro # 도커 정보에 접근하기 위함
+  #     - ./logs:/usr/share/filebeat/logs:ro
+  #   depends_on:
+  #     - elasticsearch
+  #     - logstash
+  #   command:
+  #     [
+  #       'filebeat',
+  #       '-e',
+  #       '-strict.perms=false',
+  #       '-E',
+  #       "output.logstash.hosts=['logstash:5044']",
+  #       '-E',
+  #       'setup.kibana.host=kibana:5601',
+  #     ]
+  #   restart: always
 
   # metricbeat:
   #   image: docker.elastic.co/beats/metricbeat:7.9.3

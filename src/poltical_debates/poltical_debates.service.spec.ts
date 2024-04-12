@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { Trials } from '../trials/entities/trial.entity';
@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
+import { S3Service } from '../s3/s3.service';
 
 const mockedUser = {
   id: 1,

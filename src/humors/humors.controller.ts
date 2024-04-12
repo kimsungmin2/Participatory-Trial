@@ -138,7 +138,7 @@ export class HumorsController {
   }
   //단건 게시물 조회
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
-  @Get('humor-board/:id')
+  @Get('humor-boards/:id')
   @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
   @ApiParam({
     name: 'id',
@@ -159,7 +159,7 @@ export class HumorsController {
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
   @UseGuards(AuthGuard('jwt'))
-  @Patch('humor-board/:humorBoardId')
+  @Patch('humor-boards/:humorBoardId')
   @ApiBody({
     description: '유머 게시물 수정',
     schema: {

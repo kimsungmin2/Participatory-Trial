@@ -235,5 +235,49 @@ button[type='submit'] {
 }
 
 .modify {
-  
+}
+
+.comment-form {
+  margin-top: 50px; /* 댓글 작성 폼과 이전 컨텐츠 사이의 간격 설정 */
+}
+
+.comment-form h2 {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 2rem; /* 제목 크기 설정 */
+  margin-bottom: 20px; /* 제목과 폼 사이의 간격 설정 */
+}
+
+.comment-form .form-group {
+  margin-bottom: 20px; /* 폼 그룹 사이의 간격 설정 */
+}
+
+.comment-form label {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 1.5rem; /* 라벨 크기 설정 */
+}
+
+.comment-form textarea {
+  height: 150px; /* 텍스트영역의 높이 설정 */
+}
+
+.comment-form button[type='submit'] {
+  background-color: #007bff; /* 배경색 설정 */
+  color: white; /* 텍스트 색상 설정 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 패딩 설정 */
+  font-size: 1.5rem; /* 버튼 텍스트 크기 설정 */
+  border-radius: 5px; /* 버튼 모서리를 둥글게 설정 */
+  cursor: pointer; /* 커서 타입 설정 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+.comment-form button[type='submit']:hover {
+  background-color: #0056b3; /* 호버 시 배경색 변경 */
+  transform: scale(1.05); /* 호버 시 약간 확대 */
+}
+
+.comment-form button[type='submit']:active {
+  transform: scale(0.95); /* 클릭 시 약간 축소 */
 }

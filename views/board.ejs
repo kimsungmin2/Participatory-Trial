@@ -27,7 +27,7 @@
         <% for (let i = 0; i < data.length; i++) {  %>
         <div class="card">
           <% if (boardType === 'humor') { %>
-            <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+            <div class="card-header" ><a href="http://localhost:3000/humors/humor-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'onlineBoard') { %>
             <div class="card-header" ><a href="http://localhost:3000/online-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'polticalDebate') { %>

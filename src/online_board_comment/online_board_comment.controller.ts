@@ -21,18 +21,19 @@ import { CommentOwnerGuard } from './guards/online_board_comment.guard';
 
 @ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
-@Controller('comments')
+@Controller('online-boards/:onlineBoardId/comments')
 export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
 
-  @Post(':onlineBoardId')
+  @Post()
   async create(
-    @Param() onlineBoardId: number,
+    @Param('onlineBoardId') onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
+    console.log(userInfo);
     const comment = await this.onlineBoardCommentService.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,
@@ -46,8 +47,8 @@ export class OnlineBoardCommentController {
     };
   }
 
-  @Get(':onlineBoardId')
-  async findAll(@Param() onlineBoardId: number) {
+  @Get()
+  async findAll(@Param('onlineBoardId') onlineBoardId: number) {
     const comments =
       await this.onlineBoardCommentService.findAllComments(onlineBoardId);
 
@@ -61,10 +62,12 @@ export class OnlineBoardCommentController {
   @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
-    @Param() commentId,
+    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('commentId') commentId: number,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
+      onlineBoardId,
       commentId,
       updateOnlineBoardCommentDto,
     );
@@ -78,8 +81,11 @@ export class OnlineBoardCommentController {
 
   @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
-  async remove(@Param() commentId: number) {
-    this.onlineBoardCommentService.removeComment(commentId);
+  async remove(
+    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    this.onlineBoardCommentService.removeComment(onlineBoardId, commentId);
 
     return {
       statusCode: HttpStatus.OK,

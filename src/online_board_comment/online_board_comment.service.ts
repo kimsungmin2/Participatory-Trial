@@ -11,14 +11,17 @@ import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { UsersService } from '../users/users.service';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Repository } from 'typeorm';
+import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 
 @Injectable()
 export class OnlineBoardCommentService {
   constructor(
     @InjectRepository(OnlineBoardComments)
     private readonly onlineBoardCommentRepository: Repository<OnlineBoardComments>,
+    @InjectRepository(OnlineBoards)
+    private readonly onlineBoardRepository: Repository<OnlineBoards>,
+
     private readonly onlineBoardsService: OnlineBoardsService,
-    private readonly usersService: UsersService,
   ) {}
 
   // 자유게시판 댓글 생성
@@ -27,15 +30,14 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = await this.usersService.findByMyId(userInfo.id);
-
+    console.log(userInfo.id);
     const { content } = createOnlineBoardCommentDto;
     const foundBoard =
       await this.onlineBoardsService.findBoardId(onlineBoardId);
-
+    console.log(foundBoard);
     const board = await this.onlineBoardCommentRepository.save({
       onlineBoardId: foundBoard.id,
-      userId: foundUser.id,
+      userId: userInfo.id,
       content,
     });
 
@@ -56,16 +58,15 @@ export class OnlineBoardCommentService {
 
   // 자유게시판 수정
   async updateComment(
+    onlineBoardId: number,
     commentId: number,
     updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const foundComment = await this.findCommentById(commentId);
-
-    const { content } = updateOnlineBoardCommentDto;
     const comment = await this.onlineBoardCommentRepository.update(
-      { id: foundComment.id },
+      { id: foundComment.id, onlineBoardId },
       {
-        content,
+        content: updateOnlineBoardCommentDto.content,
       },
     );
 
@@ -73,11 +74,12 @@ export class OnlineBoardCommentService {
   }
 
   // 자유게시판 삭제
-  async removeComment(commentId: number) {
+  async removeComment(onlineBoardId: number, commentId: number) {
     const foundComment = await this.findCommentById(commentId);
 
     await this.onlineBoardCommentRepository.softDelete({
       id: foundComment.id,
+      onlineBoardId,
     });
 
     return `This action removes a #${commentId} onlineBoard`;
