@@ -172,7 +172,7 @@ describe('OnlineBoardCommentService', () => {
 
   it('should update a board comment', async () => {
     const commentId = 1;
-
+    const onlineBoardId = 1;
     const updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto = {
       content: 'content',
     };
@@ -199,6 +199,7 @@ describe('OnlineBoardCommentService', () => {
     jest.spyOn(repository, 'update').mockResolvedValue(expectedResult);
 
     const result = await service.updateComment(
+      onlineBoardId,
       commentId,
       updateOnlineBoardCommentDto,
     );
@@ -208,6 +209,7 @@ describe('OnlineBoardCommentService', () => {
 
   it('should remove a board comment', async () => {
     const commentId = 1;
+    const onlineBoardId = 1;
 
     const onlineBoardComment: OnlineBoardComments = {
       id: commentId,
@@ -226,7 +228,7 @@ describe('OnlineBoardCommentService', () => {
       .mockResolvedValue(onlineBoardComment);
 
     jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
-    const result = await service.removeComment(commentId);
+    const result = await service.removeComment(onlineBoardId, commentId);
 
     expect(result).toEqual(`This action removes a #${commentId} onlineBoard`);
   });
