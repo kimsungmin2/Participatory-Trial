@@ -3,7 +3,6 @@ import { HumorCommentsService } from './humor-comments.service';
 import { HumorComments } from './entities/humor_comment.entity';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { MockRepository, createMockRepository } from '../utils/type/mock-type';
 import { Role } from '../users/types/userRole.type';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';

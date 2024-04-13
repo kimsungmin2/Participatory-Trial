@@ -31,16 +31,15 @@ export class OnlineBoardComments {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-
   @ManyToOne(
     () => OnlineBoards,
-    (onlineBoard) => onlineBoard.OnlineBoardComment,
+    (onlineBoard) => onlineBoard.onlineBoardComment,
     { onDelete: 'CASCADE' },
   )
-  @JoinColumn({ name: 'online_board_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'onlineBoardId', referencedColumnName: 'id' })
   onlineBoard: Users;
-  
+
   @ManyToOne(() => Users, (user) => user.onlineBoard, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 }

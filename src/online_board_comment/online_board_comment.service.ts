@@ -27,14 +27,14 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = await this.usersService.findByMyId(userInfo.id);
+    const foundUser = await this.usersService.findById(userInfo.id);
 
     const { content } = createOnlineBoardCommentDto;
     const foundBoard =
       await this.onlineBoardsService.findBoardId(onlineBoardId);
 
     const board = await this.onlineBoardCommentRepository.save({
-      onlineBoardId: foundBoard.id,
+      onlineBoardId: +foundBoard.id,
       userId: foundUser.id,
       content,
     });

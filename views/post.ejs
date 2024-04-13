@@ -67,13 +67,14 @@
               <% } %>
           </div>
         <% } else if (boardType === 'onlineBoard') { %>
-          <p style="font-size: 30px;">댓글: <%= data.OnlineBoardComment.length  %>개</p>
+          <%= JSON.stringify(data) %>
+          <p style="font-size: 30px;">댓글: <%= data.onlineBoardComment.length  %>개</p>
           <div class="content_container">
-            <% for (let i = 0; i < data.OnlineBoardComment.length; i++)  {%>
+            <% for (let i = 0; i < data.onlineBoardComment.length; i++)  {%>
               <div class="content">
-              <p>작성자: <%= data.OnlineBoardComment[i].userId %></p>
-              <p><%= data.OnlineBoardComment[i].content %></p>
-              <p>작성일: <%= data.OnlineBoardComment[i].createdAt %></p>
+              <p>작성자: <%= data.onlineBoardComment[i].userId %></p>
+              <p><%= data.onlineBoardComment[i].content %></p>
+              <p>작성일: <%= data.onlineBoardComment[i].createdAt %></p>
               <button class="modify">수정</button>
               <button>삭제</button>
               </div>

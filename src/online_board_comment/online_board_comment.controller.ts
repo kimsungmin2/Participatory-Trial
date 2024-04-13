@@ -16,7 +16,12 @@ import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.d
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CommentOwnerGuard } from './guards/online_board_comment.guard';
 
 @ApiTags('자유 게시판 댓글')
@@ -26,10 +31,18 @@ export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
-
+  // 특정 자유 게시판 id 조회 API
+  @ApiOperation({ summary: '특정 게시물 조회 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'onlineBoardId',
+    required: true,
+    description: ' 자유 게시판 ID',
+    type: Number,
+  })
   @Post(':onlineBoardId')
   async create(
-    @Param() onlineBoardId: number,
+    @Param('onlineBoardId') onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
@@ -76,6 +89,15 @@ export class OnlineBoardCommentController {
     };
   }
 
+  // 특정 자유 게시판 id 조회 API
+  @ApiOperation({ summary: '특정 게시물 조회 API' })
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: ' 자유 게시판 ID',
+    type: Number,
+  })
   @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
   async remove(@Param() commentId: number) {

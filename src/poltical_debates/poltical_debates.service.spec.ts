@@ -155,8 +155,7 @@ describe('PolticalDebatesService', () => {
 
       jest.spyOn(polticalDebatesRepository, 'count').mockResolvedValue(3);
 
-      const findAllPolticalDebateBoard =
-        await polticalDebatesService.findAll(PaginationQueryDto);
+      const findAllPolticalDebateBoard = await polticalDebatesService.findAll();
 
       expect(findAllPolticalDebateBoard).toEqual(mockPolticalDebates);
     });

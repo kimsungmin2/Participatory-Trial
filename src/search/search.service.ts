@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { SearchQueryDto } from './dto/search.dto';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { BoardIndex } from './type/board_index.type';
+import { SearchAllQueryDto } from './dto/searchAll.dto';
 
 @Injectable()
 export class SearchService {
@@ -10,7 +12,7 @@ export class SearchService {
     const boolQuery = {
       bool: {
         should: [],
-        minimum_should_match: 1,
+        minimum_should_match: '50%',
       },
     };
 
@@ -31,6 +33,15 @@ export class SearchService {
       index: searchQueryDto.boardName,
       body: {
         query: boolQuery,
+        sort: [
+          {
+            updated_at: {
+              order: 'desc',
+            },
+          },
+        ],
+        size: 1000,
+        from: 0,
       },
     });
 
@@ -41,5 +52,49 @@ export class SearchService {
     let result = hits.map((hit) => hit._source);
 
     return result; // 검색 결과 반환
+  }
+
+  async searchAllBoards(searchAllQueryDto: SearchAllQueryDto) {
+    const boolQuery = {
+      bool: {
+        should: [],
+        minimum_should_match: 1,
+      },
+    };
+    if (searchAllQueryDto.titleQuery) {
+      boolQuery.bool.should.push({
+        match: { title: searchAllQueryDto.titleQuery },
+      });
+    }
+    if (searchAllQueryDto.contentQuery) {
+      boolQuery.bool.should.push({
+        match: { content: searchAllQueryDto.contentQuery },
+      });
+    }
+
+    const data = await this.esService.search({
+      index: [
+        BoardIndex.humor,
+        BoardIndex.onlineBoard,
+        BoardIndex.polticalDebate,
+        BoardIndex.trial,
+      ].join(''),
+      body: {
+        query: boolQuery,
+        sort: [
+          {
+            updated_at: {
+              order: 'desc',
+            },
+          },
+        ],
+      },
+    });
+
+    const hits = data.body.hits.hits;
+
+    let result = hits.map((hit) => hit._source);
+
+    return result;
   }
 }

@@ -10,6 +10,10 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { S3Service } from '../s3/s3.service';
+import { Users } from '../users/entities/user.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
+const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
 
 describe('OnlineBoardCommentService', () => {
   let service: OnlineBoardCommentService;
@@ -37,6 +41,10 @@ describe('OnlineBoardCommentService', () => {
           useClass: Repository,
         },
         {
+          provide: getRepositoryToken(Users),
+          useClass: Repository,
+        },
+        {
           provide: S3Service,
           useValue: {
             saveImages: jest.fn(),
@@ -50,6 +58,7 @@ describe('OnlineBoardCommentService', () => {
             incr: jest.fn().mockResolvedValue(1),
           },
         },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
@@ -92,7 +101,7 @@ describe('OnlineBoardCommentService', () => {
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
@@ -109,7 +118,7 @@ describe('OnlineBoardCommentService', () => {
       onlineBoard: null,
     };
 
-    jest.spyOn(usersService, 'findByUserId').mockResolvedValue(userInfo);
+    jest.spyOn(usersService, 'findById').mockResolvedValue(userInfo);
 
     jest
       .spyOn(onlineBoardsService, 'findBoardId')
@@ -140,7 +149,7 @@ describe('OnlineBoardCommentService', () => {
       createdAt: new Date('2024-03-24T02:05:02.602Z'),
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
       imageUrl: null,
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),

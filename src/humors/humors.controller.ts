@@ -38,6 +38,7 @@ import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
 import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { Request } from 'express';
+import { HumorSeedService } from './humor-seeed.service';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -45,6 +46,7 @@ export class HumorsController {
     private readonly humorsService: HumorsService,
     private readonly likeService: LikeService,
     private readonly humorHallOfFameService: HumorHallOfFameService,
+    private readonly humorSeedService: HumorSeedService,
   ) {}
 
   //글쓰기 페이지
@@ -312,6 +314,21 @@ export class HumorsController {
       statusCode: HttpStatus.OK,
       message: '유머 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
       recentHallofFame,
+    };
+  }
+  @ApiOperation({ summary: '더미 생성' })
+  @ApiParam({
+    name: 'count',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @Post('some/:count')
+  async createDummyData(@Param('count') count: number) {
+    await this.humorSeedService.saveHumorToDataBase(count);
+
+    return {
+      message: `${count}개 생성 완료`,
     };
   }
 }
