@@ -16,13 +16,11 @@
     />
   </head>
   <body>
-    <%- include('partials/notification') %> <%- include('partials/nav') %>
-
     <div class="container">
       <div class="realtime-voting-container">
         <div class="container-info">
-          <span class="title"><%= data.OneTrials.title %></span>
-          <!-- <span class="user"><%= data.OneTrials.userId %></span> -->
+          <span class="title"><%= data.vote.title1 %></span>
+          <span class="user"><%= data.vote.title2 %></span>
         </div>
 
         <div class="progress">
@@ -48,10 +46,10 @@
             aria-valuemax="100"
           >
             <span id="vote2Result"><%= data.vote.title2 %></span>
-            <!-- 내부 텍스트를 실제 퍼센트 값으로 업데이트 -->
           </div>
         </div>
       </div>
+      <div></div>
 
       <div class="chat-container" id="chat-container">
         <div class="poll-results mt-3"></div>
@@ -82,14 +80,6 @@
         />
 
         <button class="send-btn btn-primary">Send</button>
-      </div>
-
-      <div class="info-container mt-3">
-        <span class="like-count">좋아요: <span id="like-count">0</span></span
-        >&nbsp&nbsp&nbsp&nbsp
-        <span class="view-count"
-          >조회수: <span id="view-count"><%= data.view %></span></span
-        >
       </div>
 
       <div class="btn-container mt-3">

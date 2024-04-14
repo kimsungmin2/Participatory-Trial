@@ -101,11 +101,10 @@ export class HumorsService {
         imageUrl,
       });
 
-      const createdVotes = await this.HumorVotesRepository.save({
+      await this.HumorVotesRepository.save({
         humorId: createdBoard.id,
         ...voteTitleDto,
       });
-      console.log(createdVotes);
 
       return createdBoard;
     } catch {

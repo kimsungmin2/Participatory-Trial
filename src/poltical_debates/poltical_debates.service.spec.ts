@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { Trials } from '../trials/entities/trial.entity';
@@ -61,6 +61,7 @@ describe('PolticalDebatesService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PolticalDebatesService,
+        DataSource,
         {
           provide: polticalDebatesRepositoryToken,
           useValue: {
