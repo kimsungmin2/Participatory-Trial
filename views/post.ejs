@@ -33,6 +33,7 @@
         </div>
       </div>
       <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
+      
       <!--게시글 내용-->
       <div class="post_content">
         <span><%= data.content  %></span>
@@ -46,6 +47,8 @@
           
           <% } %>
       </div>
+<<<<<<< HEAD
+=======
       <% if (boardType === 'humor') { %>
         <%- include('humorVote') %>
       <% } else if (boardType === 'polticalDebate') { %>
@@ -54,6 +57,7 @@
       <%- include('chat') %> 
         <% } %>
       </div>
+>>>>>>> 46cb4ed75e973e26deb7663d014545295bc4fd5f
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
       <div class="like_button">
@@ -77,13 +81,14 @@
               <% } %>
           </div>
         <% } else if (boardType === 'onlineBoard') { %>
-          <p style="font-size: 30px;">댓글: <%= data.OnlineBoardComment.length  %>개</p>
+          <%= JSON.stringify(data) %>
+          <p style="font-size: 30px;">댓글: <%= data.onlineBoardComment.length  %>개</p>
           <div class="content_container">
-            <% for (let i = 0; i < data.OnlineBoardComment.length; i++)  {%>
+            <% for (let i = 0; i < data.onlineBoardComment.length; i++)  {%>
               <div class="content">
-              <p>작성자: <%= data.OnlineBoardComment[i].userId %></p>
-              <p><%= data.OnlineBoardComment[i].content %></p>
-              <p>작성일: <%= data.OnlineBoardComment[i].createdAt %></p>
+              <p>작성자: <%= data.onlineBoardComment[i].userId %></p>
+              <p><%= data.onlineBoardComment[i].content %></p>
+              <p>작성일: <%= data.onlineBoardComment[i].createdAt %></p>
               <button class="modify">수정</button>
               <button>삭제</button>
               </div>

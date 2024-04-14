@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { LikeService } from './like.service';
-import { LikeController } from './like.controller';
+// import { LikeController } from './like.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
@@ -22,7 +22,7 @@ import { TrialLike } from 'src/trials/entities/trials.like.entity';
       TrialLike,
     ]),
   ],
-  controllers: [LikeController],
+  controllers: [],
   providers: [LikeService],
   exports: [LikeService],
 })
