@@ -24,4 +24,14 @@ export class SearchService {
 
     return result; // 검색 결과 반환
   }
+
+  async createIndex(): Promise<void>{
+    
+  }
+  async indexCaseData(caseData: any){
+    return await this.esService.index({
+      index: 'law_case',
+      body: caseData
+    })
+  }
 }

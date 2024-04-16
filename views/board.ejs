@@ -16,69 +16,18 @@
     <link rel="stylesheet" href="/css/board-style.css" />
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav"></ul>
-          <ul class="navbar-nav mx-auto">
-            <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="/online-boards"
-                >자유게시판</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/trials">재판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/humors">유머</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/poltical-debates">정치 토론</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">로그인</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('partials/nav')  %>
 
     <header>
-      
-      <div class="board_title">
-        <% if (boardType === 'humor') { %>
-          <span>유머 게시판</span>
-        <% } else if (boardType === 'onlineBoard') { %>
-          <span>자유 게시판</span>
-        <% } else if (boardType === 'polticalDebate') { %>
-          <span>정치토론 게시판</span>
-        <% } else if (boardType === 'trial') { %>
-          <span>재판 게시판</span>
-        <% } %>
-      </div>
+      <%- include('partials/board-title') %>
+
       <hr width="70%" color="black" size="2" style="margin-left: 30px" />
       
       <div class="cards-container">
         <% for (let i = 0; i < data.length; i++) {  %>
         <div class="card">
           <% if (boardType === 'humor') { %>
-            <div class="card-header" ><a href="http://localhost:3000/humors/humor-board/<%= data[i].id%>"><%= data[i].title %></a></div>
+            <div class="card-header" ><a href="http://localhost:3000/humors/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'onlineBoard') { %>
             <div class="card-header" ><a href="http://localhost:3000/online-boards/<%= data[i].id%>"><%= data[i].title %></a></div>
           <% } else if (boardType === 'polticalDebate') { %>
@@ -98,23 +47,45 @@
         <% } %>
       </div>
       <div class="pagination">
-        <% for(let i =  1; i <= pageCount; i++) {%>
-          <% if (i === currentPage) {%>
-            <span class="current-page-number"><%= i %></span>
-            <% } else { %>
-              <% if (boardType === 'humor') { %>
-                <a href="/humors?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'onlineBoard') { %>
-                <a href="/online-boards?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'polticalDebate') { %>
-                <a href="/poltical-debates?page=<%= i %>"><%= i  %></a>
-              <% } else if (boardType === 'trial') { %>
-                <a href="/trials?page=<%= i %>"><%= i  %></a>
-              <% } %>
-              
-              <% } %>
+
+        <%
+        // 페이지 링크를 위한 기본 URL 설정
+        let baseUrl = '';
+        switch (boardType) {
+          case 'humor':
+            baseUrl = '/humors?page=';
+            break;
+          case 'onlineBoard':
+            baseUrl = '/online-boards?page=';
+            break;
+          case 'polticalDebate':
+            baseUrl = '/poltical-debates?page=';
+            break;
+          case 'trial':
+            baseUrl = '/trials?page=';
+            break;
+        }
+        const prevGroupPage = startPage > 1 ? startPage - 1 : null;
+        const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
+        %>
+        <% if (prevGroupPage) { %>
+          <a href="<%= baseUrl + (prevGroupPage - 9) %>">« 이전</a>
         <% } %>
+        
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <% if (i === currentPage) { %>
+            <span class="current-page-number">[<%= i %>]</span>
+          <% } else { %>
+            <a href="<%= baseUrl + i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+        
+        <% if (nextGroupPage) { %>
+          <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
+        <% } %>
+        
       </div>
+
       <% if (boardType === 'humor') { %>
         <a class="submit-button" href="/humors/create">글쓰기</a>
       <% } else if (boardType === 'onlineBoard') { %>

@@ -109,6 +109,7 @@ export class AuthService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     const existingUser = await this.usersService.findByEmail(email);
+    console.log(existingUser)
     if (existingUser) {
       throw new ConflictException(
         '이미 해당 이메일로 가입된 사용자가 있습니다!',
