@@ -1,6 +1,7 @@
 config:
   target: http://localhost:3000
-  socket:
+  tls:
+    rejectUnauthorized: false
   phases:
     - duration: 60
       arrivalRate: 1
@@ -16,7 +17,7 @@ config:
       name: Spike phase
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions
-  processor: './dist/create-dummy-onlineboard.js'
+  processor: './processCookies.js'
   payload:
     - path: './artillery/onlineboard.csv'
       fields:
@@ -25,9 +26,9 @@ config:
     - path: './artillery/onlineboardcomment.csv'
       fields:
         - 'content'
-  defaults:
-    headers:
-      Cookie: 'authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwMSwiaWF0IjoxNzEyODE5NjE0LCJleHAiOjE3NTYwMTk2MTR9.HRyDR3Xk5VNs2_sLCsxtY2oFeWe24u0iVrvdU2eInlU'
+  # defaults:
+  #   headers:
+  #     Cookie: 'authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwMiwiaWF0IjoxNzEzMjAyMzMxLCJleHAiOjE3NTY0MDIzMzF9.L6Xvx6E666u-2fADnYd9CwGDWsw6ajMwLEnWrKtZjAY'
   ensure:
     thresholds:
       - http.response_time.p99: 100
@@ -39,21 +40,38 @@ config:
 scenarios:
   - name: 'create online board'
     flow:
+      - post:
+          url: 'http://localhost:3000/login'
+          json:
+            email: 'a82727282@gmail.com'
+            password: '1234'
+          afterResponse: 'extractCookie' # 응답에서 쿠키 추출
       - get:
           url: 'http://localhost:3000/online-boards'
+          beforeRequest: 'setCookieHeader'
       - get:
           url: 'http://localhost:3000/online-boards/1'
+          beforeRequest: 'setCookieHeader'
       - post:
           url: 'http://localhost:3000/online-boards'
+          beforeRequest: 'setCookieHeader'
           json:
             title: '{{$loopElement.title}}'
             content: '{{$loopElement.content}}'
   - name: 'create online board comment'
     flow:
+      - post:
+          url: 'http://localhost:3000/login'
+          json:
+            email: 'a82727282@gmail.com'
+            password: '1234'
+          afterResponse: 'extractCookie' # 응답에서 쿠키 추출
       - get:
           url: 'http://localhost:3000/online-boards/1/comments'
+          beforeRequest: 'setCookieHeader'
       - post:
           url: 'http://localhost:3000/online-boards/1/comments'
+          beforeRequest: 'setCookieHeader'
           json:
             content: '{{ $loopElement.content }}'
 # ./node_modules/.bin/artillery run ./asciiart-load-test.yaml

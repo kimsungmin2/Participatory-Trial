@@ -64,13 +64,14 @@ async function createDummyData() {
         const user = new Users();
         const createUser = await AppDataSource.manager.save(user);
 
-        // const userInfo = new UserInfos()
-        // userInfo.nickName = faker.company.name()
-        // userInfo.email = faker.internet.email()
-        // userInfo.password = faker.internet.password()
-        // userInfo.emailVerified = true
-        // userInfo.provider =
-        // userInfo.birth = faker.internet.
+        const userInfo = new UserInfos();
+        userInfo.nickName = faker.company.name();
+        userInfo.email = faker.internet.email();
+        userInfo.password = faker.internet.password();
+        userInfo.emailVerified = true;
+        userInfo.birth = '19950626';
+        userInfo.user = user;
+        await AppDataSource.manager.save(userInfo);
       }
     })
     .catch((error) => console.log(error));
