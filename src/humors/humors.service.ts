@@ -33,7 +33,7 @@ export class HumorsService {
 
   //게시물 생성
   /**
-   * 
+   *
    * @deprecated 아마 게시물과 투표를 한번에 만들어야 해서 새로 만들어야 할겁니다. 밑에 새로 만들어 놨어요
    */
   async createHumorBoard(
@@ -69,12 +69,12 @@ export class HumorsService {
 
   /**
    * 유머게시판 투표와 게시물 동시에 생성함수
-   * 
+   *
    * @param createHumorBoardDto title, content
    * @param voteTitleDto title1, title2
    * @param user user
    * @param files 파일
-   * @returns 
+   * @returns
    */
   async createHumorBoardAndVotes(
     createHumorBoardDto: CreateHumorBoardDto,
@@ -94,31 +94,32 @@ export class HumorsService {
     }
     const imageUrl =
       uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
-      try {
-        const createdBoard = await this.HumorBoardRepository.save({
-          userId: user.id,
-          ...createHumorBoardDto,
-          imageUrl,
-        });
+    try {
+      const createdBoard = await this.HumorBoardRepository.save({
+        userId: user.id,
+        ...createHumorBoardDto,
+        imageUrl,
+      });
 
-        const createdVotes = await this.HumorVotesRepository.save({
-          humorId: createdBoard.id,
-          ...voteTitleDto
-        })
+      const createdVotes = await this.HumorVotesRepository.save({
+        humorId: createdBoard.id,
+        ...voteTitleDto,
+      });
+      console.log(createdVotes);
 
-        return createdBoard;
-      } catch {
-        throw new InternalServerErrorException(
-          '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
-        );
-      }
+      return createdBoard;
+    } catch {
+      throw new InternalServerErrorException(
+        '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+      );
     }
-  
+  }
 
   //모든 게시물 조회(페이지네이션)
 
   async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     let humorBoards: HumorBoards[];
+
     const totalItems = await this.HumorBoardRepository.count();
     try {
       const { page, limit } = paginationQueryDto;
@@ -135,9 +136,6 @@ export class HumorsService {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
-    }
-    if (humorBoards.length === 0) {
-      throw new NotFoundException('더이상 게시물이 없습니다!');
     }
     return {
       humorBoards,
@@ -160,7 +158,7 @@ export class HumorsService {
     const findHumorBoard: HumorBoards = await this.HumorBoardRepository.findOne(
       {
         where: { id },
-        relations: ['humorComment'],
+        relations: ['humorComment', 'humorVotes'],
       },
     );
     if (!findHumorBoard) {
@@ -174,6 +172,7 @@ export class HumorsService {
         '요청을 처리하는 도중 오류가 발생했습니다.',
       );
     }
+    console.log(findHumorBoard);
 
     return {
       ...findHumorBoard,

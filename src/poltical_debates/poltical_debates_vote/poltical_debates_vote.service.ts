@@ -66,19 +66,37 @@ export class PolticalVotesService {
       userCode,
       polticalVoteId,
       voteFor,
-    }: { userId?: number; userCode?: string; polticalVoteId: number; voteFor: boolean },
+    }: {
+      userId?: number;
+      userCode?: string;
+      polticalVoteId: number;
+      voteFor: boolean;
+    },
     queryRunner: QueryRunner,
   ) {
     // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
     const isExistingVote = userId
-      ? await queryRunner.manager.findOneBy(EachPolticalVote, { userId, polticalVoteId })
-      : await queryRunner.manager.findOneBy(EachPolticalVote, { userCode, polticalVoteId });
+      ? await queryRunner.manager.findOneBy(EachPolticalVote, {
+          userId,
+          polticalVoteId,
+        })
+      : await queryRunner.manager.findOneBy(EachPolticalVote, {
+          userCode,
+          polticalVoteId,
+        });
+
     // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
-      throw new BadRequestException(
-        '이미 투표했습니다. 재 투표는 불가능 합니다.',
-      );
+      if (isExistingVote.voteFor === voteFor) {
+        const vote = await this.canselEachVote(isExistingVote.id);
+        return vote;
+      } else {
+        isExistingVote.voteFor = voteFor;
+        await queryRunner.manager.save(EachPolticalVote, isExistingVote);
+        return isExistingVote;
+      }
     }
+
     const voteData = this.eachPolticalVoteRepository.create({
       userId,
       userCode,
@@ -88,19 +106,19 @@ export class PolticalVotesService {
     await queryRunner.manager.save(EachPolticalVote, voteData);
   }
   // 투표하기
-  async addVoteUserorNanUser(
-    req: Request,
+  async addPolticalVoteUserorNanUser(
+    userCode: string,
     userId: number | null,
     polticalVoteId: number,
     voteFor: boolean,
   ) {
-    const userCode = await this.findOrCreateUserCodeVer2(req, userId);
+    // const userCode = await this.findOrCreateUserCodeVer2(req, userId);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, userCode, polticalVoteId, voteFor },
+        { userId, polticalVoteId, voteFor },
         queryRunner,
       );
       await queryRunner.commitTransaction();
@@ -136,7 +154,7 @@ export class PolticalVotesService {
       },
     });
   }
-  async getUserVoteCounts(userVoteId: number) {
+  async getUserVoteCounts(polticalVoteId: number) {
     const result = await this.dataSource
       .getRepository(EachPolticalVote)
       .createQueryBuilder('eachPolticalVote')
@@ -148,19 +166,26 @@ export class PolticalVotesService {
         'SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
         'voteForFalse',
       )
-      .where('eachPolticalVote.userVoteId = :userVoteId', { userVoteId })
+      .where('eachPolticalVote.polticalVoteId = :polticalVoteId', {
+        polticalVoteId,
+      })
       .andWhere('eachPolticalVote.userCode IS NULL')
       .getRawOne();
+
     const voteForTrue = parseInt(result.voteForTrue, 10);
     const voteForFalse = parseInt(result.voteForFalse, 10);
+
     const totalVotes = voteForTrue + voteForFalse;
+
     const vote1Percentage =
       totalVotes > 0 ? (voteForTrue / totalVotes) * 100 : 0;
     const vote2Percentage =
       totalVotes > 0 ? (voteForFalse / totalVotes) * 100 : 0;
+
     return {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
+      totalVotes: totalVotes,
     };
   }
   async getVoteCounts(polticalVoteId: number) {
@@ -175,7 +200,9 @@ export class PolticalVotesService {
         'SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
         'voteForFalse',
       )
-      .where('eachPolticalVote.polticalVoteId = :polticalVoteId', { polticalVoteId })
+      .where('eachPolticalVote.polticalVoteId = :polticalVoteId', {
+        polticalVoteId,
+      })
       .getRawOne();
     const voteForTrue = parseInt(result.voteForTrue, 10);
     const voteForFalse = parseInt(result.voteForFalse, 10);

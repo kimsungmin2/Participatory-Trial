@@ -19,52 +19,7 @@
   </head>
   <body>
     <%- include('partials/notification') %>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">CPT</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-
-          </ul>
-          <ul class="navbar-nav mx-auto">
-            <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="/online-boards">자유게시판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/trials">재판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/humors">유머</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/poltical-debates">정치 토론</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-            <li class="nav-item">
-              <% if (isLoggedIn)  {%>
-              <a class="nav-link" href="/logout">로그아웃</a>
-              <% } else { %>
-                <a class="nav-link" href="/sign-up">로그인</a>
-                <% } %>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <%- include('partials/nav')  %>
     <header>
       <div>
         <p class="hot_vote_now">지금 가장 핫한 토론은?</p>
@@ -125,6 +80,5 @@
         <!-- 다른 grid-item 블록 추가 -->
       </div>
     </header>
-    <script></script>
   </body>
 </html>

@@ -86,7 +86,10 @@ export class AuthController {
     res.send('로그아웃에 성공하였습니다.');
   }
 
-  @ApiOperation({ summary: '카카오 로그인', description: '카카오 계정으로 로그인 하세요.' })
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 계정으로 로그인 하세요.',
+  })
   @UseGuards(KakaoAuthGuard)
   @Get('kakao')
   redirectToKakaoAuth(@Res() res) {
@@ -96,7 +99,7 @@ export class AuthController {
 
     res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
   }
-  
+
   @UseGuards(KakaoAuthGuard)
   @Get('kakao/callback')
   async kakaoCallbacks(@Req() req, @Res() res) {
@@ -157,19 +160,19 @@ export class AuthController {
   // 회원가입 페이지로 이동
   @Get('sign-up')
   @Render('sign-up.ejs')
-  async getSignUp() {
-    return {};
+  async getSignUp(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 
   @Get('verification')
   @Render('email-validation-check.ejs')
-  async getVerifyEmail() {
-    return {};
+  async getVerifyEmail(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 
   @Get('sign-in')
   @Render('sign-in.ejs')
-  async getSignIn() {
-    return {};
+  async getSignIn(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 }

@@ -1,69 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/my-page.css">
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <link
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/my-page.css" />
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-  <title>My Page</title>
-</head>
-<body>  
-  <nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">CPT</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-        </ul>
-        <ul class="navbar-nav mx-auto">
-          <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">자유게시판</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">재판</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">유머</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">정치 토론</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav ms-auto">
-          <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">로그인</a>
-          </li>
-        </ul>
+    <title>My Page</title>
+  </head>
+  <body>
+    <%- include('partials/nav') %>
+    <main>
+      <h1>User Profile</h1>
+      <div class="info">
+        <p><span class="label">Nickname:</span> <%= data.nickName %></p>
+        <p><span class="label">Email:</span> <%= data.email %></p>
+        <p><span class="label">Birthday:</span> <%= data.birth %></p>
+        <!-- 추가적인 개인정보 항목을 여기에 추가할 수 있습니다 -->
       </div>
-    </div>
-  </nav>
-  <main>
-    <h1>User Profile</h1>
-    <div class="info">
-      <p><span class="label">Nickname:</span> <%= data.nickName %></p>
-      <p><span class="label">Email:</span> <%= data.email %></p>
-      <p><span class="label">Birthday:</span> <%= data.birth %></p>
-      <!-- 추가적인 개인정보 항목을 여기에 추가할 수 있습니다 -->
-    </div>
-  </main>
-  <footer>footer</footer>
-</body>
+    </main>
+    <footer>footer</footer>
+  </body>
 </html>
