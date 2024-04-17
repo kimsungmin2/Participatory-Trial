@@ -129,21 +129,6 @@ export class OnlineBoardsController {
     };
   }
 
-  //검색 API
-  @Get('search')
-  async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
-    const boards = await this.onlineBoardsService.findAllBoard(
-      findAllOnlineBoardDto.keyword,
-    );
-
-    return {
-      statusCode: HttpStatus.FOUND,
-      message: '게시글을 조회합니다.',
-      data: boards,
-    };
-  }
-  //단건조회
-
   // 특정 자유 게시판 id 조회 API
   @ApiOperation({ summary: '특정 게시물 조회 API' })
   @ApiBearerAuth('access-token')

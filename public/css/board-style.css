@@ -100,9 +100,7 @@ a {
 /* 검색창 스타일 */
 .search-container {
   display: flex;
-  justify-content: center;
   margin-top: 20px;
-  display: flex;
   justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
   /* 컨테이너의 너비를 필요에 따라 조정하세요 */
   margin-bottom: 50px;
@@ -130,6 +128,10 @@ button[type='submit'] {
   font-size: 17px;
   border: 1px solid grey;
   cursor: pointer;
+}
+
+select {
+  margin-right: 10px; /* 셀렉트 박스와 인풋 박스 사이의 간격 */
 }
 
 .board-container {
@@ -236,4 +238,18 @@ button[type='submit'] {
 
 .like_button {
   text-align: center;
+}
+
+.search_not_found {
+  font-size: 30px;
+  display: flex; /* 이를 통해 flex 컨테이너로 만듭니다 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  height: 100%; /* 컨테이너의 높이를 설정해야 수직 중앙 정렬이 적용됩니다. */
+}
+
+.searched-post {
+  margin-top: 30px;
+  font-size: 30px;
+  text-align: center; /* 텍스트 중앙 정렬 */
 }

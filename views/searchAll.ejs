@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/board-style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <%- include('partials/nav') %> <%- include('partials/board-title') %>
+    <hr width="90%" color="black" size="2" style="margin-left: 30px" />
+    <p class="searched-post"><%= data.length %>개의 게시물이 검색되었습니다.</p>
+    <% if (data.length !== 0) { %>
+    <div class="cards-container">
+      <% for (let i = 0; i < data.length; i++) {  %>
+        <% 
+        let boardName;
+        switch (data[i].board_name) {
+              case 'humor_boards':
+              boardName = 'humors';
+                break;
+              case 'online_boards':
+              boardName = 'online-boards';
+                break;
+              case 'poltical_debate_boards':
+              boardName = 'poltical-debates';
+                break;
+              case 'trials':
+              boardName = 'trials';
+                break;
+            }
+        %>
+      <div class="card">
+          <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
+        <div class="card-stats">
+          <div>조회 : <%= data[i].view %></div>
+          <% if (boardType !== 'polticalDebate') { %>
+          <div>좋아요 : <%= data[i].like %></div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } else {%>
+      <p class="search_not_found">검색 결과가 없습니다!</p>
+      <% } %>
+    <div class="search-container">
+      <form action="/search" method="get" id="searchForm">
+        <input type="text" placeholder="검색..." name="search" id="searchInput"/>
+        <button type="submit">검색</button>
+      </form>
+    </div>
+    <script defer>
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const searchInput = document.getElementById('searchInput').value;
+      const queryParams = new URLSearchParams();
+
+      queryParams.append('search', searchInput); // 검색어 항상 추가
+      queryParams.append('type', "titleContent"); // 선택된 검색 옵션 추가
+
+      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+      window.location.href = `/search/all?${queryParams.toString()}`;
+});
+      
+    </script>
+  </body>
+</html>

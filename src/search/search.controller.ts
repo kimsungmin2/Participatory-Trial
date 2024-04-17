@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   HttpStatus,
+  Render,
+  Req,
 } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SearchQueryDto } from './dto/search.dto';
@@ -20,27 +22,42 @@ export class SearchController {
 
   @ApiOperation({ summary: '게시판 검색' })
   @Get('')
-  async searchHumorBoard(@Query() searchQueryDto: SearchQueryDto) {
-    const data = await this.searchService.searchHumorBoard(searchQueryDto);
+  @Render('search.ejs')
+  async searchHumorBoard(
+    @Query() searchQueryDto: SearchQueryDto,
+    @Query() //페이지네이션 용 쿼리 필요함
+    @Req()
+    req: Request,
+  ) {
+    const { totalHits, result } =
+      await this.searchService.searchBoard(searchQueryDto);
 
     return {
       statusCode: HttpStatus.OK,
       message: `${searchQueryDto.boardName}게시판 검색 완료`,
-      count: data.length,
-      data,
+      count: result.length,
+      data: result,
+      boardType: searchQueryDto.boardName,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
   @ApiOperation({ summary: '전체 검색' })
   @Get('all')
-  async searchAllBoards(@Query() searchAllQueryDto: SearchAllQueryDto) {
-    const data = await this.searchService.searchHumorBoard(searchAllQueryDto);
+  @Render('searchAll.ejs')
+  async searchAllBoards(
+    @Query() searchAllQueryDto: SearchAllQueryDto,
+    @Req() req: Request,
+  ) {
+    const data = await this.searchService.searchAllBoards(searchAllQueryDto);
 
     return {
       statusCode: HttpStatus.OK,
       message: `전체 게시판 검색 완료`,
       count: data.length,
       data,
+      isLoggedIn: req['isLoggedIn'],
+      boardType: null,
     };
   }
 }

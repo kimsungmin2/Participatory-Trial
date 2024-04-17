@@ -52,6 +52,7 @@ export class HumorsController {
   //글쓰기 페이지
   @ApiOperation({ summary: '유머 게시판 게시물 생성 페이지' })
   @Get('create')
+  @UseGuards(AuthGuard('jwt'))
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {
     return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'] };
@@ -223,41 +224,6 @@ export class HumorsController {
       message: `${humorBoardId}번 게시물 삭제 성공`,
     };
   }
-  // //humors/25/like
-  // @ApiOperation({ summary: '유머 게시판 좋아요/좋아요 취소' })
-  // @ApiBody({
-  //   description: '좋아요/좋아요 취소',
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       boardType: { type: 'string' },
-  //     },
-  //   },
-  // })
-  // @ApiParam({
-  //   name: 'humorBoardId',
-  //   required: true,
-  //   description: '유머 게시물 ID',
-  //   type: Number,
-  // })
-  // @UseGuards(AuthGuard('jwt'))
-  // @Post('/humor-board/:humorBoardId/like')
-  // async like(
-  //   @Param('humorBoardId') humorBoardId: number,
-  //   @UserInfo() user: Users,
-  //   @Body() likeInputDto: LikeInputDto,
-  // ) {
-  //   const result = await this.likeService.like(
-  //     likeInputDto,
-  //     user,
-  //     humorBoardId,
-  //   );
-
-  //   return {
-  //     statusCode: HttpStatus.OK,
-  //     message: result,
-  //   };
-  // }
 
   // 유머 게시판 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 유머 게시판 명예의 전당 조회하기 API(투표 수)' })

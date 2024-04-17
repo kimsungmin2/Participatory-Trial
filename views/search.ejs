@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/board-style.css" />
+    <title>Document</title>
+  </head>
+  <body>
+
+    <%- include('partials/nav') %>
+    <header>
+    <%- include('partials/board-title') %>
+    <hr width="90%" color="black" size="2" style="margin-left: 30px" />
+
+    <% 
+    let boardName;
+    switch (boardType) {
+          case 'humor_board':
+          boardName = 'humors';
+            break;
+          case 'online_board':
+          boardName = 'online-boards';
+            break;
+          case 'poltical_debate_board':
+          boardName = 'poltical-debates';
+            break;
+          case 'trial':
+          boardName = 'trials';
+            break;
+        }
+    %>
+    <% if (data.length !== 0) { %>
+      <p class="searched-post"><%= data.length %>개의 게시물이 검색되었습니다.</p>
+    <div class="cards-container">
+      <% for (let i = 0; i < data.length; i++) {  %>
+      <div class="card">
+          <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
+        <div class="card-stats">
+          <div>조회 : <%= data[i].view %></div>
+          <% if (boardType !== 'polticalDebate') { %>
+          <div>좋아요 : <%= data[i].like %></div>
+          <% } %>
+        </div>
+      </div>
+      <% } %>
+    </div>
+    <% } else {%>
+      <p class="search_not_found">검색 결과가 없습니다!</p>
+      <% } %>
+    <div class="search-container">
+      <form action="/search" method="get" id="searchForm">
+        <div>
+          <select name="searchOption" id="searchOption">
+            <option value="title">제목</option>
+            <option value="content">내용</option>
+            <option value="titleContent">제목+내용</option>
+          </select>
+        </div>
+        <input type="text" placeholder="검색..." name="search" id="searchInput"/>
+        <button type="submit">검색</button>
+      </form>
+    </div>
+  </header>
+    <script defer>
+      console.log(1);
+      console.log("<%= boardType%>");
+      //       document.getElementById('createPostLink').addEventListener('click', function(e) {
+      //   e.preventDefault();
+
+      //   fetch('/<%= boardName %>/create')
+      //   .then(response => {
+      //     if(response.ok) {
+      //       window.location.href = '/<%= boardName %>/create'
+      //     } else if (response.status === 401) {
+      //       return response.json()
+      //     }
+      //   })
+      //   .then(data => {
+      //     if (data && data.message) {
+      //       alert('로그인해야 합니다!')
+      //     }
+      //   })
+      // })
+
+      let boardIndex = '';
+        switch ("<%= boardType %>") {
+          case 'humor_board':
+          boardIndex = 'humor_board';
+            break;
+          case 'online_board':
+          boardIndex = 'online-boards';
+            break;
+          case 'poltical_debate_board':
+          boardIndex = 'poltical-debates';
+            break;
+          case 'trial':
+          boardIndex = 'trials';
+            break;
+        }
+
+          document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const searchInput = document.getElementById('searchInput').value;
+      const selectedOption = document.getElementById('searchOption').value;
+      const queryParams = new URLSearchParams();
+
+      queryParams.append('search', searchInput); // 검색어 항상 추가
+      queryParams.append('type', selectedOption); // 선택된 검색 옵션 추가
+      queryParams.append('boardName', boardIndex)
+
+      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+      window.location.href = `/search?${queryParams.toString()}`;
+});
+      
+    </script>
+  </body>
+</html>

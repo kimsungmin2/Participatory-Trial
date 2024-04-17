@@ -10,7 +10,7 @@ import { winstonLogger } from '../../winston';
 @Injectable()
 export class HttpLoggingInterceptor implements NestInterceptor {
   constructor() {}
-  private logger = winstonLogger;
+  public logger = winstonLogger;
 
   intercept(
     context: ExecutionContext,

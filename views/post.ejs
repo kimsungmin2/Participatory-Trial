@@ -19,7 +19,6 @@
   </head>
   <body>
     <%- include('partials/nav') %>
-
     <header>
       <%- include('partials/board-title') %>
       <hr width="70%" color="lightskyblue" size="2" style="margin-left: 30px; height: 3px;" />
@@ -47,8 +46,6 @@
           
           <% } %>
       </div>
-<<<<<<< HEAD
-=======
       <% if (boardType === 'humor') { %>
         <%- include('humorVote') %>
       <% } else if (boardType === 'polticalDebate') { %>
@@ -57,7 +54,6 @@
       <%- include('chat') %> 
         <% } %>
       </div>
->>>>>>> 46cb4ed75e973e26deb7663d014545295bc4fd5f
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
       <div class="like_button">
@@ -65,97 +61,80 @@
       </div>
       <% } %>
       <!--게시글 댓글-->
+      <% 
+      let boardComment;
+      switch (boardType) {
+            case 'humor':
+            boardComment = 'humorComment';
+              break;
+            case 'onlineBoard':
+            boardComment = 'onlineBoardComment';
+              break;
+            case 'polticalDebate':
+            boardComment = 'polticalDebateComments';
+              break;
+          }
+      %>
+      <% if (boardType !== 'trial') {%>
       <div>
-        <% if (boardType === 'humor') { %>
-          <p style="font-size: 30px;">댓글: <%= data.humorComment.length  %>개</p>
+          <p style="font-size: 30px;">댓글: <%= data[boardComment].length  %>개</p>
           <div class="content_container">
-            <% for (let i = 0; i < data.humorComment.length; i++)  {%>
+            <% for (let i = 0; i < data[boardComment].length; i++)  {%>
               <div class="content">
                 
-              <p>작성자: <%= data.humorComment[i].userId %></p>
-              <p><%= data.humorComment[i].content %></p>
-              <p>작성일: <%= data.humorComment[i].createdAt %></p>
+              <p>작성자: <%= data[boardComment][i].userId %></p>
+              <p><%= data[boardComment][i].content %></p>
+              <p>작성일: <%= data[boardComment][i].createdAt %></p>
               <button class="modify">수정</button>
               <button>삭제</button>
               </div>
               <% } %>
           </div>
-        <% } else if (boardType === 'onlineBoard') { %>
-          <%= JSON.stringify(data) %>
-          <p style="font-size: 30px;">댓글: <%= data.onlineBoardComment.length  %>개</p>
-          <div class="content_container">
-            <% for (let i = 0; i < data.onlineBoardComment.length; i++)  {%>
-              <div class="content">
-              <p>작성자: <%= data.onlineBoardComment[i].userId %></p>
-              <p><%= data.onlineBoardComment[i].content %></p>
-              <p>작성일: <%= data.onlineBoardComment[i].createdAt %></p>
-              <button class="modify">수정</button>
-              <button>삭제</button>
-              </div>
-              <% } %>
-          </div>
-        <% } else if (boardType === 'polticalDebate') { %>
-          <p style="font-size: 30px;">댓글: <%= data.polticalDebateComments.length  %>개</p>
-          <div class="content_container">
-            <% for (let i = 0; i < data.polticalDebateComments.length; i++)  {%>
-              <div class="content">
-              <p>작성자: <%= data.polticalDebateComments[i].userId %></p>
-              <p><%= data.polticalDebateComments[i].content %></p>
-              <p>작성일: <%= data.polticalDebateComments[i].createdAt %></p>
-              <button class="modify">수정</button>
-              <button>삭제</button>
-              </div>
-              <% } %>
-          </div>
-        <% } %>
-        
       </div>
-      
-      
-    
+      <% } %>
     </header>
     <script>
-        let boardType;
-        boardType = "<%= boardType %>";
-        let id;
-        id = "<%= data.id %>"
+        // let boardType;
+        // boardType = "<%= boardType %>";
+        // let id;
+        // id = "<%= data.id %>"
 
     
 
-        document.getElementById('like').addEventListener('click', function() {
+        // document.getElementById('like').addEventListener('click', function() {
 
   // fetch를 사용하여 POST 요청을 보냅니다.
-  fetch(`/like/${id}`, {
-    method: 'POST', // HTTP 메소드 지정
-    headers: {
-      'Content-Type': 'application/json', // 콘텐츠 타입 헤더 설정
-    },
-    body: JSON.stringify({ // 요청 바디
-      boardType: boardType, // boardType을 요청 바디에 포함
-    }),
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.json(); // 응답을 JSON 형태로 파싱
-    }
-    throw new Error('Network response was not ok.');
-  })
-  .then(data => {
-    if (boardType === 'humor') { 
-          boardType = 'humors'
-        } else if (boardType === 'onlineBoard') { 
-          boardType = 'online-boards'
-        } else if (boardType === 'polticalDebate') { 
-          boardType = 'poltical-debates'
-        } else if (boardType === 'trial') { 
-          boardType = 'trials'
-        } 
-    window.location.href = `/${boardType}/${id}`
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-});
+//   fetch(`/like/${id}`, {
+//     method: 'POST', // HTTP 메소드 지정
+//     headers: {
+//       'Content-Type': 'application/json', // 콘텐츠 타입 헤더 설정
+//     },
+//     body: JSON.stringify({ // 요청 바디
+//       boardType: boardType, // boardType을 요청 바디에 포함
+//     }),
+//   })
+//   .then(response => {
+//     if (response.ok) {
+//       return response.json(); // 응답을 JSON 형태로 파싱
+//     }
+//     throw new Error('Network response was not ok.');
+//   })
+//   .then(data => {
+//     if (boardType === 'humor') { 
+//           boardType = 'humors'
+//         } else if (boardType === 'onlineBoard') { 
+//           boardType = 'online-boards'
+//         } else if (boardType === 'polticalDebate') { 
+//           boardType = 'poltical-debates'
+//         } else if (boardType === 'trial') { 
+//           boardType = 'trials'
+//         } 
+//     window.location.href = `/${boardType}/${id}`
+//   })
+//   .catch(error => {
+//     console.error('Error:', error);
+//   });
+// });
     </script>
     <!-- <script src="/js/vote.js"></script> -->
   </body>
