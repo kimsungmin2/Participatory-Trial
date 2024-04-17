@@ -63,7 +63,8 @@ a {
 
 .board_title,
 .post_title,
-.post_content {
+.post_content,
+.ud-container {
   font-size: 50px;
   font-family: 'SUITE-Regular';
   margin-top: 30px;
@@ -76,7 +77,8 @@ a {
   margin-bottom: 400px;
   padding: 1px;
 }
-.post_title {
+.post_title,
+.ud-container {
   font-size: 30px;
   display: flex; /* Flexbox 레이아웃 사용 */
   justify-content: space-between; /* 자식 요소들을 양 끝으로 정렬 */
@@ -86,6 +88,12 @@ a {
   display: flex; /* 조회수와 좋아요를 가진 div도 Flexbox로 설정 */
   gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
   font-size: 1.3rem;
+}
+.ud-container > div {
+  display: flex; /* Flexbox로 설정 */
+  justify-content: flex-end; /* 자식 요소들을 우측으로 정렬 */
+  gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
+  font-size: 1.3rem; /* 폰트 크기 설정 */
 }
 
 .post_image {

@@ -11,8 +11,19 @@ import { HttpExceptionFilter } from './utils/filter/exception.filter';
 import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
 
 async function bootstrap() {
+  process.on('unhandledRejection', (reason, promise) => {
+    console.log(reason);
+    winstonLogger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  });
+
+  process.on('uncaughtException', (error) => {
+    winstonLogger.error('Uncaught Exception thrown:', error);
+  });
   const logger = winstonLogger;
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const cors = require('cors');
+
+  app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({

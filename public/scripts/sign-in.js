@@ -16,15 +16,19 @@ form.addEventListener('submit', (event) => {
     body: JSON.stringify(formData),
   })
     .then((response) => {
-      response.json();
+      if (!response.ok) {
+        // 응답이 성공적이지 않을 경우 에러를 처리합니다.
+        return response.json().then((data) => {
+          throw new Error(data.message || '로그인에 실패했습니다.');
+        });
+      }
     })
     .then((data) => {
-      alert('성공적으로 로그인 했습니다. 메인페이지로 이동합니다.');
       window.location.href = 'http://localhost:3000';
     })
     .catch((error) => {
       // 요청이 실패했을 때의 처리
-      alert(error);
+      alert(error.message); // 여기서 error.message를 사용하여 좀 더 명확한 정보를 제공
       console.error(error.message);
     });
 });

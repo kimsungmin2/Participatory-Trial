@@ -174,25 +174,25 @@ export class TrialsService {
     await queryRunner.startTransaction();
     try {
       // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
-      const existTrial = await this.findOneByTrialsId(trialsId);
+      const { OneTrials, vote } = await this.findOneByTrialsId(trialsId);
 
       // 2. 내 재판이 맞는지 유효성 검사
-      if (existTrial.OneTrials.userId !== userId) {
+      if (OneTrials.userId !== userId) {
         throw new NotAcceptableException(
           '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
         );
       }
 
       // 3. 객체의 속성 업데이트
-      Object.assign(existTrial, updateTrialDto);
+      Object.assign(OneTrials, updateTrialDto);
 
       // 4. 수정한거 저장
-      await queryRunner.manager.save(Trials, existTrial);
+      await queryRunner.manager.save(Trials, OneTrials);
 
       // 5. 트랜잭션 종료
       await queryRunner.commitTransaction();
 
-      return existTrial;
+      return OneTrials;
     } catch (error) {
       await queryRunner.rollbackTransaction();
 

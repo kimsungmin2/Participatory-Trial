@@ -7,9 +7,11 @@
     <title>Document</title>
   </head>
   <body>
-    <%- include('partials/nav') %> <%- include('partials/board-title') %>
+    <%- include('partials/nav') %>
+    <header>
+    <%- include('partials/board-title') %>
     <hr width="90%" color="black" size="2" style="margin-left: 30px" />
-    <p class="searched-post"><%= data.length %>개의 게시물이 검색되었습니다.</p>
+    <p class="searched-post"><%= totalHits %>개의 게시물이 검색되었습니다.</p>
     <% if (data.length !== 0) { %>
     <div class="cards-container">
       <% for (let i = 0; i < data.length; i++) {  %>
@@ -44,12 +46,37 @@
     <% } else {%>
       <p class="search_not_found">검색 결과가 없습니다!</p>
       <% } %>
+      <div class="pagination">
+      <%
+      // 페이지 링크를 위한 기본 URL 설정
+      let baseUrl = `/search/all?search=${searchWord}&type=titleContent&page=`;
+
+      const prevGroupPage = startPage > 1 ? startPage - 1 : null;
+      const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
+      %>
+      <% if (prevGroupPage) { %>
+        <a href="<%= baseUrl + (prevGroupPage - 9) %>">« 이전</a>
+      <% } %>
+      
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <% if (i === currentPage) { %>
+          <span class="current-page-number">[<%= i %>]</span>
+        <% } else { %>
+          <a href="<%= baseUrl + i %>"><%= i %></a>
+        <% } %>
+      <% } %>
+      
+      <% if (nextGroupPage) { %>
+        <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
+      <% } %>
+    </div>
     <div class="search-container">
       <form action="/search" method="get" id="searchForm">
         <input type="text" placeholder="검색..." name="search" id="searchInput"/>
         <button type="submit">검색</button>
       </form>
     </div>
+  </header>
     <script defer>
         document.getElementById('searchForm').addEventListener('submit', function(event) {
       event.preventDefault();

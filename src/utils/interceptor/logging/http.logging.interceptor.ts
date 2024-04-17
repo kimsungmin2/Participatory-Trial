@@ -24,6 +24,7 @@ export class HttpLoggingInterceptor implements NestInterceptor {
     const referer = request.headers['referer'] || request.headers['referrer'];
     const userAgent = request.headers['user-agent'];
     const { method, body, url } = httpContext.getRequest();
+    console.log(body);
 
     return next.handle().pipe(
       tap(() => {

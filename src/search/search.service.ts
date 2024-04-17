@@ -4,6 +4,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { BoardIndex } from './type/board_index.type';
 import { SearchAllQueryDto } from './dto/searchAll.dto';
 import { SearchType } from './type/search.type';
+import { PaginateQueryDto } from './dto/paginateQuery.dto';
 
 @Injectable()
 export class SearchService {
@@ -11,9 +12,9 @@ export class SearchService {
 
   async searchBoard(
     searchQueryDto: SearchQueryDto,
-    page: number = 1,
-    pageSize: number = 10,
+    paginateQueryDto: PaginateQueryDto,
   ) {
+    const { page, pageSize } = paginateQueryDto;
     const boolQuery = {
       bool: {
         should: [],
@@ -62,7 +63,7 @@ export class SearchService {
       },
     });
     const totalHits = data.body.hits.total.value;
-    console.log(totalHits);
+    console.log(data.body.hits);
 
     // 검색 결과에서 문서들의 배열을 추출
     const hits = data.body.hits.hits;
@@ -73,7 +74,11 @@ export class SearchService {
     return { result, totalHits }; // 검색 결과 반환
   }
 
-  async searchAllBoards(searchAllQueryDto: SearchAllQueryDto) {
+  async searchAllBoards(
+    searchAllQueryDto: SearchAllQueryDto,
+    paginateQueryDto: PaginateQueryDto,
+  ) {
+    const { page, pageSize } = paginateQueryDto;
     const boolQuery = {
       bool: {
         should: [],
@@ -85,6 +90,8 @@ export class SearchService {
       { match: { title: searchAllQueryDto.search } },
       { match: { content: searchAllQueryDto.search } },
     );
+
+    const from = (page - 1) * pageSize;
 
     const data = await this.esService.search({
       index: [
@@ -102,13 +109,16 @@ export class SearchService {
             },
           },
         ],
+        size: pageSize,
+        from: from,
       },
     });
+    const totalHits = data.body.hits.total.value;
 
     const hits = data.body.hits.hits;
 
     let result = hits.map((hit) => hit._source);
 
-    return result;
+    return { result, totalHits };
   }
 }

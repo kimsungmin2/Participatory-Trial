@@ -58,6 +58,15 @@ export class HumorsController {
     return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'] };
   }
 
+  @ApiOperation({ summary: '유머 게시판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.humorsService.findOneHumorBoard(id);
+    return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'], data };
+  }
+
   @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '유머 게시판 게시물 생성' })
@@ -91,6 +100,7 @@ export class HumorsController {
     @UserInfo() user: Users,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log(files);
     const createdBoard = await this.humorsService.createHumorBoardAndVotes(
       createHumorBoardDto,
       voteTitleDto,
@@ -170,7 +180,7 @@ export class HumorsController {
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
   @UseGuards(AuthGuard('jwt'))
-  @Patch('humor-board/:humorBoardId')
+  @Patch('/:humorBoardId')
   @ApiBody({
     description: '유머 게시물 수정',
     schema: {
@@ -205,7 +215,7 @@ export class HumorsController {
     };
   }
   @ApiOperation({ summary: '유머 게시물 삭제' })
-  @Delete('humor-board/:humorBoardId')
+  @Delete('/:humorBoardId')
   @ApiParam({
     name: 'humorBoardId',
     required: true,

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/css/board-style.css" />
+    <link rel="stylesheet" href="/css/create-style.css">
+  </head>
+  <body>
+    <%- include('partials/nav')  %>
+
+    <header>
+      <div class="board_title">
+        <% if (boardType === 'humor') { %>
+          <span>유머 게시판</span>
+        <% } else if (boardType === 'onlineBoard') { %>
+          <span>자유 게시판</span>
+        <% } else if (boardType === 'polticalDebate') { %>
+          <span>정치토론 게시판</span>
+        <% } else if (boardType === 'trial') { %>
+          <span>재판 게시판</span>
+        <% } %>
+      </div>
+      <hr width="100%" color="black" size="2" style="margin-left: 30px" />
+      
+      <div class="container">
+        <h2>게시물 수정</h2>
+
+          <form id="postForm">
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" value="<%= data.title %>" required>
+            </div>
+            <div class="form-group">
+                <label for="content">내용</label>
+                <textarea  cols="100" rows="10" name="content" id="content">
+                  <%= data.title %>
+                  </textarea>
+                
+            </div>
+            <button type="submit">게시물 수정</button>
+            </form>
+    </div>
+    </header>
+<script>
+  let boardType;
+  boardType = "<%= boardType %>";
+  console.log(boardType);
+  let postId;
+  if (boardType !== "trial") {
+    postId = "<%= data.id %>"
+  } else {
+    postId = "<%= data.OneTrials.id%>"
+  }
+  if (boardType === 'humor') { 
+          boardType = 'humors'
+        } else if (boardType === 'onlineBoard') { 
+          boardType = 'online-boards'
+        } else if (boardType === 'polticalDebate') { 
+          boardType = 'poltical-debates'
+        } else if (boardType === 'trial') { 
+          boardType = 'trials'
+        } 
+
+        const form = document.getElementById('postForm');
+        form.addEventListener('submit', function(event) {
+  event.preventDefault();  // 폼 기본 제출 동작 방지
+
+
+  const titleElement = document.getElementById('title');
+    const contentElement = document.getElementById('content');
+
+    let data = {};
+    
+    // 제목이 비어있지 않다면 데이터 객체에 추가
+    if (titleElement.value.trim() !== '') {
+      data.title = titleElement.value;
+    }
+
+    // 내용이 비어있지 않다면 데이터 객체에 추가
+    if (contentElement.value.trim() !== '') {
+      data.content = contentElement.value;
+    }
+    if (Object.keys(data).length > 0) {
+      fetch(`/${boardType}/${postId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+  .then(response => {
+    if (response.ok) { 
+      return response.json(); 
+    } else {
+      throw new Error('Network response was not ok.'); 
+    }
+  })
+  .then(data => {
+    console.log(data); 
+    alert('게시물 수정에 성공하였습니다.')
+    window.location.href = `/${boardType}/${postId}`
+  })
+  .catch(error => {
+    console.error('Error:', error.message); // 오류 처리
+  });
+    } else {
+      console.error('제목 또는 내용을 비워둘 수 없습니다.');
+    }
+  })
+</script>
+  </body>
+</html>
