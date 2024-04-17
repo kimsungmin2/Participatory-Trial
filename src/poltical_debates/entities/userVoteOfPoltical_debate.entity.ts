@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PolticalDebateVotes } from "./polticalVote.entity";
-import { Users } from "src/users/entities/user.entity";
+import { Users } from "../../users/entities/user.entity";
 
 
 @Entity()

@@ -91,6 +91,7 @@
     "winston-elasticsearch": "^0.18.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/schematics": "^10.0.0",
@@ -133,7 +134,12 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/node_modules/**",
+      "!**/dto/**",
+      "!**/module/**",
+      "!**/entities/**",
+      "!**/*module.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

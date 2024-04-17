@@ -9,17 +9,14 @@ import { deflate } from 'zlib';
 import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
-import { Trials } from 'src/trials/entities/trial.entity';
-import { TrialLike } from 'src/trials/entities/trials.like.entity';
-
+import { Trials } from '../trials/entities/trial.entity';
+import { TrialLike } from '../trials/entities/trials.like.entity';
 type boardTypes = HumorBoards | OnlineBoards | Trials;
-
 interface LikeEntity {
   humorBoardId?: number;
   onlineBoardId?: number;
   userId: number;
 }
-
 @Injectable()
 export class LikeService {
   constructor(
@@ -44,11 +41,9 @@ export class LikeService {
   ): Promise<string> {
     //boardId 아이디
     //boardType 어떤 게시판
-
     let boardRepository;
     let likeRepository;
     let entityKey: 'humorBoardId' | 'onlineBoardId' | 'trialId';
-
     //타입 별 의존성 주입
     switch (boardType) {
       case 'humors':
@@ -73,7 +68,6 @@ export class LikeService {
     if (!findBoard) {
       throw new NotFoundException('게시물을 찾을 수 없습니다.');
     }
-
     const isLikeExist: HumorLike | OnlineBoardLike | TrialLike =
       await likeRepository.findOne({
         where: {
@@ -81,13 +75,11 @@ export class LikeService {
           userId,
         },
       });
-
     if (!isLikeExist) {
       const like = {
         [entityKey]: boardId,
         userId,
       } as DeepPartial<LikeEntity>;
-
       await likeRepository.save(like);
       await boardRepository.increment({ id: boardId }, 'like', 1);
     } else {
@@ -96,7 +88,6 @@ export class LikeService {
     }
     const updatedBoard = await boardRepository.findOneBy({ id: boardId });
     const currentLikes = updatedBoard ? updatedBoard.like : 0;
-
     return currentLikes;
   }
 }

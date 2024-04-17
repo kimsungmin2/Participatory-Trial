@@ -226,6 +226,7 @@ export class TrialsController {
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
+  // @Render('vote.ejs')
   @Render('post.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
@@ -308,16 +309,16 @@ export class TrialsController {
   }
 
   // 재판 게시물 좋아요 API
-  @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
-  @ApiBody({
-    description: '좋아요/좋아요 취소',
-    schema: {
-      type: 'object',
-      properties: {
-        boardType: { type: 'string' },
-      },
-    },
-  })
+  // @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
+  // @ApiBody({
+  //   description: '좋아요/좋아요 취소',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       boardType: { type: 'string' },
+  //     },
+  //   },
+  // })
   // @ApiParam({
   //   name: 'trialId',
   //   required: true,

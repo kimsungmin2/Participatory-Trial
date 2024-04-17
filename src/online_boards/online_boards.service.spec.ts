@@ -268,10 +268,12 @@
 //       like: 1,
 //       topComments: 'string',
 //       createdAt: new Date('2024-03-24T02:05:02.602Z'),
-//       updatedAt: new Date('2024-03-24T02:05:02.602Z'),
+//       updated_at: new Date('2024-03-24T02:05:02.602Z'),
 //       user: null,
 //       OnlineBoardComment: null,
 //       onlineBoardLike: null,
+//       deleted_at: null,
+//       imageUrl: null,
 //     };
 
 //     jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);

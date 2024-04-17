@@ -7,11 +7,15 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { Chat } from './entities/chat.entity';
 import { ConfigModule } from '@nestjs/config';
 import { Redis } from 'ioredis';
+import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
+import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
 
 describe('EventsGateway', () => {
   let gateway: EventsGateway;
   let chatsService: ChatsService;
   let votesService: VotesService;
+  let humorVotesService: HumorVotesService;
+  let polticalVotesService: PolticalVotesService;
   let mockSocket: CustomSocket;
   let mockRedisSubClient: jest.Mocked<Redis>;
 
@@ -42,6 +46,26 @@ describe('EventsGateway', () => {
           },
         },
         {
+          provide: HumorVotesService,
+          useValue: {
+            addVoteUserorNanUser: jest.fn().mockResolvedValue(undefined),
+            getUserVoteCounts: jest.fn().mockResolvedValue({
+              vote1Percentage: '50%',
+              vote2Percentage: '50%',
+            }),
+          },
+        },
+        {
+          provide: PolticalVotesService,
+          useValue: {
+            addVoteUserorNanUser: jest.fn().mockResolvedValue(undefined),
+            getUserVoteCounts: jest.fn().mockResolvedValue({
+              vote1Percentage: '50%',
+              vote2Percentage: '50%',
+            }),
+          },
+        },
+        {
           provide: 'REDIS_SUB_CLIENT',
           useValue: mockRedisSubClient,
         },
@@ -51,6 +75,9 @@ describe('EventsGateway', () => {
     gateway = moduleRef.get<EventsGateway>(EventsGateway);
     chatsService = moduleRef.get<ChatsService>(ChatsService);
     votesService = moduleRef.get<VotesService>(VotesService);
+    humorVotesService = moduleRef.get<HumorVotesService>(HumorVotesService);
+    polticalVotesService =
+      moduleRef.get<PolticalVotesService>(PolticalVotesService);
     gateway.server = {
       to: jest.fn().mockReturnThis(),
       emit: jest.fn(),

@@ -111,7 +111,7 @@ export class OnlineBoardsService {
   async findBoard(id: number) {
     const board = await this.onlineBoardsRepository.findOne({
       where: { id },
-      relations: { OnlineBoardComment: true },
+      relations: { onlineBoardComment: true },
     });
     return board;
   }
@@ -121,7 +121,7 @@ export class OnlineBoardsService {
     const findHumorBoard: OnlineBoards =
       await this.onlineBoardsRepository.findOne({
         where: { id },
-        relations: ['OnlineBoardComment'],
+        relations: ['onlineBoardComment'],
       });
     console.log(findHumorBoard);
     if (!findHumorBoard) {

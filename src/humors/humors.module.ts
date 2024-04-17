@@ -16,17 +16,26 @@ import { HumorHallOfFameService } from './hall_of_fameOfHumor';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { EachHumorVote } from './entities/UservoteOfHumorVote.entity';
 import { HumorsVotesModule } from './humors_votes/humors_votes.module';
+import { HumorSeedService } from './humor-seeed.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([HumorBoards, HumorVotes, HumorComments, Users, HumorsHallOfFame,EachHumorVote,
-    HumorsLikeHallOfFames, HumorsViewHallOfFames]),
+    TypeOrmModule.forFeature([
+      HumorBoards,
+      HumorVotes,
+      HumorComments,
+      Users,
+      HumorsHallOfFame,
+      EachHumorVote,
+      HumorsLikeHallOfFames,
+      HumorsViewHallOfFames,
+    ]),
     S3Module,
     LikeModule,
     SearchModule,
     HumorsVotesModule,
   ],
   controllers: [HumorsController],
-  providers: [HumorsService, HumorHallOfFameService],
+  providers: [HumorsService, HumorHallOfFameService, HumorSeedService],
 })
 export class HumorsModule {}

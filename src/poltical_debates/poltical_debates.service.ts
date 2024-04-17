@@ -15,10 +15,10 @@ import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { UpdateVoteDto } from 'src/trials/vote/dto/updateDto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import { S3Service } from 'src/s3/s3.service';
+import { S3Service } from '../s3/s3.service';
 import Redis from 'ioredis';
-import { BoardType } from 'src/s3/board-type';
-import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
+import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @Injectable()
 export class PolticalDebatesService {
