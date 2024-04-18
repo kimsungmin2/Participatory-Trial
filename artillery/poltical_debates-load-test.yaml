@@ -1,0 +1,76 @@
+# asciiart-load-test.yaml
+config:
+  # This is a test server run by team Artillery
+  # It's designed to be highly scalable
+  http:
+    defaults:
+      headers:
+        cookie: 'authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTcxMzM1NzYzOCwiZXhwIjoxNzU2NTU3NjM4fQ.-yU2RRZ7oUH-cNVBclBzmw2APsZTFwiaEOLRxv6qARU'
+  target: http://localhost:3000
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 30
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  apdex:
+    threshold: 100
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+    fake-data: {}
+scenarios:
+  - name: 'create board'
+    flow:
+      - post:
+          url: 'http://localhost:3000/poltical-debates'
+          json:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+            trialTime: '{{ $randFullName() }}'
+            title1: '{{ $randFullName() }}'
+            title2: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.id'
+            as: 'boardId'
+      - patch:
+          url: 'http://localhost:3000/poltical-debates/{{boardId}}'
+          formData:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+      - delete:
+          url: 'http://localhost:3000/poltical-debates/{{boardId}}'
+      - post:
+          url: 'http://localhost:3000/poltical-debates/{{boardId}}/comments'
+          json:
+            content: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.id'
+            as: 'commentId'
+      - patch:
+          url: 'http://localhost:3000/poltical-debates/{{boardId}}/comments/{{ commentId }}'
+          json:
+            content: '{{ $randFullName() }}'
+      - delete:
+          url: 'http://localhost:3000/poltical-debates/{{boardId}}/comments/{{ commentId }}'
+      - post:
+          url: 'http://localhost:3000/like/{{boardId}}'
+          json:
+            boardType: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.userId'
+            as: 'userId'
