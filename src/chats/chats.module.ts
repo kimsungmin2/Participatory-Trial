@@ -8,6 +8,7 @@ import { HumorsChat } from '../events/entities/humorsChat.entity';
 import { PolticalsChat } from '../events/entities/polticalsChat.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import Redis from 'ioredis';
+import { RedisIoAdapter } from '../cache/redis.adpter';
 
 @Module({
   imports: [
@@ -21,21 +22,12 @@ import Redis from 'ioredis';
   ],
   providers: [
     ChatsService,
+    RedisIoAdapter,
     {
       provide: 'REDIS_DATA_CLIENT',
-      useFactory: () =>
-        new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
-        }),
-    },
-    {
-      provide: 'REDIS_SUB_CLIENT',
-      useFactory: () =>
-        new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
-        }),
+      useFactory: (redisAdapter: RedisIoAdapter) =>
+        redisAdapter.getDataClient(),
+      inject: [RedisIoAdapter],
     },
   ],
   exports: [ChatsService],

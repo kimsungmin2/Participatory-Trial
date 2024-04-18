@@ -478,6 +478,7 @@ export class TrialsController {
   // 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 명예의 전당 조회하기 API(투표 수)' })
   @Get('HallofFame/votes')
+  @Render('board.ejs')
   async getRecentHallOfFame() {
     const recentHallofFame =
       await this.trialHallOfFameService.getRecentHallOfFame();

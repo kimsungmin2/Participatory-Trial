@@ -32,8 +32,22 @@
           case 'trial':
           boardName = 'trials';
             break;
+           case 'trialsHallofFame':
+          boardName = 'trialsHallofFame';
+            break;
+          case 'humorsHallofFame':
+          boardName = 'humorsHallofFame';
+            break;
+          case 'poltical-debatesHallofFame':
+          boardName = 'poltical-debatesHallofFame';
+            break;
+          case 'online-boardsHallofFame':
+          boardName = 'online-boardsHallofFame';
+            break;
         }
     %>
+
+  </div>
 
     <header>
       <%- include('partials/board-title') %>
@@ -72,10 +86,23 @@
           case 'polticalDebate':
             baseUrl = '/poltical-debates?page=';
             break;
+          case 'trialsHallofFame':
+            baseUrl = '/trials/HallofFame/votes?page=';
+            break;
+          case 'humorsHallofFame':
+            baseUrl = '/humors/HallofFame/votes?page=';
+            break;
+          case 'online-boardsHallofFame':
+            baseUrl = '/online-boards/HallofFame/likes?page=';
+            break;
+          case 'poltical-debatesHallofFame':
+            baseUrl = '/poltical-debates/HallofFame/votes?page=';
+            break;
           case 'trial':
             baseUrl = '/trials?page=';
             break;
         }
+
         const prevGroupPage = startPage > 1 ? startPage - 1 : null;
         const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
         %>

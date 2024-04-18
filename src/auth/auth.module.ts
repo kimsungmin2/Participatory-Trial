@@ -15,6 +15,7 @@ import { EmailService } from '../email/email.service';
 import { GoogleStrategy } from '../utils/strategy/google.strategy';
 import { EmailModule } from '../email/email.module';
 import { BullModule } from '@nestjs/bull';
+import { RedisModule } from '../cache/redis.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BullModule } from '@nestjs/bull';
     TypeOrmModule.forFeature([Users, UserInfos]),
     UsersModule,
     EmailModule,
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [

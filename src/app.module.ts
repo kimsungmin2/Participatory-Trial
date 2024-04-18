@@ -1,4 +1,3 @@
-import { CacheConfigService } from './cache/cache.config';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -25,7 +24,6 @@ import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
-
 import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
@@ -37,14 +35,27 @@ export const typeOrmModuleOptions = {
     configService: ConfigService,
   ): Promise<TypeOrmModuleOptions> => ({
     type: 'postgres',
-    host: configService.get<string>('DB_HOST'),
-    username: configService.get('DB_USERNAME'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
-    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
+    replication: {
+      master: {
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+      },
+      slaves: [
+        {
+          host: configService.get<string>('DB_SLAVE_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          username: configService.get('DB_SLAVE_USERNAME'),
+          password: configService.get('DB_SLAVE_PASSWORD'),
+          database: configService.get('DB_NAME'),
+        },
+      ],
+    },
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
-    logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
+    logging: true,
   }),
   inject: [ConfigService],
 };
@@ -64,14 +75,13 @@ export const typeOrmModuleOptions = {
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
+        DB_SLAVE_HOST: Joi.string().required(),
+        DB_SLAVE_USERNAME: Joi.string().required(),
+        DB_SLAVE_PASSWORD: Joi.string().required(),
       }),
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
-    }),
-    CacheModule.registerAsync({
-      isGlobal: true,
-      useClass: CacheConfigService,
     }),
     BullModule.forRoot({
       redis: {
@@ -82,7 +92,6 @@ export const typeOrmModuleOptions = {
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),
-
     RedisModule.forRootAsync({
       useFactory: () => ({
         type: 'single',

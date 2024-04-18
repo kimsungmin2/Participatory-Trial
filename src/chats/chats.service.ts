@@ -24,8 +24,7 @@ export class ChatsService implements OnModuleInit {
     @InjectRepository(PolticalsChat)
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
-    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
-    @Inject('REDIS_SUB_CLIENT') private redisSubClient: Redis,
+    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
   ) {}
 
   async publishNotification(message: string) {
@@ -35,11 +34,6 @@ export class ChatsService implements OnModuleInit {
 
   async onModuleInit() {
     this.handleScheduledTasks();
-  }
-  async onModuleDestroy() {
-    await this.redisDataClient.quit();
-    await this.redisSubClient.quit();
-    console.log('Redis 클라이언트 연결이 종료되었습니다.');
   }
 
   @Interval(1000 * 60)

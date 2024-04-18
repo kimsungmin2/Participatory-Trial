@@ -1,4 +1,4 @@
-import { Req, UseGuards } from '@nestjs/common';
+import { Inject, Req, UseGuards } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -27,33 +27,23 @@ import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server: Server;
-  private redisSubClient: Redis;
 
   constructor(
     private readonly chatsService: ChatsService,
     private readonly votesService: VotesService,
     private readonly humorVotesService: HumorVotesService,
     private readonly polticalVotesService: PolticalVotesService,
-  ) {
-    this.redisSubClient = new Redis({
-      host: process.env.REDIS_HOST,
-      port: Number(process.env.REDIS_PORT),
-    });
-  }
+    @Inject('REDIS_SUB_CLIENT') private redisSubClient: Redis,
+  ) {}
 
   async onModuleInit() {
-    const pubClient = new Redis({
-      host: process.env.REDIS_HOST,
-      port: Number(process.env.REDIS_PORT),
-    });
-    const subClient = pubClient.duplicate();
-    this.server.adapter(createAdapter(pubClient as any, subClient as any));
-
     await this.redisSubClient.subscribe('notifications');
-    this.redisSubClient.on(
-      'message',
-      this.handleNotificationMessage.bind(this),
-    );
+    this.redisSubClient.on('message', (channel, message) => {
+      if (channel === 'notifications') {
+        this.server.emit('notification', message);
+        console.log(message);
+      }
+    });
   }
 
   handleNotificationMessage(channel: string, message: string) {
