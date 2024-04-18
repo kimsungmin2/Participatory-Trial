@@ -20,7 +20,15 @@ import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
@@ -33,8 +41,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 export class OnlineBoardsController {
   constructor(
     private readonly onlineBoardsService: OnlineBoardsService,
-    private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService
-    ) {}
+    private readonly onlineBoardHallOfFameService: OnlineBoardHallOfFameService,
+  ) {}
   @ApiOperation({ summary: '자유 게시판 생성 API' })
   @ApiBearerAuth('access-token')
 
@@ -80,7 +88,6 @@ export class OnlineBoardsController {
   }
   //전체조회
 
-
   // 모든 자유 게시판 검색어 조회 API
   @ApiOperation({ summary: '모든 자유 게시판 검색어 조회 API' })
   @ApiBearerAuth('access-token')
@@ -91,13 +98,11 @@ export class OnlineBoardsController {
     type: String,
     example: '은가누',
   })
-
   @Get('')
   @Render('board.ejs')
   async paginateBoards(
     @Query() paginationQueryDto: PaginationQueryDto,
-  ): Promise<HumorBoardReturnValue> 
-  {
+  ): Promise<HumorBoardReturnValue> {
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
@@ -110,7 +115,7 @@ export class OnlineBoardsController {
       currentPage: paginationQueryDto.page,
     };
   }
-  
+
   //검색 API
   @Get('search')
   async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
@@ -168,7 +173,6 @@ export class OnlineBoardsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
-
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -186,7 +190,6 @@ export class OnlineBoardsController {
     };
   }
 
-  
   // 내 자유 게시물 삭제 API
   @ApiOperation({ summary: ' 내 자유 게시물 삭제 API' })
   @ApiBearerAuth('access-token')

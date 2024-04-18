@@ -67,7 +67,7 @@ export class AuthController {
       secure: true,
     });
     res.send('로그인에 성공하였습니다.');
-    res.redirect('/online-board');
+    // res.redirect('/online-board');
   }
 
   // @ApiOperation({ summary: '유저 정보' })
@@ -86,7 +86,10 @@ export class AuthController {
     res.send('로그아웃에 성공하였습니다.');
   }
 
-  @ApiOperation({ summary: '카카오 로그인', description: '카카오 계정으로 로그인 하세요.' })
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 계정으로 로그인 하세요.',
+  })
   @UseGuards(KakaoAuthGuard)
   @Get('kakao')
   redirectToKakaoAuth(@Res() res) {
@@ -96,7 +99,7 @@ export class AuthController {
 
     res.redirect(HttpStatus.TEMPORARY_REDIRECT, kakaoAuthURL);
   }
-  
+
   @UseGuards(KakaoAuthGuard)
   @Get('kakao/callback')
   async kakaoCallbacks(@Req() req, @Res() res) {
