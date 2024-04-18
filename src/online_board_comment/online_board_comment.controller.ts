@@ -47,6 +47,7 @@ export class OnlineBoardCommentController {
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
+    console.log(userInfo);
     const comment = await this.onlineBoardCommentService.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,

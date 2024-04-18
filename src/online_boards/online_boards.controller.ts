@@ -58,7 +58,7 @@ export class OnlineBoardsController {
 
   @ApiOperation({ summary: '유머 게시판 게시물 수정 페이지' })
   @Get('update/:id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
   @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
     const data = await this.onlineBoardsService.findBoardId(id);

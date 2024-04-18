@@ -6,12 +6,18 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
@@ -111,7 +117,7 @@ export class PolticalDebateCommentsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
-  @Put(':commentId')
+  @Patch(':commentId')
   async updateComment(
     @UserInfo() userInfo: UserInfos,
     @Param('polticalDebateId') polticalDebateId: number,

@@ -55,6 +55,7 @@ export class TrialsController {
   // 어쓰 가드 필요
 
   // 글쓰기 페이지 이동
+  @UseGuards(AuthGuard('jwt'))
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {

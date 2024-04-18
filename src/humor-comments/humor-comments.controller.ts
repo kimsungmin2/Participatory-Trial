@@ -19,7 +19,7 @@ import { Users } from '../users/entities/user.entity';
 import { userInfo } from 'os';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 @ApiTags('유머 게시판 댓글 API')
-@Controller('humors/humor-boards/:boardId/comments')
+@Controller('humors/:boardId/comments')
 export class HumorCommentsController {
   constructor(private readonly humorCommentsService: HumorCommentsService) {}
 
@@ -155,7 +155,7 @@ export class HumorCommentsController {
     @Param('commentId') commentId: number,
     @Param('boardId') boardId: number,
     @UserInfo() user: Users,
-  ){
+  ) {
     await this.humorCommentsService.deleteHumorComment(
       commentId,
       boardId,
