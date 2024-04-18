@@ -41,7 +41,7 @@ export class OnlineBoards {
   topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;
@@ -58,7 +58,7 @@ export class OnlineBoards {
     (OnlineBoardComment) => OnlineBoardComment.onlineBoard,
     { cascade: true },
   )
-  OnlineBoardComment: OnlineBoardComments[];
+  onlineBoardComment: OnlineBoardComments[];
 
   @OneToMany(
     () => OnlineBoardLike,

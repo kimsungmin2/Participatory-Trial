@@ -13,12 +13,13 @@ import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
-import { VoteTitleDto } from '../trials/vote/dto/voteDto';
-import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 import { S3Service } from '../s3/s3.service';
+import Redis from 'ioredis';
 import { BoardType } from '../s3/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { NotFound } from '@aws-sdk/client-s3';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 
 @Injectable()
 export class PolticalDebatesService {
@@ -171,6 +172,15 @@ export class PolticalDebatesService {
       where: { userId },
       order: { id: 'ASC' },
     });
+  }
+
+  async findBoardbyId(id: number) {
+    const board = await this.polticalDebateRepository.findOneBy({ id });
+
+    if (!board) {
+      throw new NotFoundException('게시물을 찾을 수 없습니다.');
+    }
+    return board;
   }
 
   async findOne(id: number) {

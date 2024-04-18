@@ -34,8 +34,9 @@ import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service
 import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { start } from 'repl';
 import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @ApiTags('자유 게시판')
 @Controller('online-boards')
@@ -53,6 +54,19 @@ export class OnlineBoardsController {
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {
     return { boardType: BoardType.OnlineBoard, isLoggedIn: req['isLoggedIn'] };
+  }
+
+  @ApiOperation({ summary: '유머 게시판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'), BoardOwnerGuard)
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.onlineBoardsService.findBoardId(id);
+    return {
+      boardType: BoardType.OnlineBoard,
+      isLoggedIn: req['isLoggedIn'],
+      data,
+    };
   }
   //게시글 생성
   @UseInterceptors(FilesInterceptor('files'))
@@ -76,6 +90,7 @@ export class OnlineBoardsController {
     @UserInfo() userInfo: UserInfos,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log(1, files);
     const board = await this.onlineBoardsService.createBoard(
       createOnlineBoardDto,
       userInfo,
@@ -109,31 +124,24 @@ export class OnlineBoardsController {
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.FOUND,
       message: '게시글을 조회합니다.',
       data: onlineBoards,
       boardType: BoardType.OnlineBoard,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }
-
-  //검색 API
-  @Get('search')
-  async findAll(@Body() findAllOnlineBoardDto: FindAllOnlineBoardDto) {
-    const boards = await this.onlineBoardsService.findAllBoard(
-      findAllOnlineBoardDto.keyword,
-    );
-
-    return {
-      statusCode: HttpStatus.FOUND,
-      message: '게시글을 조회합니다.',
-      data: boards,
-    };
-  }
-  //단건조회
 
   // 특정 자유 게시판 id 조회 API
   @ApiOperation({ summary: '특정 게시물 조회 API' })
@@ -159,6 +167,7 @@ export class OnlineBoardsController {
   }
 
   // 내 자유 게시물 수정 API
+  @ApiConsumes()
   @ApiOperation({ summary: '자유 게시물 수정 API' })
   @ApiBearerAuth('access-token')
   @ApiBody({
@@ -183,6 +192,7 @@ export class OnlineBoardsController {
     @Param('id') id: number,
     @Body() updateOnlineBoardDto: UpdateOnlineBoardDto,
   ) {
+    console.log(updateOnlineBoardDto);
     const board = await this.onlineBoardsService.updateBoard(
       id,
       updateOnlineBoardDto,

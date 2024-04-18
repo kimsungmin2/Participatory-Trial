@@ -37,6 +37,7 @@ import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
 import { Request } from 'express';
+import { HumorSeedService } from './humor-seeed.service';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 @ApiTags('유머 게시판')
 @Controller('humors')
@@ -45,14 +46,25 @@ export class HumorsController {
     private readonly humorsService: HumorsService,
     private readonly likeService: LikeService,
     private readonly humorHallOfFameService: HumorHallOfFameService,
+    private readonly humorSeedService: HumorSeedService,
   ) {}
 
   //글쓰기 페이지
   @ApiOperation({ summary: '유머 게시판 게시물 생성 페이지' })
   @Get('create')
+  @UseGuards(AuthGuard('jwt'))
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {
     return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'] };
+  }
+
+  @ApiOperation({ summary: '유머 게시판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.humorsService.findOneHumorBoard(id);
+    return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'], data };
   }
 
   @UseInterceptors(FilesInterceptor('files'))
@@ -88,6 +100,7 @@ export class HumorsController {
     @UserInfo() user: Users,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
+    console.log(files);
     const createdBoard = await this.humorsService.createHumorBoardAndVotes(
       createHumorBoardDto,
       voteTitleDto,
@@ -126,19 +139,27 @@ export class HumorsController {
     const { humorBoards, totalItems } =
       await this.humorsService.getAllHumorBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: humorBoards,
       boardType: BoardType.Humor,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }
   //단건 게시물 조회
   @ApiOperation({ summary: '단편 유머 게시물 조회' })
-  @Get('humor-boards/:id')
+  @Get('/:id')
   @Render('post.ejs') // index.ejs 파일을 렌더링하여 응답
   @ApiParam({
     name: 'id',
@@ -159,7 +180,7 @@ export class HumorsController {
   }
   @ApiOperation({ summary: '유머 게시물 수정' })
   @UseGuards(AuthGuard('jwt'))
-  @Patch('humor-boards/:humorBoardId')
+  @Patch('/:humorBoardId')
   @ApiBody({
     description: '유머 게시물 수정',
     schema: {
@@ -194,7 +215,7 @@ export class HumorsController {
     };
   }
   @ApiOperation({ summary: '유머 게시물 삭제' })
-  @Delete('humor-board/:humorBoardId')
+  @Delete('/:humorBoardId')
   @ApiParam({
     name: 'humorBoardId',
     required: true,
@@ -211,41 +232,6 @@ export class HumorsController {
     return {
       statusCode: HttpStatus.OK,
       message: `${humorBoardId}번 게시물 삭제 성공`,
-    };
-  }
-  //humors/25/like
-  @ApiOperation({ summary: '유머 게시판 좋아요/좋아요 취소' })
-  @ApiBody({
-    description: '좋아요/좋아요 취소',
-    schema: {
-      type: 'object',
-      properties: {
-        boardType: { type: 'string' },
-      },
-    },
-  })
-  @ApiParam({
-    name: 'humorBoardId',
-    required: true,
-    description: '유머 게시물 ID',
-    type: Number,
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Post('/humor-board/:humorBoardId/like')
-  async like(
-    @Param('humorBoardId') humorBoardId: number,
-    @UserInfo() user: Users,
-    @Body() likeInputDto: LikeInputDto,
-  ) {
-    const result = await this.likeService.like(
-      likeInputDto,
-      user,
-      humorBoardId,
-    );
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: result,
     };
   }
 
@@ -304,6 +290,21 @@ export class HumorsController {
       statusCode: HttpStatus.OK,
       message: '유머 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
       recentHallofFame,
+    };
+  }
+  @ApiOperation({ summary: '더미 생성' })
+  @ApiParam({
+    name: 'count',
+    required: true,
+    description: '유머 게시물 ID',
+    type: Number,
+  })
+  @Post('some/:count')
+  async createDummyData(@Param('count') count: number) {
+    await this.humorSeedService.saveHumorToDataBase(count);
+
+    return {
+      message: `${count}개 생성 완료`,
     };
   }
 }

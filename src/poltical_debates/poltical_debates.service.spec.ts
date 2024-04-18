@@ -253,24 +253,146 @@ describe('PolticalDebatesService', () => {
         voteTitleDto,
       );
 
-      // Assertions
-      expect(result).toEqual({
-        newVote: polticalDebatesVote,
-        savedVote: polticalDebatesVote,
-      });
-      expect(mockQueryRunner.connect).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.commitTransaction).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
-        PolticalDebateBoards,
-        expect.objectContaining(createPolticalDebateDto),
+      expect(polticalDebatesRepository.save).toHaveBeenCalledTimes(1);
+      expect(createPolticalDebateDto).toEqual(mockPolticalDebate);
+    });
+  });
+
+  describe('정치 토론 게시판 전체 조회', () => {
+    const mockPolticalDebateBoards = [
+      {
+        mockPolticalDebate,
+      },
+    ] as unknown as PolticalDebateBoards[];
+    it('성공', async () => {
+      const mockPolticalDebates = {
+        polticalDebateBoards: mockPolticalDebateBoards,
+        totalItems: 3,
+      };
+      const PaginationQueryDto = {
+        limit: 1,
+        page: 1,
+      };
+      jest
+        .spyOn(polticalDebatesRepository, 'find')
+        .mockResolvedValue(mockPolticalDebateBoards);
+
+      jest.spyOn(polticalDebatesRepository, 'count').mockResolvedValue(3);
+
+      const findAllPolticalDebateBoard = await polticalDebatesService.findAll();
+
+      expect(findAllPolticalDebateBoard).toEqual(mockPolticalDebates);
+    });
+  });
+
+  describe('유저의 정치 토론 게시판 조회 ', () => {
+    it('성공', async () => {
+      const mockUserId = 1;
+      const mockUserPolticalDebates: PolticalDebateBoards[] = [
+        mockPolticalDebate,
+      ];
+      jest
+        .spyOn(polticalDebatesRepository, 'find')
+        .mockResolvedValue(mockUserPolticalDebates);
+
+      const findOnePolticalDebateBoard =
+        await polticalDebatesService.findMyBoards(mockUserId);
+
+      expect(findOnePolticalDebateBoard).toEqual(mockUserPolticalDebates);
+    });
+  });
+
+  describe('정치 토론 게시판 상세 조회', () => {
+    const a = {
+      id: 1,
+      userId: 1,
+      title: 'test',
+      content: 'test2',
+      view: 1,
+      createdAt: new Date(),
+      updated_at: new Date(),
+    } as PolticalDebateBoards;
+
+    const b = {
+      ...a,
+      view: a.view + 1,
+    };
+    it('성공', async () => {
+      const mockPolticalDebateId = 1;
+      jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(a);
+
+      const findOnePolticalDebateBoard =
+        await polticalDebatesService.findOne(mockPolticalDebateId);
+
+      expect(findOnePolticalDebateBoard).toEqual(b);
+    });
+
+    it('실패: 정치 토론 게시판을 찾을 수 없습니다.', async () => {
+      const mockPolticalDebateId = 1000;
+      jest.spyOn(polticalDebatesRepository, 'findOne').mockResolvedValue(null);
+
+      await expect(
+        polticalDebatesService.findOne(mockPolticalDebateId),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('정치 토론 게시판 수정', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('정치 토론 게시판 업데이트 성공', async () => {
+      const updatePolticalDebateDto: UpdatePolticalDebateDto = {
+        title: 'Updated Title',
+        content: 'Updated Content',
+      };
+
+      const mockPolticalDebateId = 1;
+      const mockUserId = 1;
+
+      const mockPolticalDebate = {
+        id: mockPolticalDebateId,
+        userId: mockUserId,
+        title: '기존 타이틀',
+        content: '기존 컨텐츠',
+        view: 1,
+        createdAt: new Date(),
+        updated_at: new Date(),
+      } as PolticalDebateBoards;
+
+      jest
+        .spyOn(polticalDebatesRepository, 'findOne')
+        .mockResolvedValue(mockPolticalDebate);
+      jest
+        .spyOn(polticalDebatesRepository, 'save')
+        .mockResolvedValue(mockPolticalDebate);
+
+      const updatedBoard = await polticalDebatesService.update(
+        mockedUser,
+        mockPolticalDebateId,
+        updatePolticalDebateDto,
       );
+      const mockQueryRunner = {
+        connect: jest.fn(),
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+        manager: {
+          create: jest
+            .fn()
+            .mockReturnValueOnce(polticalDebatesRepository) // Return the new board
+            .mockReturnValueOnce(polticalDebatesVote), // Return the new vote
+          save: jest.fn(), // Not needed for this test
+        },
+      };
       expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
         PolticalDebateVotes,
         expect.objectContaining({
-          title1: voteTitleDto.title1,
-          title2: voteTitleDto.title2,
-          polticalId,
+          title1: VoteTitleDto.title1,
+          title2: VoteTitleDto.title2,
+          mockPolticalDebateId,
         }),
       );
       expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);

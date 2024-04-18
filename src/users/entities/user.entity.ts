@@ -20,8 +20,8 @@ import { EachVote } from '../../trials/entities/Uservote.entity';
 import { HumorLike } from '../../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
 import { EachHumorVote } from '../../humors/entities/UservoteOfHumorVote.entity';
-import { TrialsChat } from '../../events/entities/trialsChat.entity';
 import { EachPolticalVote } from '../../poltical_debates/entities/userVoteOfPoltical_debate.entity';
+import { TrialsChat } from '../../events/entities/trialsChat.entity';
 
 @Entity({
   name: 'users',

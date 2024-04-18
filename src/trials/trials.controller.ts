@@ -51,11 +51,11 @@ export class TrialsController {
     private readonly likeServise: LikeService,
   ) {}
   // 모든 API는 비동기 처리
-
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
-  // 어쓰 가드 필요\
+  // 어쓰 가드 필요
 
   // 글쓰기 페이지 이동
+  @UseGuards(AuthGuard('jwt'))
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {
@@ -202,23 +202,32 @@ export class TrialsController {
   async findAllTrials(
     @Query() paginationQueryDto: PaginationQueryDto,
     @Req() req: Request,
-  ): Promise<ReturnValue> {
+  ) {
     const { allTrials, totalItems } =
       await this.trialsService.findAllTrials(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: allTrials,
       boardType: BoardType.Trial,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
-  @Render('vote.ejs')
+  // @Render('vote.ejs')
+  @Render('post.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
     name: 'trialsId',
@@ -235,6 +244,20 @@ export class TrialsController {
       message: '재판 검색에 성공하였습니다.',
       data,
       isLoggedIn: req['isLoggedIn'],
+      boardType: BoardType.Trial,
+    };
+  }
+  //특정 재판 수정 페이지
+  @ApiOperation({ summary: '재판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.trialsService.findOneByTrialsId(id);
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+      data,
     };
   }
 
@@ -299,36 +322,36 @@ export class TrialsController {
   }
 
   // 재판 게시물 좋아요 API
-  @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
-  @ApiBody({
-    description: '좋아요/좋아요 취소',
-    schema: {
-      type: 'object',
-      properties: {
-        boardType: { type: 'string' },
-      },
-    },
-  })
-  @ApiParam({
-    name: 'trialId',
-    required: true,
-    description: '재판 게시물 ID',
-    type: Number,
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Post('/:trialId/like')
-  async like(
-    @Param('trialId') trialId: number,
-    @UserInfo() user: Users,
-    @Body() likeInputDto: LikeInputDto,
-  ) {
-    const result = await this.likeServise.like(likeInputDto, user, trialId);
+  // @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
+  // @ApiBody({
+  //   description: '좋아요/좋아요 취소',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       boardType: { type: 'string' },
+  //     },
+  //   },
+  // })
+  // @ApiParam({
+  //   name: 'trialId',
+  //   required: true,
+  //   description: '재판 게시물 ID',
+  //   type: Number,
+  // })
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('/:trialId/like')
+  // async like(
+  //   @Param('trialId') trialId: number,
+  //   @UserInfo() user: Users,
+  //   @Body() likeInputDto: LikeInputDto,
+  // ) {
+  //   const result = await this.likeServise.like(likeInputDto, user, trialId);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: result,
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: result,
+  //   };
+  // }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   // -------------------------------------------------------------------------- 재판 vs API ----------------------------------------------------------------------//
 

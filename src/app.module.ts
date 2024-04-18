@@ -18,7 +18,6 @@ import { LikeModule } from './like/like.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { HumorsService } from './humors/humors.service';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { BullModule } from '@nestjs/bull';
@@ -27,10 +26,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
 
-import { WinstonModule } from "nest-winston"
+import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
-import { ErrorInterceptor } from './utils/interceptor/logging/error.logging.interceptor';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 import { SearchModule } from './search/search.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 console.log(__dirname);
@@ -117,10 +115,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: HttpLoggingInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

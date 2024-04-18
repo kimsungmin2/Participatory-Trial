@@ -7,8 +7,8 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Users } from '../../users/entities/user.entity';
 import { PolticalDebateVotes } from './polticalVote.entity';
+import { Users } from '../../users/entities/user.entity';
 
 @Entity()
 export class EachPolticalVote {

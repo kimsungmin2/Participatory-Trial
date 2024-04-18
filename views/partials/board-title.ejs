@@ -9,15 +9,17 @@
 </head>
 <body>
   <div class="board_title">
-    <% if (boardType === 'humor') { %>
+    <% if (boardType === 'humor' || boardType === 'humor_board') { %>
       <span>유머 게시판</span>
-    <% } else if (boardType === 'onlineBoard') { %>
+    <% } else if (boardType === 'onlineBoard' || boardType === 'online_boardaw') { %>
       <span>자유 게시판</span>
-    <% } else if (boardType === 'polticalDebate') { %>
+    <% } else if (boardType === 'polticalDebate' || boardType === 'poltical_debate_board') { %>
       <span>정치토론 게시판</span>
     <% } else if (boardType === 'trial') { %>
       <span>재판 게시판</span>
-    <% } %>
+    <% } else {%>
+      <span>전체 검색</span>
+      <% } %>
   </div>
 </body>
 </html>

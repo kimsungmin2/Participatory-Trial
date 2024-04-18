@@ -194,4 +194,28 @@ a {
   font-size: 24px;
 }
 
+.search {
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
+  margin-bottom: 110px;
+}
 
+input {
+  width: 100%;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 30px;
+  height: 50 px;
+}
+
+.glass_button {
+  position: absolute;
+  width: 17px;
+  top: 12px;
+  right: 40px;
+  margin: 0;
+  background: transparent;
+  border: transparent;
+}

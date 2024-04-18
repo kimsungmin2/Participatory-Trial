@@ -107,7 +107,6 @@
 <script>
   let boardType;
   boardType = "<%= boardType %>";
-
   if (boardType === 'humor') { 
           boardType = 'humors'
         } else if (boardType === 'onlineBoard') { 
@@ -119,6 +118,13 @@
         } 
   document.getElementById('postForm').addEventListener('submit', function(event) {
   event.preventDefault(); // 기본 폼 제출 이벤트 방지
+
+  const titleElement = document.getElementById('title'); // 제목 필드 선택
+    const contentElement = document.querySelector('textarea[name="content"]'); // 내용 필드 선택
+
+    if (titleElement.value.trim() === '' || contentElement.value.trim() === '') {
+      alert('제목 또는 내용을 비워둘 수 없습니다.'); // 알림 메시지 표시
+    }
 
   const formData = new FormData(this); // FormData 객체를 사용하여 폼 데이터를 수집
 

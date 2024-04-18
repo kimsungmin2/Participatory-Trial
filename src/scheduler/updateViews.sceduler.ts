@@ -45,8 +45,6 @@ export class UpdateViewsScheduler {
           await this.redis.del(key);
         }
       });
-    } else {
-      console.log('유머 게시판에 조회수를 업데이트 할 게시물이 없습니다!');
     }
     console.log('=======유머 게시판 조회수 업데이트 완료!=======');
   }
@@ -78,8 +76,6 @@ export class UpdateViewsScheduler {
           await this.redis.del(key);
         }
       });
-    } else {
-      console.log('자유 게시판에 조회수를 업데이트 할 게시물이 없습니다!');
     }
     console.log('=======자유 게시판 조회수 업데이트 완료!=======');
   }
@@ -118,8 +114,6 @@ export class UpdateViewsScheduler {
           await this.redis.del(key);
         }
       });
-    } else {
-      console.log('정치 토론 게시판에 조회수를 업데이트 할 게시물이 없습니다!');
     }
     console.log('=======정치 토론 게시판 조회수 업데이트 완료!=======');
   }

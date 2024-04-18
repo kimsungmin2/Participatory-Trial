@@ -46,7 +46,11 @@ export class LikeController {
     @UserInfo() user: Users,
     @Param('boardId') boardId: number,
   ) {
-    const result = await this.likeService.like(likeInputDto, user, boardId);
+    const result = await this.likeService.like(
+      likeInputDto.boardType,
+      user.id,
+      boardId,
+    );
     console.log(result);
     return {
       statusCode: HttpStatus.OK,

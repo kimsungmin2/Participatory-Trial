@@ -44,6 +44,9 @@ export class UsersService {
       where: { id },
       select: ['id'],
     });
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+    }
 
     await this.cacheManager.set(`id:${id}`, user, 1000 * 60 * 60 * 24);
     return user;

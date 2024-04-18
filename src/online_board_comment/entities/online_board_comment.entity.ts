@@ -5,6 +5,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,15 +32,25 @@ export class OnlineBoardComments {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
+  @DeleteDateColumn({ type: 'timestamp' })
+  deleted_at: Date;
+
   @ManyToOne(
     () => OnlineBoards,
-    (onlineBoard) => onlineBoard.OnlineBoardComment,
+    (onlineBoard) => onlineBoard.onlineBoardComment,
     { onDelete: 'CASCADE' },
   )
   @JoinColumn({ name: 'onlineBoardId', referencedColumnName: 'id' })
   onlineBoard: Users;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
+
+  @OneToMany(
+    () => OnlineBoardComments,
+    (onlineboardComment) => onlineboardComment.onlineBoard,
+    { onDelete: 'CASCADE' },
+  )
+  onlineBoardComment: OnlineBoards;
 }

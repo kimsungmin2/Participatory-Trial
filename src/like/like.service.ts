@@ -11,15 +11,12 @@ import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
 import { Trials } from '../trials/entities/trial.entity';
 import { TrialLike } from '../trials/entities/trials.like.entity';
-
 type boardTypes = HumorBoards | OnlineBoards | Trials;
-
 interface LikeEntity {
   humorBoardId?: number;
   onlineBoardId?: number;
   userId: number;
 }
-
 @Injectable()
 export class LikeService {
   constructor(
@@ -37,35 +34,32 @@ export class LikeService {
     private trialsLikeRepository: Repository<TrialLike>,
   ) {}
   async like(
-    likeInputDto: LikeInputDto,
-    user: Users,
+    boardType: string,
+    userId: number,
     boardId: number,
   ): Promise<string> {
     //boardId 아이디
     //boardType 어떤 게시판
-    const { boardType } = likeInputDto;
-    const { id } = user;
-
     let boardRepository;
     let likeRepository;
     let entityKey: 'humorBoardId' | 'onlineBoardId' | 'trialId';
-
     //타입 별 의존성 주입
     switch (boardType) {
-      case BoardType.Humor:
+      case 'humors':
         boardRepository = this.humorBoardRepository;
         likeRepository = this.humorLikeRepository;
         entityKey = `humorBoardId`;
         break;
-      case BoardType.OnlineBoard:
+      case 'onlineBoards':
         boardRepository = this.onlineBoardRepository;
         likeRepository = this.onlineLikeRepository;
         entityKey = `onlineBoardId`;
         break;
-      case BoardType.Trial:
+      case 'trials':
         boardRepository = this.trialsRepository;
         likeRepository = this.trialsLikeRepository;
         entityKey = 'trialId';
+        break;
       default:
         throw new NotFoundException(`${boardType}은 현재 지원되지 않습니다.`);
     }
@@ -73,30 +67,26 @@ export class LikeService {
     if (!findBoard) {
       throw new NotFoundException('게시물을 찾을 수 없습니다.');
     }
-
     const isLikeExist: HumorLike | OnlineBoardLike | TrialLike =
       await likeRepository.findOne({
         where: {
           [entityKey]: boardId,
-          userId: id,
+          userId,
         },
       });
-
     if (!isLikeExist) {
-      // console.log(boardId);
-      // console.log(id);
       const like = {
         [entityKey]: boardId,
-        userId: id,
+        userId,
       } as DeepPartial<LikeEntity>;
-
       await likeRepository.save(like);
       await boardRepository.increment({ id: boardId }, 'like', 1);
-      return '좋아요 성공';
     } else {
       await likeRepository.remove(isLikeExist);
       await boardRepository.decrement({ id: boardId }, 'like', 1);
-      return '좋아요 취소 성공';
     }
+    const updatedBoard = await boardRepository.findOneBy({ id: boardId });
+    const currentLikes = updatedBoard ? updatedBoard.like : 0;
+    return currentLikes;
   }
 }

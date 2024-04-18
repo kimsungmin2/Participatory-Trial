@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "cross-env IS_TEST=false nest start --watch",
+    "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
@@ -46,11 +47,9 @@
     "@types/cron": "^2.4.0",
     "@types/multer": "^1.4.11",
     "aggregate-error": "^5.0.0",
-    "artillery": "^2.0.10",
-    "artillery-plugin-apdex": "^1.1.0",
-    "artillery-plugin-ensure": "^1.4.0",
+    "artillery": "^2.0.9",
+    "artillery-plugin-expect": "^2.3.3",
     "artillery-plugin-fake-data": "^1.1.0",
-    "artillery-plugin-metrics-by-endpoint": "^1.4.0",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "bootstrap": "^5.3.3",
@@ -83,8 +82,9 @@
     "passport-jwt": "^4.0.1",
     "passport-kakao": "^1.0.1",
     "passport-naver": "^1.0.6",
-    "pg": "^8.11.4",
-    "reflect-metadata": "^0.2.2",
+    "pg": "^8.11.5",
+    "redis": "^4.6.13",
+    "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.5",
     "socket.io-redis": "^6.1.1",
@@ -96,6 +96,7 @@
     "winston-elasticsearch": "^0.18.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/schematics": "^10.0.0",
@@ -138,7 +139,12 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/node_modules/**",
+      "!**/dto/**",
+      "!**/module/**",
+      "!**/entities/**",
+      "!**/*module.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

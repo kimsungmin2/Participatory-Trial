@@ -47,6 +47,11 @@ a {
   background-color: #f4edcc;
 }
 
+.no_posts {
+  font-size: 30px;
+  margin: 0 auto;
+}
+
 .navbar-nav .nav-item:not(:last-child) {
   margin-right: 100px;
   font-family: 'MBC1961GulimM';
@@ -63,7 +68,8 @@ a {
 
 .board_title,
 .post_title,
-.post_content {
+.post_content,
+.ud-container {
   font-size: 50px;
   font-family: 'SUITE-Regular';
   margin-top: 30px;
@@ -76,7 +82,8 @@ a {
   margin-bottom: 400px;
   padding: 1px;
 }
-.post_title {
+.post_title,
+.ud-container {
   font-size: 30px;
   display: flex; /* Flexbox 레이아웃 사용 */
   justify-content: space-between; /* 자식 요소들을 양 끝으로 정렬 */
@@ -86,6 +93,12 @@ a {
   display: flex; /* 조회수와 좋아요를 가진 div도 Flexbox로 설정 */
   gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
   font-size: 1.3rem;
+}
+.ud-container > div {
+  display: flex; /* Flexbox로 설정 */
+  justify-content: flex-end; /* 자식 요소들을 우측으로 정렬 */
+  gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
+  font-size: 1.3rem; /* 폰트 크기 설정 */
 }
 
 .post_image {
@@ -100,9 +113,7 @@ a {
 /* 검색창 스타일 */
 .search-container {
   display: flex;
-  justify-content: center;
   margin-top: 20px;
-  display: flex;
   justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
   /* 컨테이너의 너비를 필요에 따라 조정하세요 */
   margin-bottom: 50px;
@@ -130,6 +141,10 @@ button[type='submit'] {
   font-size: 17px;
   border: 1px solid grey;
   cursor: pointer;
+}
+
+select {
+  margin-right: 10px; /* 셀렉트 박스와 인풋 박스 사이의 간격 */
 }
 
 .board-container {
@@ -234,7 +249,22 @@ button[type='submit'] {
   width: 100%;
 }
 
-.modify {
+.like_button {
+  text-align: center;
+}
+
+.search_not_found {
+  font-size: 30px;
+  display: flex; /* 이를 통해 flex 컨테이너로 만듭니다 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  height: 100%; /* 컨테이너의 높이를 설정해야 수직 중앙 정렬이 적용됩니다. */
+}
+
+.searched-post {
+  margin-top: 30px;
+  font-size: 30px;
+  text-align: center; /* 텍스트 중앙 정렬 */
 }
 
 .comment-form {

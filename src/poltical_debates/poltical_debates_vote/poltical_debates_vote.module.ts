@@ -18,5 +18,6 @@ import { PanryeInfo } from '../../trials/entities/panryedata.entity';
   ],
   controllers: [PolticalVotesController],
   providers: [PolticalVotesService],
+  exports: [PolticalVotesService],
 })
 export class PolticalDebatesVoteModule {}

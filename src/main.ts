@@ -1,22 +1,28 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-
 import { setupSwagger } from './utils/swagger';
-import { LoggingInterceptor } from './utils/logging.interceptor';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { winstonLogger } from './utils/winston';
-import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
-import { WinstonLogger } from 'nest-winston';
 import { HttpExceptionFilter } from './utils/filter/exception.filter';
 import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
-import expressLayout from 'express-ejs-layouts';
 
 async function bootstrap() {
+  process.on('unhandledRejection', (reason, promise) => {
+    console.log(reason);
+    winstonLogger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  });
+
+  process.on('uncaughtException', (error) => {
+    winstonLogger.error('Uncaught Exception thrown:', error);
+  });
   const logger = winstonLogger;
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const cors = require('cors');
+
+  app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -37,4 +43,3 @@ async function bootstrap() {
   logger.verbose(`${port}번 포트에서 어플리케이션 실행`);
 }
 bootstrap();
-

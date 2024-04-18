@@ -33,8 +33,9 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { start } from 'repl';
 import { BoardType } from '../s3/board-type';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @ApiTags('정치 토론')
@@ -51,6 +52,19 @@ export class PolticalDebatesController {
     return {
       boardType: BoardType.PolticalDebate,
       isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  @ApiOperation({ summary: '정치토론 게시판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.polticalDebatesService.findOne(id);
+    return {
+      boardType: BoardType.PolticalDebate,
+      isLoggedIn: req['isLoggedIn'],
+      data,
     };
   }
 
@@ -133,13 +147,21 @@ export class PolticalDebatesController {
         paginationQueryDto,
       );
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '게시물 조회 성공',
       data: polticalDebateBoards,
       boardType: BoardType.PolticalDebate,
       pageCount,
-      currentPage: paginationQueryDto.page,
+      currentPage,
+      startPage,
+      endPage,
       isLoggedIn: req['isLoggedIn'],
     };
   }

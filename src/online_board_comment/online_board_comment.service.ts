@@ -46,11 +46,8 @@ export class OnlineBoardCommentService {
 
   //자유게시판 댓글 목록 조회
   async findAllComments(onlineBoardId: number) {
-    const foundBoard =
-      await this.onlineBoardsService.findBoardId(onlineBoardId);
-
     const comments = await this.onlineBoardCommentRepository.findBy({
-      onlineBoardId: foundBoard.id,
+      onlineBoardId,
     });
 
     return comments;
@@ -106,5 +103,7 @@ export class OnlineBoardCommentService {
     if (!foundCommentOwner) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
+
+    return foundCommentOwner;
   }
 }

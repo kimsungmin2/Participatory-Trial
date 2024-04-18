@@ -22,6 +22,9 @@ import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
 import { Redis } from 'ioredis';
 import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
+import { HumorVotes } from './entities/HumorVote.entity';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { Readable } from 'stream';
 
 const mockedUser: Users = {
   id: 1,
@@ -54,14 +57,41 @@ const mockBoard = {
   deleted_at: new Date(),
 } as HumorBoards;
 
+const mockVote = {
+  humorId: 1,
+  title1: '냠냠',
+  title2: '냠냠2',
+} as HumorVotes;
+
+const mockFile: Express.Multer.File[] = [
+  {
+    fieldname: 'file',
+    originalname: 'testfile.txt',
+    encoding: '7bit',
+    mimetype: 'text/plain',
+    size: 128,
+    destination: './upload',
+    filename: 'testfile.txt',
+    path: './upload/testfile.txt',
+    buffer: Buffer.from('Hello World'),
+    stream: Readable.from(Buffer.from('Hello World')),
+  },
+];
+
 describe('HumorsService', () => {
   let humorService: HumorsService;
   let humorBoardRepository: Repository<HumorBoards>;
+  let humorVoteRepository: Repository<HumorVotes>;
+  let s3Service: S3Service;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         HumorsService,
+        S3Service,
         {
           provide: S3Service,
           useValue: {
@@ -84,46 +114,95 @@ describe('HumorsService', () => {
           },
         },
         {
+          provide: getRepositoryToken(HumorVotes),
+          useClass: Repository,
+        },
+        {
           provide: 'default_IORedisModuleConnectionToken',
           useValue: {
             set: jest.fn(),
             get: jest.fn(),
+            incr: jest.fn().mockReturnValue(1),
           },
         },
       ],
     }).compile();
 
     humorService = module.get<HumorsService>(HumorsService);
+    s3Service = module.get<S3Service>(S3Service);
     humorBoardRepository = module.get<Repository<HumorBoards>>(
       getRepositoryToken(HumorBoards),
+    );
+    humorVoteRepository = module.get<Repository<HumorVotes>>(
+      getRepositoryToken(HumorVotes),
     );
   });
 
   it('should be defined', () => {
     expect(humorService).toBeDefined();
+    expect(s3Service).toBeDefined();
   });
   describe('createHumorBoard', () => {
     const createHumorBoardDto: CreateHumorBoardDto = {
       content: '냠냠',
       title: '냠냠냠',
     };
+    const voteTitleDto: VoteTitleDto = {
+      title1: '냠냠',
+      title2: '냠냠2',
+    };
     const files: Express.Multer.File[] = [];
     it('must be success', async () => {
       jest.spyOn(humorBoardRepository, 'save').mockResolvedValue(mockBoard);
-      const createdBoard = await humorService.createHumorBoard(
+      jest.spyOn(humorVoteRepository, 'save').mockResolvedValue(mockVote);
+      const createdBoard = await humorService.createHumorBoardAndVotes(
         createHumorBoardDto,
+        voteTitleDto,
         mockedUser,
         files,
       );
       expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
+      expect(humorVoteRepository.save).toHaveBeenCalledTimes(1);
       expect(createdBoard).toEqual(mockBoard);
     });
+    it('must be success with image', async () => {
+      const mockedUrl = [
+        {
+          imageUrl: 'hello',
+        },
+      ];
+      const mockBoard1 = {
+        id: 1,
+        content: '냠냠',
+        userId: 1,
+        like: 1,
+        view: 1,
+        createdAt: new Date(),
+        updated_at: new Date(),
+        deleted_at: new Date(),
+        imageUrl: '[hello]',
+      } as HumorBoards;
+      jest.spyOn(humorBoardRepository, 'save').mockResolvedValue(mockBoard1);
+      jest.spyOn(humorVoteRepository, 'save').mockResolvedValue(mockVote);
+      jest.spyOn(s3Service, 'saveImages').mockResolvedValue(mockedUrl);
+      const createdBoard = await humorService.createHumorBoardAndVotes(
+        createHumorBoardDto,
+        voteTitleDto,
+        mockedUser,
+        mockFile,
+      );
+      expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
+      expect(humorVoteRepository.save).toHaveBeenCalledTimes(1);
+      expect(createdBoard).toEqual(mockBoard1);
+    });
     it('must be save is failed', async () => {
-      expect.assertions(3);
+      expect.assertions(4);
       jest.spyOn(humorBoardRepository, 'save').mockRejectedValue(new Error());
+      jest.spyOn(humorVoteRepository, 'save').mockRejectedValue(new Error());
       try {
-        await humorService.createHumorBoard(
+        await humorService.createHumorBoardAndVotes(
           createHumorBoardDto,
+          voteTitleDto,
           mockedUser,
           files,
         );
@@ -134,6 +213,7 @@ describe('HumorsService', () => {
         );
       }
       expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
+      expect(humorVoteRepository.save).toHaveBeenCalledTimes(0);
     });
   });
   describe('getAllHumorBoards', () => {
@@ -200,6 +280,39 @@ describe('HumorsService', () => {
       expect(humorBoardRepository.findOneBy).toHaveBeenCalledTimes(1);
     });
   });
+  describe('findOneHumorBoardWithIncreaseView', () => {
+    const mockBoardRedis = {
+      id: 1,
+      content: '냠냠',
+      userId: 1,
+      like: 1,
+      view: 2,
+      createdAt: new Date(),
+      updated_at: new Date(),
+      deleted_at: new Date(),
+    } as HumorBoards;
+    it('must be success', async () => {
+      jest
+        .spyOn(humorBoardRepository, 'findOne')
+        .mockResolvedValue(mockBoardRedis);
+      const createdBoard = await humorService.findOneHumorBoardWithIncreaseView(
+        mockBoard.id,
+      );
+      mockBoardRedis.view = 3;
+      expect(humorBoardRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(createdBoard).toEqual(mockBoardRedis);
+    });
+    it('must be failed by NotFoundException', async () => {
+      jest.spyOn(humorBoardRepository, 'findOne').mockResolvedValue(null);
+      try {
+        await humorService.findOneHumorBoardWithIncreaseView(mockBoard.id);
+      } catch (err) {
+        expect(err).toBeInstanceOf(NotFoundException);
+        expect(err.message).toEqual(`1번 게시물을 찾을 수 없습니다.`);
+      }
+      expect(humorBoardRepository.findOne).toHaveBeenCalledTimes(1);
+    });
+  });
   describe('updateHumorBoard', () => {
     const updateHumorDto = {
       title: 'title',
@@ -209,7 +322,6 @@ describe('HumorsService', () => {
       ...mockBoard,
       ...updateHumorDto,
     };
-
     it('must be success', async () => {
       jest
         .spyOn(humorService, 'findOneHumorBoard')
