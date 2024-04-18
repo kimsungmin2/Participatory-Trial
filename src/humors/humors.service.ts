@@ -16,8 +16,8 @@ import { BoardType } from '../s3/board-type';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { cache } from 'joi';
-import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { HumorVotes } from './entities/HumorVote.entity';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 
 @Injectable()
 export class HumorsService {

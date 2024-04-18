@@ -1,0 +1,1414 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.create board": 1230,
+      "vusers.created": 1230,
+      "http.requests": 1230,
+      "http.codes.201": 1230,
+      "http.responses": 1230,
+      "http.downloaded_bytes": 621844,
+      "apdex.satisfied": 1223,
+      "apdex.tolerated": 7,
+      "apdex.frustrated": 0,
+      "plugins.metrics-by-endpoint./poltical-debates.codes.201": 1230,
+      "errors.Failed capture or match": 1230,
+      "vusers.failed": 1230
+    },
+    "rates": {
+      "http.request_rate": 14
+    },
+    "firstCounterAt": 1713423527017,
+    "firstHistogramAt": 1713423527217,
+    "lastCounterAt": 1713423676496,
+    "lastHistogramAt": 1713423676495,
+    "firstMetricAt": 1713423527017,
+    "lastMetricAt": 1713423676496,
+    "period": 1713423670000,
+    "summaries": {
+      "http.response_time": {
+        "min": 5,
+        "max": 167,
+        "count": 1230,
+        "mean": 17,
+        "p50": 13.1,
+        "median": 13.1,
+        "p75": 19.1,
+        "p90": 25.8,
+        "p95": 34.1,
+        "p99": 80.6,
+        "p999": 138.4
+      },
+      "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+        "min": 5,
+        "max": 167,
+        "count": 1230,
+        "mean": 17,
+        "p50": 13.1,
+        "median": 13.1,
+        "p75": 19.1,
+        "p90": 25.8,
+        "p95": 34.1,
+        "p99": 80.6,
+        "p999": 138.4
+      }
+    },
+    "histograms": {
+      "http.response_time": {
+        "min": 5,
+        "max": 167,
+        "count": 1230,
+        "mean": 17,
+        "p50": 13.1,
+        "median": 13.1,
+        "p75": 19.1,
+        "p90": 25.8,
+        "p95": 34.1,
+        "p99": 80.6,
+        "p999": 138.4
+      },
+      "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+        "min": 5,
+        "max": 167,
+        "count": 1230,
+        "mean": 17,
+        "p50": 13.1,
+        "median": 13.1,
+        "p75": 19.1,
+        "p90": 25.8,
+        "p95": 34.1,
+        "p99": 80.6,
+        "p999": 138.4
+      }
+    }
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 3,
+        "vusers.created": 3,
+        "http.requests": 3,
+        "http.codes.201": 3,
+        "http.responses": 3,
+        "http.downloaded_bytes": 1506,
+        "apdex.satisfied": 2,
+        "apdex.tolerated": 1,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 3,
+        "errors.Failed capture or match": 3,
+        "vusers.failed": 3
+      },
+      "rates": {
+        "http.request_rate": 2
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423527017,
+      "firstHistogramAt": 1713423527217,
+      "lastCounterAt": 1713423529072,
+      "lastHistogramAt": 1713423529069,
+      "firstMetricAt": 1713423527017,
+      "lastMetricAt": 1713423529072,
+      "period": "1713423520000",
+      "summaries": {
+        "http.response_time": {
+          "min": 13,
+          "max": 139,
+          "count": 3,
+          "mean": 59.3,
+          "p50": 25.8,
+          "median": 25.8,
+          "p75": 25.8,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 25.8,
+          "p999": 25.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 13,
+          "max": 139,
+          "count": 3,
+          "mean": 59.3,
+          "p50": 25.8,
+          "median": 25.8,
+          "p75": 25.8,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 25.8,
+          "p999": 25.8
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 13,
+          "max": 139,
+          "count": 3,
+          "mean": 59.3,
+          "p50": 25.8,
+          "median": 25.8,
+          "p75": 25.8,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 25.8,
+          "p999": 25.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 13,
+          "max": 139,
+          "count": 3,
+          "mean": 59.3,
+          "p50": 25.8,
+          "median": 25.8,
+          "p75": 25.8,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 25.8,
+          "p999": 25.8
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 15,
+        "vusers.created": 15,
+        "http.requests": 15,
+        "http.codes.201": 15,
+        "http.responses": 15,
+        "http.downloaded_bytes": 7628,
+        "apdex.satisfied": 15,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 15,
+        "errors.Failed capture or match": 15,
+        "vusers.failed": 15
+      },
+      "rates": {
+        "http.request_rate": 2
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423530020,
+      "firstHistogramAt": 1713423530054,
+      "lastCounterAt": 1713423539111,
+      "lastHistogramAt": 1713423539111,
+      "firstMetricAt": 1713423530020,
+      "lastMetricAt": 1713423539111,
+      "period": "1713423530000",
+      "summaries": {
+        "http.response_time": {
+          "min": 10,
+          "max": 21,
+          "count": 15,
+          "mean": 13.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 16,
+          "p90": 16,
+          "p95": 16.9,
+          "p99": 16.9,
+          "p999": 16.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 21,
+          "count": 15,
+          "mean": 13.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 16,
+          "p90": 16,
+          "p95": 16.9,
+          "p99": 16.9,
+          "p999": 16.9
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 10,
+          "max": 21,
+          "count": 15,
+          "mean": 13.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 16,
+          "p90": 16,
+          "p95": 16.9,
+          "p99": 16.9,
+          "p999": 16.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 21,
+          "count": 15,
+          "mean": 13.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 16,
+          "p90": 16,
+          "p95": 16.9,
+          "p99": 16.9,
+          "p999": 16.9
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 20,
+        "vusers.created": 20,
+        "http.requests": 20,
+        "http.codes.201": 20,
+        "http.responses": 20,
+        "http.downloaded_bytes": 10170,
+        "apdex.satisfied": 17,
+        "apdex.tolerated": 3,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 20,
+        "errors.Failed capture or match": 20,
+        "vusers.failed": 20
+      },
+      "rates": {
+        "http.request_rate": 2
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423540029,
+      "firstHistogramAt": 1713423540148,
+      "lastCounterAt": 1713423549105,
+      "lastHistogramAt": 1713423549104,
+      "firstMetricAt": 1713423540029,
+      "lastMetricAt": 1713423549105,
+      "period": "1713423540000",
+      "summaries": {
+        "http.response_time": {
+          "min": 10,
+          "max": 122,
+          "count": 20,
+          "mean": 30.9,
+          "p50": 15,
+          "median": 15,
+          "p75": 21.1,
+          "p90": 98.5,
+          "p95": 104.6,
+          "p99": 104.6,
+          "p999": 104.6
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 122,
+          "count": 20,
+          "mean": 30.9,
+          "p50": 15,
+          "median": 15,
+          "p75": 21.1,
+          "p90": 98.5,
+          "p95": 104.6,
+          "p99": 104.6,
+          "p999": 104.6
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 10,
+          "max": 122,
+          "count": 20,
+          "mean": 30.9,
+          "p50": 15,
+          "median": 15,
+          "p75": 21.1,
+          "p90": 98.5,
+          "p95": 104.6,
+          "p99": 104.6,
+          "p999": 104.6
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 122,
+          "count": 20,
+          "mean": 30.9,
+          "p50": 15,
+          "median": 15,
+          "p75": 21.1,
+          "p90": 98.5,
+          "p95": 104.6,
+          "p99": 104.6,
+          "p999": 104.6
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 30,
+        "vusers.created": 30,
+        "http.requests": 30,
+        "http.codes.201": 30,
+        "http.responses": 30,
+        "http.downloaded_bytes": 15194,
+        "apdex.satisfied": 30,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 30,
+        "errors.Failed capture or match": 30,
+        "vusers.failed": 30
+      },
+      "rates": {
+        "http.request_rate": 3
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423550032,
+      "firstHistogramAt": 1713423550063,
+      "lastCounterAt": 1713423559172,
+      "lastHistogramAt": 1713423559171,
+      "firstMetricAt": 1713423550032,
+      "lastMetricAt": 1713423559172,
+      "period": "1713423550000",
+      "summaries": {
+        "http.response_time": {
+          "min": 11,
+          "max": 32,
+          "count": 30,
+          "mean": 15.8,
+          "p50": 15,
+          "median": 15,
+          "p75": 16.9,
+          "p90": 21.1,
+          "p95": 22.9,
+          "p99": 22.9,
+          "p999": 22.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 11,
+          "max": 32,
+          "count": 30,
+          "mean": 15.8,
+          "p50": 15,
+          "median": 15,
+          "p75": 16.9,
+          "p90": 21.1,
+          "p95": 22.9,
+          "p99": 22.9,
+          "p999": 22.9
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 11,
+          "max": 32,
+          "count": 30,
+          "mean": 15.8,
+          "p50": 15,
+          "median": 15,
+          "p75": 16.9,
+          "p90": 21.1,
+          "p95": 22.9,
+          "p99": 22.9,
+          "p999": 22.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 11,
+          "max": 32,
+          "count": 30,
+          "mean": 15.8,
+          "p50": 15,
+          "median": 15,
+          "p75": 16.9,
+          "p90": 21.1,
+          "p95": 22.9,
+          "p99": 22.9,
+          "p999": 22.9
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 36,
+        "vusers.created": 36,
+        "http.requests": 36,
+        "http.codes.201": 36,
+        "http.responses": 36,
+        "http.downloaded_bytes": 18176,
+        "apdex.satisfied": 36,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 36,
+        "errors.Failed capture or match": 36,
+        "vusers.failed": 36
+      },
+      "rates": {
+        "http.request_rate": 4
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423560034,
+      "firstHistogramAt": 1713423560059,
+      "lastCounterAt": 1713423569220,
+      "lastHistogramAt": 1713423569219,
+      "firstMetricAt": 1713423560034,
+      "lastMetricAt": 1713423569220,
+      "period": "1713423560000",
+      "summaries": {
+        "http.response_time": {
+          "min": 9,
+          "max": 84,
+          "count": 36,
+          "mean": 20.8,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 30.9,
+          "p95": 32.8,
+          "p99": 34.8,
+          "p999": 34.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 9,
+          "max": 84,
+          "count": 36,
+          "mean": 20.8,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 30.9,
+          "p95": 32.8,
+          "p99": 34.8,
+          "p999": 34.8
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 9,
+          "max": 84,
+          "count": 36,
+          "mean": 20.8,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 30.9,
+          "p95": 32.8,
+          "p99": 34.8,
+          "p999": 34.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 9,
+          "max": 84,
+          "count": 36,
+          "mean": 20.8,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 30.9,
+          "p95": 32.8,
+          "p99": 34.8,
+          "p999": 34.8
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 41,
+        "vusers.created": 41,
+        "http.requests": 41,
+        "http.codes.201": 41,
+        "http.responses": 41,
+        "http.downloaded_bytes": 20686,
+        "apdex.satisfied": 41,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 41,
+        "errors.Failed capture or match": 41,
+        "vusers.failed": 41
+      },
+      "rates": {
+        "http.request_rate": 5
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423570040,
+      "firstHistogramAt": 1713423570066,
+      "lastCounterAt": 1713423579286,
+      "lastHistogramAt": 1713423579284,
+      "firstMetricAt": 1713423570040,
+      "lastMetricAt": 1713423579286,
+      "period": "1713423570000",
+      "summaries": {
+        "http.response_time": {
+          "min": 10,
+          "max": 68,
+          "count": 41,
+          "mean": 20.6,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 63.4,
+          "p999": 63.4
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 68,
+          "count": 41,
+          "mean": 20.6,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 63.4,
+          "p999": 63.4
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 10,
+          "max": 68,
+          "count": 41,
+          "mean": 20.6,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 63.4,
+          "p999": 63.4
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 68,
+          "count": 41,
+          "mean": 20.6,
+          "p50": 16,
+          "median": 16,
+          "p75": 24.8,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 63.4,
+          "p999": 63.4
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 50,
+        "vusers.created": 50,
+        "http.requests": 50,
+        "http.codes.201": 50,
+        "http.responses": 50,
+        "http.downloaded_bytes": 25182,
+        "apdex.satisfied": 50,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 50,
+        "errors.Failed capture or match": 50,
+        "vusers.failed": 50
+      },
+      "rates": {
+        "http.request_rate": 5
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423580045,
+      "firstHistogramAt": 1713423580081,
+      "lastCounterAt": 1713423589272,
+      "lastHistogramAt": 1713423589270,
+      "firstMetricAt": 1713423580045,
+      "lastMetricAt": 1713423589272,
+      "period": "1713423580000",
+      "summaries": {
+        "http.response_time": {
+          "min": 7,
+          "max": 89,
+          "count": 50,
+          "mean": 19,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 36.2,
+          "p99": 53,
+          "p999": 53
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 7,
+          "max": 89,
+          "count": 50,
+          "mean": 19,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 36.2,
+          "p99": 53,
+          "p999": 53
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 7,
+          "max": 89,
+          "count": 50,
+          "mean": 19,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 36.2,
+          "p99": 53,
+          "p999": 53
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 7,
+          "max": 89,
+          "count": 50,
+          "mean": 19,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 36.2,
+          "p99": 53,
+          "p999": 53
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 57,
+        "vusers.created": 57,
+        "http.requests": 57,
+        "http.codes.201": 57,
+        "http.responses": 57,
+        "http.downloaded_bytes": 28668,
+        "apdex.satisfied": 57,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 57,
+        "errors.Failed capture or match": 57,
+        "vusers.failed": 57
+      },
+      "rates": {
+        "http.request_rate": 6
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423590052,
+      "firstHistogramAt": 1713423590098,
+      "lastCounterAt": 1713423599301,
+      "lastHistogramAt": 1713423599301,
+      "firstMetricAt": 1713423590052,
+      "lastMetricAt": 1713423599301,
+      "period": "1713423590000",
+      "summaries": {
+        "http.response_time": {
+          "min": 6,
+          "max": 79,
+          "count": 57,
+          "mean": 19.7,
+          "p50": 16.9,
+          "median": 16.9,
+          "p75": 22,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 47.9,
+          "p999": 47.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 6,
+          "max": 79,
+          "count": 57,
+          "mean": 19.7,
+          "p50": 16.9,
+          "median": 16.9,
+          "p75": 22,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 47.9,
+          "p999": 47.9
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 6,
+          "max": 79,
+          "count": 57,
+          "mean": 19.7,
+          "p50": 16.9,
+          "median": 16.9,
+          "p75": 22,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 47.9,
+          "p999": 47.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 6,
+          "max": 79,
+          "count": 57,
+          "mean": 19.7,
+          "p50": 16.9,
+          "median": 16.9,
+          "p75": 22,
+          "p90": 29.1,
+          "p95": 39.3,
+          "p99": 47.9,
+          "p999": 47.9
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 65,
+        "vusers.created": 65,
+        "http.requests": 65,
+        "http.codes.201": 65,
+        "http.responses": 65,
+        "http.downloaded_bytes": 32912,
+        "apdex.satisfied": 65,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 65,
+        "errors.Failed capture or match": 65,
+        "vusers.failed": 65
+      },
+      "rates": {
+        "http.request_rate": 7
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423600057,
+      "firstHistogramAt": 1713423600073,
+      "lastCounterAt": 1713423609398,
+      "lastHistogramAt": 1713423609398,
+      "firstMetricAt": 1713423600057,
+      "lastMetricAt": 1713423609398,
+      "period": "1713423600000",
+      "summaries": {
+        "http.response_time": {
+          "min": 9,
+          "max": 41,
+          "count": 65,
+          "mean": 16.3,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 40,
+          "p999": 40
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 9,
+          "max": 41,
+          "count": 65,
+          "mean": 16.3,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 40,
+          "p999": 40
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 9,
+          "max": 41,
+          "count": 65,
+          "mean": 16.3,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 40,
+          "p999": 40
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 9,
+          "max": 41,
+          "count": 65,
+          "mean": 16.3,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 40,
+          "p999": 40
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 74,
+        "vusers.created": 74,
+        "http.requests": 74,
+        "http.codes.201": 74,
+        "http.responses": 74,
+        "http.downloaded_bytes": 37272,
+        "apdex.satisfied": 73,
+        "apdex.tolerated": 1,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 74,
+        "errors.Failed capture or match": 74,
+        "vusers.failed": 74
+      },
+      "rates": {
+        "http.request_rate": 7
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423610058,
+      "firstHistogramAt": 1713423610076,
+      "lastCounterAt": 1713423619599,
+      "lastHistogramAt": 1713423619599,
+      "firstMetricAt": 1713423610058,
+      "lastMetricAt": 1713423619599,
+      "period": "1713423610000",
+      "summaries": {
+        "http.response_time": {
+          "min": 10,
+          "max": 156,
+          "count": 74,
+          "mean": 19.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 37.7,
+          "p99": 92.8,
+          "p999": 92.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 156,
+          "count": 74,
+          "mean": 19.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 37.7,
+          "p99": 92.8,
+          "p999": 92.8
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 10,
+          "max": 156,
+          "count": 74,
+          "mean": 19.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 37.7,
+          "p99": 92.8,
+          "p999": 92.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 10,
+          "max": 156,
+          "count": 74,
+          "mean": 19.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 37.7,
+          "p99": 92.8,
+          "p999": 92.8
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 82,
+        "vusers.created": 82,
+        "http.requests": 82,
+        "http.codes.201": 82,
+        "http.responses": 82,
+        "http.downloaded_bytes": 41498,
+        "apdex.satisfied": 82,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 82,
+        "errors.Failed capture or match": 82,
+        "vusers.failed": 82
+      },
+      "rates": {
+        "http.request_rate": 8
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423620059,
+      "firstHistogramAt": 1713423620107,
+      "lastCounterAt": 1713423629614,
+      "lastHistogramAt": 1713423629614,
+      "firstMetricAt": 1713423620059,
+      "lastMetricAt": 1713423629614,
+      "period": "1713423620000",
+      "summaries": {
+        "http.response_time": {
+          "min": 8,
+          "max": 38,
+          "count": 82,
+          "mean": 16.1,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 21.1,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 32.8,
+          "p999": 32.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 8,
+          "max": 38,
+          "count": 82,
+          "mean": 16.1,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 21.1,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 32.8,
+          "p999": 32.8
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 8,
+          "max": 38,
+          "count": 82,
+          "mean": 16.1,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 21.1,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 32.8,
+          "p999": 32.8
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 8,
+          "max": 38,
+          "count": 82,
+          "mean": 16.1,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 21.1,
+          "p90": 25.8,
+          "p95": 25.8,
+          "p99": 32.8,
+          "p999": 32.8
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 90,
+        "vusers.created": 90,
+        "http.requests": 90,
+        "http.codes.201": 90,
+        "http.responses": 90,
+        "http.downloaded_bytes": 45720,
+        "apdex.satisfied": 90,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 90,
+        "errors.Failed capture or match": 90,
+        "vusers.failed": 90
+      },
+      "rates": {
+        "http.request_rate": 9
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423630064,
+      "firstHistogramAt": 1713423630123,
+      "lastCounterAt": 1713423639630,
+      "lastHistogramAt": 1713423639630,
+      "firstMetricAt": 1713423630064,
+      "lastMetricAt": 1713423639630,
+      "period": "1713423630000",
+      "summaries": {
+        "http.response_time": {
+          "min": 7,
+          "max": 80,
+          "count": 90,
+          "mean": 17.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 48.9,
+          "p999": 48.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 7,
+          "max": 80,
+          "count": 90,
+          "mean": 17.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 48.9,
+          "p999": 48.9
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 7,
+          "max": 80,
+          "count": 90,
+          "mean": 17.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 48.9,
+          "p999": 48.9
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 7,
+          "max": 80,
+          "count": 90,
+          "mean": 17.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 26.8,
+          "p95": 34.1,
+          "p99": 48.9,
+          "p999": 48.9
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 104,
+        "vusers.created": 104,
+        "http.requests": 104,
+        "http.codes.201": 104,
+        "http.responses": 104,
+        "http.downloaded_bytes": 52560,
+        "apdex.satisfied": 104,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 104,
+        "errors.Failed capture or match": 104,
+        "vusers.failed": 104
+      },
+      "rates": {
+        "http.request_rate": 10
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423640068,
+      "firstHistogramAt": 1713423640093,
+      "lastCounterAt": 1713423649797,
+      "lastHistogramAt": 1713423649797,
+      "firstMetricAt": 1713423640068,
+      "lastMetricAt": 1713423649797,
+      "period": "1713423640000",
+      "summaries": {
+        "http.response_time": {
+          "min": 8,
+          "max": 97,
+          "count": 104,
+          "mean": 17.3,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 29.1,
+          "p99": 43.4,
+          "p999": 61
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 8,
+          "max": 97,
+          "count": 104,
+          "mean": 17.3,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 29.1,
+          "p99": 43.4,
+          "p999": 61
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 8,
+          "max": 97,
+          "count": 104,
+          "mean": 17.3,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 29.1,
+          "p99": 43.4,
+          "p999": 61
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 8,
+          "max": 97,
+          "count": 104,
+          "mean": 17.3,
+          "p50": 13.9,
+          "median": 13.9,
+          "p75": 19.1,
+          "p90": 25.8,
+          "p95": 29.1,
+          "p99": 43.4,
+          "p999": 61
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 159,
+        "vusers.created": 159,
+        "http.requests": 159,
+        "http.codes.201": 159,
+        "http.responses": 159,
+        "http.downloaded_bytes": 80298,
+        "apdex.satisfied": 157,
+        "apdex.tolerated": 2,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 159,
+        "errors.Failed capture or match": 159,
+        "vusers.failed": 159
+      },
+      "rates": {
+        "http.request_rate": 16
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423650073,
+      "firstHistogramAt": 1713423650093,
+      "lastCounterAt": 1713423659958,
+      "lastHistogramAt": 1713423659958,
+      "firstMetricAt": 1713423650073,
+      "lastMetricAt": 1713423659958,
+      "period": "1713423650000",
+      "summaries": {
+        "http.response_time": {
+          "min": 6,
+          "max": 167,
+          "count": 159,
+          "mean": 17.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 34.1,
+          "p99": 76,
+          "p999": 98.5
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 6,
+          "max": 167,
+          "count": 159,
+          "mean": 17.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 34.1,
+          "p99": 76,
+          "p999": 98.5
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 6,
+          "max": 167,
+          "count": 159,
+          "mean": 17.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 34.1,
+          "p99": 76,
+          "p999": 98.5
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 6,
+          "max": 167,
+          "count": 159,
+          "mean": 17.9,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 19.9,
+          "p90": 25.8,
+          "p95": 34.1,
+          "p99": 76,
+          "p999": 98.5
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 223,
+        "vusers.created": 223,
+        "http.requests": 223,
+        "http.codes.201": 223,
+        "http.responses": 223,
+        "http.downloaded_bytes": 112802,
+        "apdex.satisfied": 223,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 223,
+        "errors.Failed capture or match": 223,
+        "vusers.failed": 223
+      },
+      "rates": {
+        "http.request_rate": 23
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423660092,
+      "firstHistogramAt": 1713423660121,
+      "lastCounterAt": 1713423669976,
+      "lastHistogramAt": 1713423669976,
+      "firstMetricAt": 1713423660092,
+      "lastMetricAt": 1713423669976,
+      "period": "1713423660000",
+      "summaries": {
+        "http.response_time": {
+          "min": 5,
+          "max": 79,
+          "count": 223,
+          "mean": 15.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 18,
+          "p90": 22.9,
+          "p95": 24.8,
+          "p99": 54.1,
+          "p999": 66
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 5,
+          "max": 79,
+          "count": 223,
+          "mean": 15.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 18,
+          "p90": 22.9,
+          "p95": 24.8,
+          "p99": 54.1,
+          "p999": 66
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 5,
+          "max": 79,
+          "count": 223,
+          "mean": 15.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 18,
+          "p90": 22.9,
+          "p95": 24.8,
+          "p99": 54.1,
+          "p999": 66
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 5,
+          "max": 79,
+          "count": 223,
+          "mean": 15.1,
+          "p50": 13.1,
+          "median": 13.1,
+          "p75": 18,
+          "p90": 22.9,
+          "p95": 24.8,
+          "p99": 54.1,
+          "p999": 66
+        }
+      }
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.create board": 181,
+        "vusers.created": 181,
+        "http.requests": 181,
+        "http.codes.201": 181,
+        "http.responses": 181,
+        "http.downloaded_bytes": 91572,
+        "apdex.satisfied": 181,
+        "apdex.tolerated": 0,
+        "apdex.frustrated": 0,
+        "plugins.metrics-by-endpoint./poltical-debates.codes.201": 181,
+        "errors.Failed capture or match": 181,
+        "vusers.failed": 181
+      },
+      "rates": {
+        "http.request_rate": 29
+      },
+      "http.request_rate": null,
+      "firstCounterAt": 1713423670007,
+      "firstHistogramAt": 1713423670030,
+      "lastCounterAt": 1713423676496,
+      "lastHistogramAt": 1713423676495,
+      "firstMetricAt": 1713423670007,
+      "lastMetricAt": 1713423676496,
+      "period": "1713423670000",
+      "summaries": {
+        "http.response_time": {
+          "min": 5,
+          "max": 81,
+          "count": 181,
+          "mean": 12.7,
+          "p50": 10.1,
+          "median": 10.1,
+          "p75": 13.9,
+          "p90": 21.1,
+          "p95": 25.8,
+          "p99": 34.8,
+          "p999": 61
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 5,
+          "max": 81,
+          "count": 181,
+          "mean": 12.7,
+          "p50": 10.1,
+          "median": 10.1,
+          "p75": 13.9,
+          "p90": 21.1,
+          "p95": 25.8,
+          "p99": 34.8,
+          "p999": 61
+        }
+      },
+      "histograms": {
+        "http.response_time": {
+          "min": 5,
+          "max": 81,
+          "count": 181,
+          "mean": 12.7,
+          "p50": 10.1,
+          "median": 10.1,
+          "p75": 13.9,
+          "p90": 21.1,
+          "p95": 25.8,
+          "p99": 34.8,
+          "p999": 61
+        },
+        "plugins.metrics-by-endpoint.response_time./poltical-debates": {
+          "min": 5,
+          "max": 81,
+          "count": 181,
+          "mean": 12.7,
+          "p50": 10.1,
+          "median": 10.1,
+          "p75": 13.9,
+          "p90": 21.1,
+          "p95": 25.8,
+          "p99": 34.8,
+          "p999": 61
+        }
+      }
+    }
+  ]
+}

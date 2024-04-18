@@ -47,7 +47,7 @@ export class LikeController {
     @Param('boardId') boardId: number,
   ) {
     const result = await this.likeService.like(likeInputDto, user, boardId);
-
+    console.log(result);
     return {
       statusCode: HttpStatus.OK,
       message: result,

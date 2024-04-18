@@ -26,21 +26,21 @@ import {
 } from '@nestjs/swagger';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { VoteTitleDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
-import { LikeInputDto } from 'src/like/dto/create-like.dto';
-import { LikeService } from 'src/like/like.service';
-import { Users } from 'src/users/entities/user.entity';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { BoardType } from '../s3/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { Request } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { LikeInputDto } from '../like/dto/create-like.dto';
+import { LikeService } from '../like/like.service';
+import { Users } from '../users/entities/user.entity';
 
 @ApiTags('재판')
 @Controller('trials')

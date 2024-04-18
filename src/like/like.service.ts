@@ -9,8 +9,8 @@ import { deflate } from 'zlib';
 import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
-import { Trials } from 'src/trials/entities/trial.entity';
-import { TrialLike } from 'src/trials/entities/trials.like.entity';
+import { Trials } from '../trials/entities/trial.entity';
+import { TrialLike } from '../trials/entities/trials.like.entity';
 
 type boardTypes = HumorBoards | OnlineBoards | Trials;
 
@@ -83,8 +83,8 @@ export class LikeService {
       });
 
     if (!isLikeExist) {
-      console.log(boardId);
-      console.log(id);
+      // console.log(boardId);
+      // console.log(id);
       const like = {
         [entityKey]: boardId,
         userId: id,

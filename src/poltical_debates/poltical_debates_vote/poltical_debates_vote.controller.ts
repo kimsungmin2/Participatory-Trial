@@ -10,9 +10,7 @@ import {
   HttpStatus,
   Get,
 } from '@nestjs/common';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 import { userInfo } from 'os';
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { Request } from 'express';
 import {
   ApiBearerAuth,
@@ -24,8 +22,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Users } from '../../users/entities/user.entity';
 import { PolticalVotesService } from './poltical_debates_vote.service';
-import { VoteForDto } from 'src/trials/dto/vote.dto';
-import { IsVoteGuard } from 'src/trials/guards/isvote.guard';
+import { UserInfo } from '../../utils/decorator/userInfo.decorator';
+import { VoteForDto } from '../../trials/dto/vote.dto';
+import { UserInfos } from '../../users/entities/user-info.entity';
 
 @ApiTags('정치 토론 투표')
 @Controller('poltical-debates/vote')
@@ -119,7 +118,8 @@ export class PolticalVotesController {
     type: Number,
   })
   async getUserVoteCounts(@Param('polticalVoteId') polticalVoteId: number) {
-    const vote = await this.polticalVotesService.getUserVoteCounts(polticalVoteId);
+    const vote =
+      await this.polticalVotesService.getUserVoteCounts(polticalVoteId);
     return {
       statusCode: HttpStatus.OK,
       message: '투표 현황입니다.',
