@@ -1,0 +1,65 @@
+config:
+  target: http://localhost:3000
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 30
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  # processor: './processCookies.js'
+  http:
+    defaults:
+      headers:
+        cookie: 'authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEwMiwiaWF0IjoxNzEzMzQzOTI1LCJleHAiOjE3NTY1NDM5MjV9.gX9IUNzpx8x7MFEKJ2OPM9K1o1KzBF8AUzSH2zdiEII'
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+  plugins:
+    ensure: {}
+    apdex: {}
+    # metrics-by-endpoint: {}
+    fake-data: {}
+scenarios:
+  - name: 'online board and comment api test'
+    flow:
+      - post:
+          url: 'http://localhost:3000/online-boards'
+          formData:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+            files: ''
+          capture:
+            json: '$.data.id'
+            as: 'boardId'
+      - patch:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}'
+          formData:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+      - post:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments'
+          json:
+            content: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.id'
+            as: 'commentId'
+      - patch:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+          json:
+            content: '{{ $randFullName() }}'
+      - delete:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+      - delete:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}'
+# ./node_modules/.bin/artillery run ./asciiart-load-test.yaml
+# ./node_modules/.bin/artillery run --output report.json ./asciiart-load-test.yaml

@@ -17,8 +17,6 @@ export class OnlineBoardCommentService {
   constructor(
     @InjectRepository(OnlineBoardComments)
     private readonly onlineBoardCommentRepository: Repository<OnlineBoardComments>,
-    private readonly onlineBoardsService: OnlineBoardsService,
-    private readonly usersService: UsersService,
   ) {}
 
   // 자유게시판 댓글 생성
@@ -27,15 +25,11 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    const foundUser = await this.usersService.findById(userInfo.id);
-
     const { content } = createOnlineBoardCommentDto;
-    const foundBoard =
-      await this.onlineBoardsService.findBoardId(onlineBoardId);
 
     const board = await this.onlineBoardCommentRepository.save({
-      onlineBoardId: +foundBoard.id,
-      userId: foundUser.id,
+      onlineBoardId,
+      userId: userInfo.id,
       content,
     });
 
@@ -44,11 +38,8 @@ export class OnlineBoardCommentService {
 
   //자유게시판 댓글 목록 조회
   async findAllComments(onlineBoardId: number) {
-    const foundBoard =
-      await this.onlineBoardsService.findBoardId(onlineBoardId);
-
     const comments = await this.onlineBoardCommentRepository.findBy({
-      onlineBoardId: foundBoard.id,
+      onlineBoardId,
     });
 
     return comments;
@@ -56,16 +47,15 @@ export class OnlineBoardCommentService {
 
   // 자유게시판 수정
   async updateComment(
+    onlineBoardId: number,
     commentId: number,
     updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const foundComment = await this.findCommentById(commentId);
-
-    const { content } = updateOnlineBoardCommentDto;
     const comment = await this.onlineBoardCommentRepository.update(
-      { id: foundComment.id },
+      { id: foundComment.id, onlineBoardId },
       {
-        content,
+        content: updateOnlineBoardCommentDto.content,
       },
     );
 
@@ -73,11 +63,12 @@ export class OnlineBoardCommentService {
   }
 
   // 자유게시판 삭제
-  async removeComment(commentId: number) {
+  async removeComment(onlineBoardId: number, commentId: number) {
     const foundComment = await this.findCommentById(commentId);
 
     await this.onlineBoardCommentRepository.softDelete({
       id: foundComment.id,
+      onlineBoardId,
     });
 
     return `This action removes a #${commentId} onlineBoard`;
@@ -104,5 +95,7 @@ export class OnlineBoardCommentService {
     if (!foundCommentOwner) {
       throw new ForbiddenException('접근 권한이 없습니다.');
     }
+
+    return foundCommentOwner;
   }
 }

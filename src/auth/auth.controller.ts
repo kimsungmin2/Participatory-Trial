@@ -67,7 +67,7 @@ export class AuthController {
       secure: true,
     });
     res.send('로그인에 성공하였습니다.');
-    res.redirect('/online-board');
+    // res.redirect('/online-board');
   }
 
   // @ApiOperation({ summary: '유저 정보' })

@@ -17,7 +17,11 @@ services:
     ports:
       - '6379:6379'
   elasticsearch:
+<<<<<<< HEAD
     image: my-custom-elasticsearch:latest
+=======
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.3
+>>>>>>> 04e25c5f115df8301b25e21c10a94c26186c047d
     user: '1000:1000'
     volumes:
       - type: bind
@@ -74,6 +78,7 @@ services:
       ]
     restart: always
 
+<<<<<<< HEAD
   # metricbeat:
   #   image: docker.elastic.co/beats/metricbeat:7.9.3
   #   user: root
@@ -92,3 +97,23 @@ services:
   #       'setup.kibana.host=kibana:5601',
   #     ]
   #   restart: always
+=======
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.9.3
+    user: root
+    volumes:
+      - ./metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - elasticsearch
+    command:
+      [
+        'metricbeat',
+        '-e',
+        '-E',
+        "output.elasticsearch.hosts=['elasticsearch:9200']",
+        '-E',
+        'setup.kibana.host=kibana:5601',
+      ]
+    restart: always
+>>>>>>> 04e25c5f115df8301b25e21c10a94c26186c047d
