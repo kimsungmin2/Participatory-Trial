@@ -32,47 +32,6 @@ import { IsVoteGuard } from '../../trials/guards/isvote.guard';
 export class PolticalVotesController {
   constructor(private readonly polticalVotesService: PolticalVotesService) {}
 
-  // // 투표하기 API
-  // @UseGuards(AuthGuard('jwt'))
-  // @ApiOperation({ summary: '투표하기 API' })
-  // @Post(':voteId')
-  // // @ApiBody({
-  // //   description: '찬성 반대, 찬성일때 true',
-  // //   schema: {
-  // //     type: 'boolean',
-  // //     properties: {
-  // //       voteFor: { type: 'boolean' },
-  // //     },
-  // //   },
-  // // })
-  // @ApiParam({
-  //   name: 'polticalVoteId',
-  //   required: true,
-  //   description: ' 정치 토론 게시판 투표 ID',
-  //   type: Number,
-  // })
-  // async vote(
-  //   @Param('polticalVoteId') polticalVoteId: number,
-  //   @UserInfo() users: UserInfos,
-  //   @Body() voteForDro: VoteForDto,
-  //   @Req() req: Request,
-  // ) {
-  //   // UserInfo에서 userInfo가 있으면 id 추출하고 없으면 null로 함req.user.id ? req.user.id :
-
-  //   const userId = users.id ? users.id : null;
-  //   const vote = await this.polticalVotesService.addVoteUserorNanUser(
-  //     req,
-  //     userId,
-  //     polticalVoteId,
-  //     voteForDro.voteFor,
-  //   );
-  //   return {
-  //     statusCode: HttpStatus.CREATED,
-  //     message: '투표에 성공하였습니다.',
-  //     vote,
-  //   };
-  // }
-
   // 투표 취소하기 API(회원 유저만 투표 취소 가능)
   @ApiOperation({ summary: '투표 취소 API' })
   @ApiBearerAuth('access-token')

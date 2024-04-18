@@ -31,7 +31,7 @@ export class OnlineBoardCommentController {
   constructor(
     private readonly onlineBoardCommentService: OnlineBoardCommentService,
   ) {}
-  // 특정 자유 게시판 id 조회 API
+  //댓글 생성
   @ApiOperation({ summary: '특정 게시물 조회 API' })
   @ApiBearerAuth('access-token')
   @ApiParam({

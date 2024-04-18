@@ -51,9 +51,8 @@ export class TrialsController {
     private readonly likeServise: LikeService,
   ) {}
   // 모든 API는 비동기 처리
-
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
-  // 어쓰 가드 필요\
+  // 어쓰 가드 필요
 
   // 글쓰기 페이지 이동
   @Get('create')
@@ -245,6 +244,19 @@ export class TrialsController {
       data,
       isLoggedIn: req['isLoggedIn'],
       boardType: BoardType.Trial,
+    };
+  }
+  //특정 재판 수정 페이지
+  @ApiOperation({ summary: '재판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.trialsService.findOneByTrialsId(id);
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+      data,
     };
   }
 

@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SearchService } from './search.service';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
+import { SearchQueryDto } from './dto/search.dto';
+import { SearchAllQueryDto } from './dto/searchAll.dto';
 
 describe('SearchService', () => {
   let service: SearchService;
@@ -16,6 +18,7 @@ describe('SearchService', () => {
             search: jest.fn().mockResolvedValue({
               body: {
                 hits: {
+                  total: { value: 10 },
                   hits: [
                     { _source: { title: 'Example', content: 'Content here' } },
                     // 다른 검색 결과 추가 가능
@@ -38,31 +41,50 @@ describe('SearchService', () => {
   });
 
   describe('searchHumorBoard', () => {
+    const mockPaginateQuery = {
+      page: 1,
+      pageSize: 10,
+    };
     it('must be success', async () => {
       const searchQueryDto = {
         boardName: 'humor',
-        titleQuery: 'funny',
-        contentQuery: 'joke',
+        type: 'content',
+        search: '냠냠',
       };
       const spy = jest.spyOn(esService, 'search');
-      const result = await service.searchHumorBoard(searchQueryDto);
+      const result = await service.searchBoard(
+        searchQueryDto,
+        mockPaginateQuery,
+      );
       expect(spy).toHaveBeenCalled();
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({ title: 'Example', content: 'Content here' });
+      expect(result.result[0]).toEqual({
+        title: 'Example',
+        content: 'Content here',
+      });
     });
   });
 
   describe('searchAllBoards', () => {
+    const mockPaginateQuery = {
+      page: 1,
+      pageSize: 10,
+    };
     it('must be success', async () => {
       const searchQueryDto = {
-        titleQuery: 'funny',
-        contentQuery: 'joke',
-      };
+        search: '냠냠',
+        type: 'titleContent',
+      } as SearchAllQueryDto;
       const spy = jest.spyOn(esService, 'search');
-      const result = await service.searchAllBoards(searchQueryDto);
+      const result = await service.searchAllBoards(
+        searchQueryDto,
+        mockPaginateQuery,
+      );
+      console.log(result);
       expect(spy).toHaveBeenCalled();
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual({ title: 'Example', content: 'Content here' });
+      expect(result.result[0]).toEqual({
+        title: 'Example',
+        content: 'Content here',
+      });
     });
   });
 });
