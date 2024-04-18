@@ -41,6 +41,7 @@
       <hr width="70%" color="black" size="2" style="margin-left: 30px" />
       
       <div class="cards-container">
+        <% if (data.length !== 0) {%>
         <% for (let i = 0; i < data.length; i++) {  %>
         <div class="card">
             <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
@@ -52,6 +53,9 @@
             <% } %>
           </div>
         </div>
+        <% } %>
+      <% } else { %>
+        <p class="no_posts">게시물이 없습니다!</p>
         <% } %>
       </div>
       <div class="pagination">

@@ -60,7 +60,7 @@ export class SearchController {
 
   @ApiOperation({ summary: '전체 검색' })
   @Get('all')
-  @Render('searchAll.ejs')
+  @Render('search-all.ejs')
   async searchAllBoards(
     @Query() searchAllQueryDto: SearchAllQueryDto,
     @Query() paginateQueryDto: PaginateQueryDto,

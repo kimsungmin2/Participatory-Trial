@@ -35,8 +35,11 @@
       
       <div class="container">
         <h2>게시물 수정</h2>
-
-          <form id="postForm">
+        <% if (boardType !== "trial") { %>
+          <form id="postForm" data-post-id="<%= data.id %>">
+        <% } else { %>
+          <form id="postForm" data-post-id="<%= data.OneTrials.id %>">
+          <% } %>
             <div class="form-group">
                 <label for="title">제목</label>
                 <input type="text" id="title" name="title" value="<%= data.title %>" required>
@@ -57,11 +60,6 @@
   boardType = "<%= boardType %>";
   console.log(boardType);
   let postId;
-  if (boardType !== "trial") {
-    postId = "<%= data.id %>"
-  } else {
-    postId = "<%= data.OneTrials.id%>"
-  }
   if (boardType === 'humor') { 
           boardType = 'humors'
         } else if (boardType === 'onlineBoard') { 
@@ -79,6 +77,8 @@
 
   const titleElement = document.getElementById('title');
     const contentElement = document.getElementById('content');
+
+    postId = form.getAttribute('data-post-id');
 
     let data = {};
     

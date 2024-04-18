@@ -213,7 +213,10 @@ export class TrialsService {
     await queryRunner.startTransaction();
     try {
       // 1. 삭제하려는 재판이 존재하는지 검사
-      const deleteResult = await queryRunner.manager.delete(Trials, { id: id });
+      const deleteResult = await queryRunner.manager.softDelete(Trials, {
+        id: id,
+      });
+      console.log(1);
 
       // 2. 404 던지기
       if (deleteResult.affected === 0) {
