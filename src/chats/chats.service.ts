@@ -11,6 +11,10 @@ import { PolticalsChat } from '../events/entities/polticalsChat.entity';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { ChatDocument } from 'src/cats/schemas/chat.schemas';
+import { Model } from 'mongoose';
+import { th } from '@faker-js/faker';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -26,6 +30,7 @@ export class ChatsService implements OnModuleInit {
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
     @Inject('REDIS_SUB_CLIENT') private redisSubClient: Redis,
+    @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
   ) {}
 
   async publishNotification(message: string) {
@@ -86,7 +91,7 @@ export class ChatsService implements OnModuleInit {
     if (messages.length > 0) {
       const [channelType, roomId] = key.split(':');
 
-      await this.saveMessagesToDatabase(messages, channelType, +roomId, key);
+      await this.saveMessagesToDatabase(messages, channelType, +roomId);
 
       await this.redisDataClient.ltrim(key, -retainCount, -1);
     }
@@ -96,60 +101,31 @@ export class ChatsService implements OnModuleInit {
     messages: string[],
     channelType: string,
     roomId: number,
-    redisKey: string,
   ) {
-    let channelChatsRepository: Repository<any>;
-    let ChatEntity:
-      | typeof TrialsChat
-      | typeof HumorsChat
-      | typeof PolticalsChat;
-
-    switch (channelType) {
-      case 'trials':
-        channelChatsRepository = this.trialsChatRepository;
-        ChatEntity = TrialsChat;
-        break;
-      case 'humors':
-        channelChatsRepository = this.humorsChatRepository;
-        ChatEntity = HumorsChat;
-        break;
-      case 'polticals':
-        channelChatsRepository = this.polticalsChatRepository;
-        ChatEntity = PolticalsChat;
-        break;
-    }
-
     const chats = [];
+
     for (const message of messages) {
       const parsedMessage = JSON.parse(message);
       const user = await this.usersInfoRepository.findOne({
-        where: { id: parsedMessage.userId },
+        where : { id: parsedMessage.userId },
         select: ['nickName'],
       });
 
-      const chat = new ChatEntity();
-      chat.message = parsedMessage.message;
-      chat.userId = parsedMessage.userId;
-      chat.roomId = roomId;
-      chat.timestamp = new Date(parsedMessage.timestamp);
-      chat.userName = user ? user.nickName : 'Unknown User';
-
-      chats.push(chat);
+      chats.push(new this.chatModel({
+        message: parsedMessage.message,
+        userId: parsedMessage.userId,
+        RoomId: roomId,
+        timestamp: new Date(parsedMessage.timestamp),
+        userName: user ? user.nickName : 'Unknown User',
+        channelType: channelType,
+      }));
     }
-
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
     try {
-      await channelChatsRepository.save(chats);
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
+      await this.chatModel.insertMany(chats);
+    }catch(error) {
+      console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error)
     }
-  }
+}
 
   async createChannelChat(
     channelType: string,

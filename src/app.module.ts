@@ -1,5 +1,5 @@
 import { CacheConfigService } from './cache/cache.config';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -31,6 +31,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 import { SearchModule } from './search/search.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ServerApiVersion } from 'typeorm';
 console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -86,6 +88,9 @@ export const typeOrmModuleOptions = {
         url: process.env.REDIS_URL,
         options: {},
       }),
+    }),
+    MongooseModule.forRoot(process.env.MONGODB_URI, {
+      serverApi: ServerApiVersion.v1,
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
