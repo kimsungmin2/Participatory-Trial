@@ -9,29 +9,22 @@ import {
   MinLength,
 } from 'class-validator';
 import { BoardIndex } from '../type/board_index.type';
+import { SearchType } from '@elastic/elasticsearch/api/types';
 
 export class SearchAllQueryDto {
-  // 제목 쿼리
   @ApiProperty({
-    example: '세민이햄',
+    example: '세민',
     description: '검색어를 입력해주세요.',
-    required: false,
+    required: true,
   })
-  @IsString({ message: '제목은 문자열로 입력 해주세요.' })
-  @MinLength(1)
-  @MaxLength(50)
+  @IsString({ message: '검색어는 문자열로 입력 해주세요.' })
   @IsOptional()
-  titleQuery?: string;
+  search: string;
 
-  // 내용 쿼리
   @ApiProperty({
-    example: '음주운전 형량 이대로 괜찮은가',
-    description: '토론을 할 내용을 입력해주세요.',
-    required: false,
+    example: 'title',
+    description: '검색 형식을 지정해주세요',
   })
-  @MinLength(1)
-  @MaxLength(50)
-  @IsString({ message: '내용은 문자열로 입력 해주세요.' })
-  @IsOptional()
-  contentQuery?: string;
+  @IsString()
+  type: string;
 }

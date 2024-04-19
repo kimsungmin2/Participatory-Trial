@@ -21,25 +21,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const userAgent = request.headers['user-agent'];
     const clientIp = request.headers['x-forwarded-for'] || request.ip;
 
-    // 에러 메시지 추출 로직 개선
     let errorMessage: string;
     if (
       typeof exceptionResponse === 'object' &&
-      exceptionResponse !== null &&
       'message' in exceptionResponse
     ) {
       const message = exceptionResponse.message;
       if (typeof message === 'string') {
         errorMessage = message;
-      } else if (Array.isArray(message)) {
-        errorMessage = message.join(', ');
-      } else {
-        errorMessage = 'An unknown error occurred';
       }
-    } else if (typeof exceptionResponse === 'string') {
-      errorMessage = exceptionResponse;
-    } else {
-      errorMessage = 'An unknown error occurred';
     }
 
     // 향상된 로깅 메커니즘

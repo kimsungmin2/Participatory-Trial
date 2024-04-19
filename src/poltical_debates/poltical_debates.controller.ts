@@ -55,6 +55,19 @@ export class PolticalDebatesController {
     };
   }
 
+  @ApiOperation({ summary: '정치토론 게시판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.polticalDebatesService.findOne(id);
+    return {
+      boardType: BoardType.PolticalDebate,
+      isLoggedIn: req['isLoggedIn'],
+      data,
+    };
+  }
+
   @UseInterceptors(FilesInterceptor('files'))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: '정치토론 게시판 게시물 생성' })

@@ -1,6 +1,7 @@
 import {
   ExecutionContext,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -36,6 +37,10 @@ export class BoardOwnerGuard extends AuthGuard('jwt') {
       boardId,
     );
 
-    return !!foundBoardOwner;
+    if (!foundBoardOwner) {
+      throw new NotFoundException(`Board with ID ${boardId} not found`);
+    }
+
+    return true;
   }
 }

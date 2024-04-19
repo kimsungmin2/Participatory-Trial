@@ -41,7 +41,7 @@ export class OnlineBoards {
   topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updated_at: Date;

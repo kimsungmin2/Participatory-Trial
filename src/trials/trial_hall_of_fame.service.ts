@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trials } from "./entities/trial.entity";
 import { Between, DataSource, Repository } from "typeorm";
@@ -7,6 +7,9 @@ import { TrialHallOfFames } from "./entities/trial_hall_of_fame.entity";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { TrialLikeHallOfFames } from "./entities/trail_hall_of_fame.like.entity";
 import { TrialViewHallOfFames } from "./entities/trial_hall_of_fame.view.entity";
+import { th } from "@faker-js/faker";
+import { VotesService } from "./vote/vote.service";
+import { PaginationQueryDto } from "src/humors/dto/get-humorBoard.dto";
 
 @Injectable()
 export class TrialHallOfFameService {
@@ -21,6 +24,7 @@ export class TrialHallOfFameService {
     private trialHallOfLikeFamesRepository: Repository<TrialLikeHallOfFames>,
     @InjectRepository(TrialViewHallOfFames)
     private trialHallOfViewFamesRepository: Repository<TrialViewHallOfFames>,
+    private readonly votesService: VotesService,
     private dataSource: DataSource,
   ){}
 
@@ -30,11 +34,17 @@ export class TrialHallOfFameService {
 @Cron('0 2 * * 1')
 async updateHallOfFame() {
   const { start, end } = this.getLastWeekRange();
+
   const lastWeekVotes = await this.votesRepository.find({
     where: {
       createdAt : Between(start, end)
     },
   });
+
+  for (const vote of lastWeekVotes) {
+    await this.votesService.updateVoteCounts(vote.id)
+  }
+
   const lastWeekTrials = await this.trialsRepository.find({
     where : {
       createdAt: Between(start, end)
@@ -43,11 +53,11 @@ async updateHallOfFame() {
 
   // 투표 기반으로 명예의 전당 집계
   // 투표 수 데이터 가공
-  const hallOfFameData = this.aggVotesForHallOfFame(lastWeekVotes)
+  const hallOfFameData = await this.aggVotesForHallOfFame(lastWeekVotes)
   // 좋아요 데이터 가공
-  const likeHallOfFameData = this.aggVotesLikeForHallOfFame(lastWeekTrials)
+  const likeHallOfFameData = await this.aggVotesLikeForHallOfFame(lastWeekTrials)
   // 조회수 데이터 가공
-  const viewHallOfFameData = this.aggVotesViewForHallOfFame(lastWeekTrials)
+  const viewHallOfFameData = await this.aggVotesViewForHallOfFame(lastWeekTrials)
 
   // 업데이트
   // 투표 명전 업데이트
@@ -243,8 +253,30 @@ try{
 
 
 // 명예전당 투표수 조회 매서드
-async getRecentHallOfFame(){
-  return await this.trialHallOfFamesRepository.find();
+async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+  let trialHallOfFames: TrialHallOfFames[];
+
+  const totalItems = await this.trialHallOfFamesRepository.count();
+  try {
+    const { page, limit } = paginationQueryDto;
+    const skip = (page -1) * limit;
+    trialHallOfFames = await this.trialHallOfFamesRepository.find({
+      skip,
+      take: limit,
+      order: {
+        totalVotes: 'DESC'
+      }
+    });
+  } catch (err) {
+    console.log(err.message);
+    throw new InternalServerErrorException(
+      "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+    );
+  }
+  return {
+    trialHallOfFames,
+    totalItems
+  }
 }
 
 

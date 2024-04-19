@@ -28,7 +28,7 @@ import { ChatsModule } from './chats/chats.module';
 
 import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { HttpLoggingInterceptor } from './utils/interceptor/logging/access.logging.interceptor';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 import { SearchModule } from './search/search.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 console.log(__dirname);

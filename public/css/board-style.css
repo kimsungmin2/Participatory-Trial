@@ -47,6 +47,11 @@ a {
   background-color: #f4edcc;
 }
 
+.no_posts {
+  font-size: 30px;
+  margin: 0 auto;
+}
+
 .navbar-nav .nav-item:not(:last-child) {
   margin-right: 100px;
   font-family: 'MBC1961GulimM';
@@ -63,7 +68,8 @@ a {
 
 .board_title,
 .post_title,
-.post_content {
+.post_content,
+.ud-container {
   font-size: 50px;
   font-family: 'SUITE-Regular';
   margin-top: 30px;
@@ -76,7 +82,8 @@ a {
   margin-bottom: 400px;
   padding: 1px;
 }
-.post_title {
+.post_title,
+.ud-container {
   font-size: 30px;
   display: flex; /* Flexbox 레이아웃 사용 */
   justify-content: space-between; /* 자식 요소들을 양 끝으로 정렬 */
@@ -86,6 +93,12 @@ a {
   display: flex; /* 조회수와 좋아요를 가진 div도 Flexbox로 설정 */
   gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
   font-size: 1.3rem;
+}
+.ud-container > div {
+  display: flex; /* Flexbox로 설정 */
+  justify-content: flex-end; /* 자식 요소들을 우측으로 정렬 */
+  gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
+  font-size: 1.3rem; /* 폰트 크기 설정 */
 }
 
 .post_image {
@@ -100,9 +113,7 @@ a {
 /* 검색창 스타일 */
 .search-container {
   display: flex;
-  justify-content: center;
   margin-top: 20px;
-  display: flex;
   justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
   /* 컨테이너의 너비를 필요에 따라 조정하세요 */
   margin-bottom: 50px;
@@ -130,6 +141,10 @@ button[type='submit'] {
   font-size: 17px;
   border: 1px solid grey;
   cursor: pointer;
+}
+
+select {
+  margin-right: 10px; /* 셀렉트 박스와 인풋 박스 사이의 간격 */
 }
 
 .board-container {
@@ -236,4 +251,63 @@ button[type='submit'] {
 
 .like_button {
   text-align: center;
+}
+
+.search_not_found {
+  font-size: 30px;
+  display: flex; /* 이를 통해 flex 컨테이너로 만듭니다 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  height: 100%; /* 컨테이너의 높이를 설정해야 수직 중앙 정렬이 적용됩니다. */
+}
+
+.searched-post {
+  margin-top: 30px;
+  font-size: 30px;
+  text-align: center; /* 텍스트 중앙 정렬 */
+}
+
+.comment-form {
+  margin-top: 50px; /* 댓글 작성 폼과 이전 컨텐츠 사이의 간격 설정 */
+}
+
+.comment-form h2 {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 2rem; /* 제목 크기 설정 */
+  margin-bottom: 20px; /* 제목과 폼 사이의 간격 설정 */
+}
+
+.comment-form .form-group {
+  margin-bottom: 20px; /* 폼 그룹 사이의 간격 설정 */
+}
+
+.comment-form label {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 1.5rem; /* 라벨 크기 설정 */
+}
+
+.comment-form textarea {
+  height: 150px; /* 텍스트영역의 높이 설정 */
+}
+
+.comment-form button[type='submit'] {
+  background-color: #007bff; /* 배경색 설정 */
+  color: white; /* 텍스트 색상 설정 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 패딩 설정 */
+  font-size: 1.5rem; /* 버튼 텍스트 크기 설정 */
+  border-radius: 5px; /* 버튼 모서리를 둥글게 설정 */
+  cursor: pointer; /* 커서 타입 설정 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+.comment-form button[type='submit']:hover {
+  background-color: #0056b3; /* 호버 시 배경색 변경 */
+  transform: scale(1.05); /* 호버 시 약간 확대 */
+}
+
+.comment-form button[type='submit']:active {
+  transform: scale(0.95); /* 클릭 시 약간 축소 */
 }

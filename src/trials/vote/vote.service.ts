@@ -12,6 +12,7 @@ import { Request } from 'express';
 import { EachVote } from '../entities/Uservote.entity';
 import { VoteTitleDto } from './dto/voteDto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { th } from '@faker-js/faker';
 @Injectable()
 export class VotesService {
   constructor(
@@ -210,5 +211,28 @@ export class VotesService {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
+  }
+
+
+  async updateVoteCounts(voteId: number) {
+    const result = await this.dataSource
+      .getRepository(EachVote)
+      .createQueryBuilder('eachVote')
+      .select('SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END)', 'voteCount1')
+      .addSelect('SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)', 'voteCount2')
+      .where('eachVote.voteId = :voteId', { voteId })
+      .andWhere('eachVote.userCode IS NULL')
+      .getRawOne();
+  
+    const voteCount1 = parseInt(result.voteCount1, 10);
+    const voteCount2 = parseInt(result.voteCount2, 10);
+  
+    await this.dataSource
+      .getRepository(Votes)
+      .createQueryBuilder()
+      .update(Votes)
+      .set({ voteCount1: voteCount1, voteCount2: voteCount2 })
+      .where('id = :voteId', { voteId })
+      .execute();
   }
 }

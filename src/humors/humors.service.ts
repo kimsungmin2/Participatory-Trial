@@ -129,6 +129,7 @@ export class HumorsService {
         order: {
           createdAt: 'DESC',
         },
+        relations: ['humorComment'],
       });
     } catch (err) {
       console.log(err.message);

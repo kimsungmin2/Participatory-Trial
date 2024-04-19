@@ -51,11 +51,11 @@ export class TrialsController {
     private readonly likeServise: LikeService,
   ) {}
   // 모든 API는 비동기 처리
-
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
-  // 어쓰 가드 필요\
+  // 어쓰 가드 필요
 
   // 글쓰기 페이지 이동
+  @UseGuards(AuthGuard('jwt'))
   @Get('create')
   @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
   async getCreatePostPage(@Req() req: Request) {
@@ -245,6 +245,19 @@ export class TrialsController {
       data,
       boardType: BoardType.Trial,
       isLoggedIn: req['isLoggedIn'],
+    };
+  }
+  //특정 재판 수정 페이지
+  @ApiOperation({ summary: '재판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.trialsService.findOneByTrialsId(id);
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+      data,
     };
   }
 
@@ -464,22 +477,43 @@ export class TrialsController {
 
   // 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 명예의 전당 조회하기 API(투표 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/votes')
-  async getRecentHallOfFame() {
-    const recentHallofFame =
-      await this.trialHallOfFameService.getRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '명예의 전당 정보가 없습니다.',
-      };
+  async getRecentHallOfFame(
+    @Query() paginationQueryDto:PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { trialHallOfFames, totalItems } = await this.trialHallOfFameService.getRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
     }
-
     return {
       statusCode: HttpStatus.OK,
       message: '명예의 전당을 조회하였습니다.(투표 수 순)',
-      recentHallofFame,
-    };
+      data: trialHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
+    }
   }
 
   // 명예의 전당 조회하기 API(종아요 수)

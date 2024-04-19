@@ -1,8 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { TrialsService } from '../trials.service';
-import { Observable } from 'rxjs';
 import { VotesService } from '../vote/vote.service';
-import { UserInfos } from '../../users/entities/user-info.entity';
 
 @Injectable()
 export class IsVoteGuard implements CanActivate {
