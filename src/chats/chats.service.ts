@@ -41,11 +41,6 @@ export class ChatsService implements OnModuleInit {
   async onModuleInit() {
     this.handleScheduledTasks();
   }
-  async onModuleDestroy() {
-    await this.redisDataClient.quit();
-    await this.redisSubClient.quit();
-    console.log('Redis 클라이언트 연결이 종료되었습니다.');
-  }
 
   @Interval(1000 * 60)
   async handleScheduledTasks() {
@@ -146,7 +141,7 @@ export class ChatsService implements OnModuleInit {
       chat.timestamp = new Date();
       chat.userName = user.nickName;
 
-      const chatKey = `${channelType}:${roomId}`;
+      const chatKey = `${channelType}:chat:${roomId}`;
       const chatValue = JSON.stringify(chat);
 
       await this.redisDataClient.rpush(chatKey, chatValue);
@@ -188,7 +183,7 @@ export class ChatsService implements OnModuleInit {
   ): Promise<Chat[]> {
     // await this.redisConnection();
 
-    const channelKey = `${channelType}:${roomId}`;
+    const channelKey = `${channelType}:chat:${roomId}`;
     const redisMessageCount = await this.redisDataClient.llen(channelKey);
 
     let chats = [];

@@ -1,4 +1,4 @@
-import { Req, UseGuards } from '@nestjs/common';
+import { Inject, Req, UseGuards } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -17,7 +17,6 @@ import { Redis } from 'ioredis';
 import { createAdapter } from 'socket.io-redis';
 import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
 import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
-import { LikeService } from '../like/like.service';
 
 @WebSocketGateway({
   namespace: '',
@@ -28,20 +27,14 @@ import { LikeService } from '../like/like.service';
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() public server: Server;
-  private redisSubClient: Redis;
 
   constructor(
     private readonly chatsService: ChatsService,
     private readonly votesService: VotesService,
     private readonly humorVotesService: HumorVotesService,
     private readonly polticalVotesService: PolticalVotesService,
-    private readonly likesService: LikeService,
-  ) {
-    this.redisSubClient = new Redis({
-      host: process.env.REDIS_HOST,
-      port: Number(process.env.REDIS_PORT),
-    });
-  }
+    @Inject('REDIS_SUB_CLIENT') private redisSubClient: Redis,
+  ) {}
 
   async onModuleInit() {
     await this.redisSubClient.subscribe('notifications');
@@ -53,26 +46,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     });
   }
 
-  @UseGuards(WsJwtGuard)
-  @SubscribeMessage('like')
-  async handleLikeEvent(
-    @MessageBody() data: { roomId: number; channelType: string },
-    @ConnectedSocket() socket: CustomSocket,
-  ) {
-    const { roomId, channelType } = data;
-    const userId = socket.userId;
-    console.log(roomId);
-    try {
-      const updatedLikes = await this.likesService.like(
-        roomId,
-        userId,
-        channelType,
-      );
-      console.log(updatedLikes);
-      this.server.emit('likesUpdated', { id: roomId, likes: updatedLikes });
-    } catch (error) {
-      console.error('좋아요 처리 중 오류 발생:', error);
-      socket.emit('error', '좋아요 처리에 실패하였습니다.');
+  handleNotificationMessage(channel: string, message: string) {
+    if (channel === 'notifications') {
+      this.server.emit('notification', message);
     }
   }
 
@@ -169,14 +145,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
           this.chatsService.publishNotification(notificationMessage);
         }
-      } else {
+      } else if (channelType === 'poltical-debates') {
         await this.polticalVotesService.addPolticalVoteUserorNanUser(
           userCode,
           userId,
           roomId,
           voteFor,
         );
-        const votes = await this.polticalVotesService.getUserVoteCounts(roomId);
+        const votes = await this.humorVotesService.getUserVoteCounts(roomId);
 
         this.server.to(`${channelType}:${roomId}`).emit('vote', {
           userId,
@@ -216,11 +192,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           data.roomId,
         );
         socket.emit('votesResponse', votes);
-      } else {
+      } else if (channelTypes === 'poltical-debates') {
         const votes = await this.polticalVotesService.getUserVoteCounts(
           data.roomId,
         );
-        console.log(votes);
         socket.emit('votesResponse', votes);
       }
     } catch (error) {

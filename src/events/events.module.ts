@@ -6,7 +6,7 @@ import { WsJwtGuard } from '../utils/guard/ws.guard';
 import { VoteModule } from '../trials/vote/vote.module';
 import { HumorsVotesModule } from '../humors/humors_votes/humors_votes.module';
 import { PolticalDebatesVoteModule } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.module';
-import { LikeModule } from '../like/like.module';
+import { RedisIoAdapter } from '../cache/redis.adpter';
 
 @Module({
   imports: [
@@ -14,9 +14,17 @@ import { LikeModule } from '../like/like.module';
     VoteModule,
     HumorsVotesModule,
     PolticalDebatesVoteModule,
-    LikeModule,
   ],
-  providers: [EventsGateway, WsJwtGuard],
+  providers: [
+    EventsGateway,
+    WsJwtGuard,
+    RedisIoAdapter,
+    {
+      provide: 'REDIS_SUB_CLIENT',
+      useFactory: (redisAdapter: RedisIoAdapter) => redisAdapter.getSubClient(),
+      inject: [RedisIoAdapter],
+    },
+  ],
   exports: [EventsGateway],
 })
 export class EventsModule {}

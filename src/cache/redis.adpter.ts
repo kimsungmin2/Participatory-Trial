@@ -1,40 +1,42 @@
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { Server, ServerOptions } from 'socket.io';
-import { createAdapter } from '@socket.io/redis-adapter';
-import { createClient } from 'redis';
-import { ConfigService } from '@nestjs/config';
-import { Logger } from '@nestjs/common';
+import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import Redis, { RedisOptions } from 'ioredis';
 
-export class RedisIoAdapter extends IoAdapter {
-  private adapterConstructor: ReturnType<typeof createAdapter>;
-  private serverInstance: Server;
+@Injectable()
+export class RedisIoAdapter implements OnModuleInit, OnModuleDestroy {
+  private dataClient: Redis;
+  private subClient: Redis;
 
-  async connectToRedis(configService: ConfigService): Promise<void> {
-    const pubClient = createClient({
-      password: configService.get<string>('REDIS_PASSWORD'),
-      socket: {
-        host: configService.get<string>('REDIS_HOST'),
-        port: configService.get<number>('REDIS_PORT'),
-      },
-    });
-    const subClient = pubClient.duplicate();
-    const connect = await Promise.all([
-      pubClient.connect(),
-      subClient.connect(),
-    ]).catch((err) => Logger.log('adapter 에러 확인 로그', err));
-    Logger.log('connect', connect);
-    this.adapterConstructor = createAdapter(pubClient, subClient);
+  constructor() {
+    const redisOptions: RedisOptions = {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT),
+    };
+
+    this.dataClient = new Redis(redisOptions);
+    this.subClient = this.dataClient.duplicate();
+
+    this.setupErrorHandlers();
   }
 
-  createIOServer(port: number, options?: ServerOptions): any {
-    const server = super.createIOServer(port, options);
-    server.adapter(this.adapterConstructor);
-    this.serverInstance = server;
-
-    return server;
+  private setupErrorHandlers(): void {
+    this.dataClient.on('error', (err) => {});
+    this.subClient.on('error', (err) => {});
   }
 
-  getServerInstance(): Server {
-    return this.serverInstance;
+  getDataClient(): Redis {
+    return this.dataClient;
+  }
+
+  getSubClient(): Redis {
+    return this.subClient;
+  }
+
+  async onModuleInit() {
+    console.log('연결');
+  }
+
+  async onModuleDestroy() {
+    await this.dataClient.quit();
+    await this.subClient.quit();
   }
 }

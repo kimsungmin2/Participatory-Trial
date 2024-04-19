@@ -229,6 +229,7 @@ export class OnlineBoardsController {
   // 자유 게시판 명예의 전당 조회하기 API(종아요 수)
   @ApiOperation({ summary: '자유 게시판 명예의 전당 조회하기 API(종아요 수)' })
   @Get('HallofFame/likes')
+  @Render('board.ejs')
   async getRecentLikeHallOfFame() {
     const recentHallofFame =
       await this.onlineBoardHallOfFameService.getLikeRecentHallOfFame();
