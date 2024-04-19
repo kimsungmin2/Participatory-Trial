@@ -10,10 +10,12 @@ export class WsJwtGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const socket = context.switchToWs().getClient();
     const cookies = socket.handshake.headers.cookie;
-
+    console.log(socket.handshake);
     if (!cookies) {
+      console.log('왜안되냐고');
       throw new WsException('인증되지않음');
     }
+    console.log(3);
 
     const authToken = this.parseCookie(cookies, 'authorization');
 

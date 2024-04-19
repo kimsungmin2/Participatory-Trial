@@ -107,8 +107,8 @@ export class AuthController {
 
     res.cookie('authorization', `Bearer ${accessToken}`, {
       maxAge: 1000 * 60 * 60 * 12,
-      httpOnly: true,
-      secure: true,
+      httpOnly: false,
+      secure: false,
     });
     res.redirect('/');
   }
@@ -131,7 +131,7 @@ export class AuthController {
     res.cookie('authorization', `Bearer ${accessToken}`, {
       maxAge: 1000 * 60 * 60 * 12,
       httpOnly: true,
-      secure: true,
+      secure: false,
     });
     res.redirect('/');
   }
