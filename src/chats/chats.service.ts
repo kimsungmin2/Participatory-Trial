@@ -164,7 +164,7 @@ export class ChatsService implements OnModuleInit {
       chat.timestamp = new Date();
       chat.userName = user.nickName;
 
-      const chatKey = `${channelType}:${roomId}`;
+      const chatKey = `${channelType}:chat:${roomId}`;
       const chatValue = JSON.stringify(chat);
 
       await this.redisDataClient.rpush(chatKey, chatValue);
@@ -206,7 +206,7 @@ export class ChatsService implements OnModuleInit {
   ): Promise<Chat[]> {
     // await this.redisConnection();
 
-    const channelKey = `${channelType}:${roomId}`;
+    const channelKey = `${channelType}:chat:${roomId}`;
     const redisMessageCount = await this.redisDataClient.llen(channelKey);
 
     let chats = [];

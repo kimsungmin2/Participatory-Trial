@@ -91,7 +91,10 @@ export class AuthService {
 
   async AuthenticationNumberCache(email: string) {
     const code = Math.floor(Math.random() * 900000) + 100000;
-
+    const emailCode = await this.redisService.getCluster().get(email);
+    if (emailCode) {
+      await this.redisService.getCluster().del(email);
+    }
     await this.redisService.getCluster().set(email, code, 'EX', 60 * 60 * 3);
 
     await this.emailService.queueVerificationEmail(email, code);
@@ -108,11 +111,15 @@ export class AuthService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     const existingUser = await this.usersService.findByEmail(email);
+
     if (existingUser) {
-      throw new ConflictException(
-        '이미 해당 이메일로 가입된 사용자가 있습니다!',
-      );
+      if (existingUser.emailVerified === true) {
+        throw new ConflictException(
+          '이미 해당 이메일로 가입된 사용자가 있습니다!',
+        );
+      }
     }
+
     if (password !== passwordConfirm) {
       throw new UnauthorizedException(
         '비밀번호가 체크비밀번호와 일치하지 않습니다.',
@@ -122,6 +129,11 @@ export class AuthService {
     try {
       const hashedPassword = await hash(password, 10);
 
+      await queryRunner.manager
+        .getRepository(UserInfos)
+        .delete(existingUser.id);
+
+      await queryRunner.manager.getRepository(Users).delete(existingUser.id);
       const user = await queryRunner.manager.getRepository(Users).save({});
 
       const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
