@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/8bc9e38e4e.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="/css/main-style.css" />
+  </head>
+  <body>
+    <%- include('partials/notification') %>
+    <%- include('partials/nav')  %>
+    <header>
+      <div>
+        <p class="hot_vote_now">지금 가장 핫한 토론은?</p>
+      </div>
+      <div class="hot_vote">
+        <div class="hot_vote_container">
+          
+          <div class="hot_vote_title">
+            <div>
+              <span>맥그리거</span>
+            </div>
+            <div>
+              <span>VS</span>
+            </div>
+            <div>
+              <span>할머니 500명</span>
+            </div>
+          </div>
+          <div class="hot_vote_sub">
+            <div class="fighter">
+              <span>맥그리거</span>
+              <span>5000표</span>
+            </div>
+            <div class="vs">
+              <span>VS</span>
+            </div>
+            <div class="grandmothers">
+              <span>할머니 500명</span>
+              <span>1000표</span>
+            </div>
+          </div>
+          <div class="hot_vote_timer">
+            <span>1시간 30분 33초</span>
+          </div>
+        </div>
+      </div>
+      <div class="other">
+        <form action="/search" method="get" id="searchForm">
+        <div class="search">
+          <input type="text" placeholder="검색어 입력" name="search" id="searchInput">
+          <button type="submit" class="glass_button"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+      </form>
+      <span>그 외에도 재밌는 투표들을 만나보세요!</span>
+
+    </div>
+      <div class="grid-container">
+        <% for(let i = 0; i < 9; i++) { %>
+        <div class="grid-item">
+          <div class="vote-title">맥그리거 VS 할머니 500명</div>
+          <div class="vote-options">
+            <div class="vote-option">
+              <div>맥그리거</div>
+              <div class="vote-count">5000표</div>
+            </div>
+            <div class="vote-title">VS</div>
+            <div class="vote-option">
+              <div>할머니 500명</div>
+              <div class="vote-count">1000표</div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <!-- 다른 grid-item 블록 추가 -->
+      </div>
+    </header>
+    <script>
+      document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const searchInput = document.getElementById('searchInput').value;
+      const queryParams = new URLSearchParams();
+
+      queryParams.append('search', searchInput); // 검색어 항상 추가
+      queryParams.append('type', "titleContent"); // 선택된 검색 옵션 추가
+
+      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+      window.location.href = `/search/all?${queryParams.toString()}`;
+});
+    </script>
+  </body>
+</html>

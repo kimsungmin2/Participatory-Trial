@@ -17,16 +17,23 @@ import { Trials } from './trials/entities/trial.entity';
 import { Votes } from './trials/entities/vote.entity';
 import { OnlineBoardComments } from './online_boards/entities/online_board_comment.entity';
 import { OnlineBoards } from './online_boards/entities/online_board.entity';
-import { HumorComments } from './humors/entities/humor_comment.entity';
-import { HumorBoards } from './humors/entities/humor.entity';
 import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
+import { EventsModule } from './events/events.module';
+import { ChatsModule } from './chats/chats.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { RedisModule } from './cache/redis.module';
 import { CacheConfigService } from './cache/cache.config';
-
+import { MongooseModule } from '@nestjs/mongoose';
+import { ServerApiVersion } from 'mongodb';
+// import { CacheConfigService } from './cache/config';
+// import { RedisIoAdapter } from './cache/redis.adpter';
+// import { CacheConfigService } from './cache/cache.config';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -46,6 +53,9 @@ export const typeOrmModuleOptions = {
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.IS_TEST === 'true' ? `.env.test` : `.env`,
@@ -60,7 +70,7 @@ export const typeOrmModuleOptions = {
     }),
     CacheModule.registerAsync({
       isGlobal: true,
-      useClass: CacheConfigService
+      useClass: CacheConfigService,
     }),
     BullModule.forRoot({
       redis: {
@@ -68,6 +78,9 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
+    // MongooseModule.forRoot(process.env.MONGODB_URI, {
+    //   serverApi: ServerApiVersion.v1,
+    // }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
@@ -78,6 +91,9 @@ export const typeOrmModuleOptions = {
     AuthModule,
     EmailModule,
     VoteModule,
+    RedisModule,
+    EventsModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

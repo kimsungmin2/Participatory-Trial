@@ -15,6 +15,7 @@ import { EmailService } from '../email/email.service';
 import { GoogleStrategy } from '../utils/strategy/google.strategy';
 import { EmailModule } from '../email/email.module';
 import { BullModule } from '@nestjs/bull';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [

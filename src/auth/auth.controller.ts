@@ -6,9 +6,9 @@ import {
   Req,
   HttpStatus,
   Post,
-  Render,
   Body,
   Patch,
+  Render,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from '../utils/guard/kakao.guard';
@@ -27,6 +27,7 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
   async register(@Body() signUpdto: SignUpDto) {
+    console.log(signUpdto);
     const user = await this.authService.signUp(
       signUpdto.email,
       signUpdto.password,
@@ -42,7 +43,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '회원가입 이메일 인증' })
-  @Patch('signup/verifiCation')
+  @Patch('sign-up/verification')
   async verifiCationEmail(@Body() verifiCation: VerifiCation) {
     const user = await this.authService.verifiCationEmail(verifiCation);
     return {
@@ -66,6 +67,7 @@ export class AuthController {
       secure: true,
     });
     res.send('로그인에 성공하였습니다.');
+    // res.redirect('/online-board');
   }
 
   // @ApiOperation({ summary: '유저 정보' })
@@ -84,6 +86,10 @@ export class AuthController {
     res.send('로그아웃에 성공하였습니다.');
   }
 
+  @ApiOperation({
+    summary: '카카오 로그인',
+    description: '카카오 계정으로 로그인 하세요.',
+  })
   @UseGuards(KakaoAuthGuard)
   @Get('kakao')
   redirectToKakaoAuth(@Res() res) {
@@ -149,5 +155,24 @@ export class AuthController {
       secure: true,
     });
     res.redirect('/');
+  }
+
+  // 회원가입 페이지로 이동
+  @Get('sign-up')
+  @Render('sign-up.ejs')
+  async getSignUp(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
+  }
+
+  @Get('verification')
+  @Render('email-validation-check.ejs')
+  async getVerifyEmail(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
+  }
+
+  @Get('sign-in')
+  @Render('sign-in.ejs')
+  async getSignIn(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 }

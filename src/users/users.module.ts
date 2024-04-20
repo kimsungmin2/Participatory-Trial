@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from './entities/user.entity';
 import { UserInfos } from './entities/user-info.entity';
+import { RedisModule } from '../cache/redis.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserInfos } from './entities/user-info.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Users, UserInfos]),
+    RedisModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

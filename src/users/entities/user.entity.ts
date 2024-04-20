@@ -11,12 +11,14 @@ import { UserInfos } from './user-info.entity';
 import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
 import { OnlineBoardComments } from '../../online_boards/entities/online_board_comment.entity';
 import { Trials } from '../../trials/entities/trial.entity';
-import { HumorBoards } from '../../humors/entities/humor.entity';
-import { HumorComments } from '../../humors/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';
-import { EachVote } from 'src/trials/entities/Uservote.entity';
+import { EachVote } from '../../trials/entities/Uservote.entity';
+import { TrialsChat } from '../../events/entities/trialsChat.entity';
+import { EachPolticalVote } from '../../poltical_debates/entities/userVoteOfPoltical_debate.entity';
+import { EachHumorVote } from '../../humors/entities/UservoteOfHumorVote.entity';
+import { HumorBoards } from '../../humors/entities/humor-board.entity';
 
 @Entity({
   name: 'users',
@@ -54,9 +56,6 @@ export class Users {
   @OneToMany(() => HumorBoards, (humorBoard) => humorBoard.user)
   humorBoard: HumorBoards[];
 
-  @OneToMany(() => HumorComments, (humorComment) => humorComment.user)
-  humorComment: HumorComments[];
-
   @OneToMany(
     () => PolticalDebateBoards,
     (polticalDebateBoards) => polticalDebateBoards.user,
@@ -71,10 +70,20 @@ export class Users {
   )
   polticalDebateComments: PolticalDebateComments[];
 
+  @OneToMany(() => EachVote, (eachVote) => eachVote.user, { cascade: true })
+  eachVote: EachVote[];
+
   @OneToMany(
-    () => EachVote,
-    (eachVote) => eachVote.user,
+    () => EachPolticalVote,
+    (eachPolticalVote) => eachPolticalVote.user,
     { cascade: true },
   )
-  eachVote: EachVote[];
+  eachPolticalVote: EachPolticalVote[];
+
+  @OneToMany(() => EachHumorVote, (eachHumorVote) => eachHumorVote.user, {
+    cascade: true,
+  })
+  eachHumorVote: EachHumorVote[];
+  @OneToMany(() => TrialsChat, (trialsChat) => trialsChat.user)
+  trialsChat: TrialsChat[];
 }
