@@ -29,7 +29,6 @@ export class ChatsService implements OnModuleInit {
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
-    @Inject('REDIS_SUB_CLIENT') private redisSubClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
   ) {}
 

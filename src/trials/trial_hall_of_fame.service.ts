@@ -10,6 +10,7 @@ import { TrialViewHallOfFames } from "./entities/trial_hall_of_fame.view.entity"
 import { th } from "@faker-js/faker";
 import { VotesService } from "./vote/vote.service";
 import { PaginationQueryDto } from "src/humors/dto/get-humorBoard.dto";
+import { throwIfEmpty } from "rxjs";
 
 @Injectable()
 export class TrialHallOfFameService {
@@ -281,12 +282,56 @@ async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
 
 
 // 명예전당 좋아요 조회 매서드
-async getLikeRecentHallOfFame(){
-    return await this.trialHallOfLikeFamesRepository.find();
+async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+  let trialLikeHallOfFames: TrialLikeHallOfFames[];
+
+  const totalItems = await this.trialHallOfLikeFamesRepository.count();
+  try{
+    const { page, limit } = paginationQueryDto;
+    const skip = (page - 1) * limit;
+    trialLikeHallOfFames = await this.trialHallOfLikeFamesRepository.find({
+      skip,
+      take: limit,
+      order : {
+        totallike: 'DESC'
+      }
+    });
+  } catch (err) {
+    console.log(err.message);
+    throw new InternalServerErrorException(
+      "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+    );
   }
+  return {
+    trialLikeHallOfFames,
+    totalItems
+  }
+}
 
 // 명예전당 조회수 조회 매서드
-async getViewRecentHallOfFame(){
-    return await this.trialHallOfViewFamesRepository.find();
+async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+  let trialViewHallOfFames: TrialViewHallOfFames[]
+
+  const totalItems = await this.trialHallOfViewFamesRepository.count();
+  try{
+    const { page, limit } = paginationQueryDto
+    const skip = (page - 1) * limit;
+    trialViewHallOfFames = await this.trialHallOfViewFamesRepository.find({
+      skip,
+      take: limit,
+      order: {
+        totalview: 'DESC'
+      }
+    });
+  } catch(err) {
+    console.log(err.message)
+    throw new InternalServerErrorException(
+      "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+    );
+  }
+    return {
+      trialViewHallOfFames,
+      totalItems
+    }
   }
 }

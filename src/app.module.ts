@@ -27,11 +27,11 @@ import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
 import { WinstonModule } from 'nest-winston';
 import { APP_INTERCEPTOR } from '@nestjs/core';
-import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
+// import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 import { SearchModule } from './search/search.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ServerApiVersion } from 'typeorm';
+import { ServerApiVersion } from 'mongodb';
 console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -105,6 +105,7 @@ export const typeOrmModuleOptions = {
     MongooseModule.forRoot(process.env.MONGODB_URI, {
       serverApi: ServerApiVersion.v1,
     }),
+    
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
@@ -130,10 +131,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: HttpLoggingInterceptor,
+    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { HumorBoards } from "./entities/humor-board.entity";
 import { Between, DataSource, Repository } from "typeorm";
@@ -7,6 +7,9 @@ import { HumorsHallOfFame } from "./entities/humor_hall_of_fame.entity";
 import { HumorsLikeHallOfFames } from "./entities/humor_hall_of_fame.like.entity";
 import { HumorsViewHallOfFames } from "./entities/humor_hall_of_fame.view.entity";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { PaginationQueryDto } from "./dto/get-humorBoard.dto";
+import { th } from "@faker-js/faker";
+import { HumorVotesService } from "./humors_votes/humors_votes.service";
 
 @Injectable()
 export class HumorHallOfFameService {
@@ -21,6 +24,7 @@ export class HumorHallOfFameService {
         private humorsLikeHallOfFamesRepository: Repository<HumorsLikeHallOfFames>,
         @InjectRepository(HumorsViewHallOfFames)
         private humorsViewHallOfFamesRepository: Repository<HumorsViewHallOfFames>,
+        private readonly humorVotesService: HumorVotesService,
         private dataSource: DataSource,
     ){}
 
@@ -29,16 +33,24 @@ export class HumorHallOfFameService {
     @Cron('0 2 * * 1')
     async updateHumorHallOfFame() {
         const { start, end } = this.getLastWeekRange();
+
+        
         const lastWeekVotes = await this.humorVotesRepository.find({
             where: {
                 createdAt: Between(start, end)
             },
         });
+        
+        for(const vote of lastWeekVotes) {
+          await this.humorVotesService.updateVoteCounts(vote.id)
+        }
+
         const lastWeekHumors = await this.humorsRepository.find({
-            where: {
-                createdAt: Between(start, end)
-            }
+           where: {
+              createdAt: Between(start, end)
+          }
         })
+        
 
         // 투표 기반으로 명예의 전당 집계
         // 투표 수 데이터 가공
@@ -238,18 +250,85 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     }
 
     // 명예전당 투표수 조회 매서드
-async getRecentHallOfFame(){
-    return await this.humorsHallOfFameRepository.find();
+async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto
+){
+  let humorsHallOfFame:HumorsHallOfFame[];
+
+  const totalItems = await this.humorsHallOfFameRepository.count();
+  try{
+    const { page, limit } = paginationQueryDto;
+    const skip = (page - 1) * limit;
+    humorsHallOfFame = await this.humorsHallOfFameRepository.find({
+      skip,
+      take: limit,
+      order :{
+        totalVotes: 'DESC'
+      }
+    });
+  } catch (err) {
+    console.log(err.message);
+    throw new InternalServerErrorException(
+      "명예의 전당을 불러오는 도중오류가 발생했습니다"
+    );
+  }
+    return {
+      humorsHallOfFame,
+      totalItems
+    }
   }
   
   
   // 명예전당 좋아요 조회 매서드
-  async getLikeRecentHallOfFame(){
-      return await this.humorsLikeHallOfFamesRepository.find();
+  async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let humorsLikeHallOfFames : HumorsLikeHallOfFames[];
+
+    const totalItems = await this.humorsLikeHallOfFamesRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      humorsLikeHallOfFames = await this.humorsLikeHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          totallike: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중오류가발생했습니다."
+      );
+    }
+      return {
+        humorsLikeHallOfFames,
+        totalItems,
+      }
     }
   
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame(){
-      return await this.humorsViewHallOfFamesRepository.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let humorsViewHallOfFames:HumorsViewHallOfFames[];
+
+    const totalItems = await this.humorsViewHallOfFamesRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      humorsViewHallOfFames = await this.humorsViewHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          totalview:'DESC'
+        }
+      });
+    } catch(err) {
+      console.log(err.message)
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는도중 오류가 발생했습니다."
+      )
+    }
+      return {
+        humorsViewHallOfFames,
+        totalItems
+      }
     }
 }

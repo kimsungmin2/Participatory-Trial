@@ -25,6 +25,7 @@ import {
   ApiOperation,
   ApiTags,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
@@ -37,6 +38,7 @@ import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { start } from 'repl';
+import { th } from '@faker-js/faker';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -266,41 +268,84 @@ export class PolticalDebatesController {
 
   // 정치 게시판 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 정치 게시판 명예의 전당 조회하기 API(투표 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/votes')
   @Render('board.ejs')
-  async getRecentHallOfFame() {
-    const recentHallofFame =
-      await this.polticalDabateHallOfFameService.getRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '정치 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentHallOfFame(
+    @Query() paginationQueryDto:PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { polticalDebateHallOfFame, totalItems }= await this.polticalDabateHallOfFameService.getRecentHallOfFame(paginationQueryDto)
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
-
     return {
       statusCode: HttpStatus.OK,
       message: '정치 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
-      recentHallofFame,
+      data: polticalDebateHallOfFame,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
     };
   }
 
   // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
   @ApiOperation({ summary: '정치 게시판 명예의 전당 조회하기 API(조회수 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/views')
-  async getRecentViewHallOfFame() {
-    const recentHallofFame =
-      await this.polticalDabateHallOfFameService.getViewRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '정치 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentViewHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { polticalDebateBoardsViewHallOfFames, totalItems } = await this.polticalDabateHallOfFameService.getViewRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
       message: '정치 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
-      recentHallofFame,
+      data: polticalDebateBoardsViewHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
     };
   }
 }

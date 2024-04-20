@@ -228,40 +228,84 @@ export class OnlineBoardsController {
 
   // 자유 게시판 명예의 전당 조회하기 API(종아요 수)
   @ApiOperation({ summary: '자유 게시판 명예의 전당 조회하기 API(종아요 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/likes')
   @Render('board.ejs')
-  async getRecentLikeHallOfFame() {
-    const recentHallofFame =
-      await this.onlineBoardHallOfFameService.getLikeRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '자유 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentLikeHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { onlineBoardLikeHallOfFames, totalItems } = await this.onlineBoardHallOfFameService.getLikeRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1;
+    let endPage = startPage + 9
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
       message: '자유 게시판 명예의 전당을 조회하였습니다.(좋아요 순)',
-      recentHallofFame,
+      data: onlineBoardLikeHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
     };
   }
 
   // 자유 게시판 명예의 전당 조회하기 API(조회수 수)
   @ApiOperation({ summary: '자유 게시판 명예의 전당 조회하기 API(조회수 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/views')
-  async getRecentViewHallOfFame() {
-    const recentHallofFame =
-      await this.onlineBoardHallOfFameService.getViewRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '자유 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentViewHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { onlineBoardViewHallOfFames, totalItems } = await this.onlineBoardHallOfFameService.getViewRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1;
+    let endPage = startPage + 9
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
       message: '자유 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
-      recentHallofFame,
+      data: onlineBoardViewHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
     };
   }
 }

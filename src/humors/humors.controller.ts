@@ -237,61 +237,127 @@ export class HumorsController {
 
   // 유머 게시판 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 유머 게시판 명예의 전당 조회하기 API(투표 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/votes')
   @Render('board.ejs')
-  async getRecentHallOfFame() {
-    const recentHallofFame =
-      await this.humorHallOfFameService.getRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '유머 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request
+  ) {
+    const { humorsHallOfFame, totalItems } = await this.humorHallOfFameService.getRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
-
     return {
       statusCode: HttpStatus.OK,
-      message: '유머 게시판 명예의 전당을 조회하였습니다.(투표 수 순)',
-      recentHallofFame,
-    };
+      message: '명예의 전당을 조회하였습니다.',
+      data: humorsHallOfFame,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
+    }
   }
 
   // 유머 게시판 명예의 전당 조회하기 API(종아요 수)
   @ApiOperation({ summary: '유머 게시판 명예의 전당 조회하기 API(종아요 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/likes')
-  async getRecentLikeHallOfFame() {
-    const recentHallofFame =
-      await this.humorHallOfFameService.getLikeRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '유머 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentLikeHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request
+  ) {
+    const { humorsLikeHallOfFames, totalItems } = await this.humorHallOfFameService.getLikeRecentHallOfFame(paginationQueryDto)
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage-1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if(endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
-      message: '유머 게시판 명예의 전당을 조회하였습니다.(좋아요 순)',
-      recentHallofFame,
-    };
+      message: '명예의 전당을 조회하였습니다.(좋아요 순)',
+      data: humorsLikeHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
+    }
   }
 
   // 유머 게시판 명예의 전당 조회하기 API(조회수 수)
   @ApiOperation({ summary: '유머 게시판 명예의 전당 조회하기 API(조회수 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/views')
-  async getRecentViewHallOfFame() {
-    const recentHallofFame =
-      await this.humorHallOfFameService.getViewRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '유머 게시판 명예의 전당 정보가 없습니다.',
-      };
+  async getRecentViewHallOfFame(
+    @Query() paginationQueryDto:PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { humorsViewHallOfFames, totalItems } = await this.humorHallOfFameService.getViewRecentHallOfFame(paginationQueryDto)
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1
+    let endPage = startPage + 9;
+    if(endPage > pageCount) {
+      endPage = pageCount
     }
-    return {
+    return{
       statusCode: HttpStatus.OK,
-      message: '유머 게시판 명예의 전당을 조회하였습니다.(조회수 순)',
-      recentHallofFame,
-    };
+      message: '명예의 전당을 조회하였습니다.',
+      data: humorsViewHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn']
+    }
+    
   }
   @ApiOperation({ summary: '더미 생성' })
   @ApiParam({

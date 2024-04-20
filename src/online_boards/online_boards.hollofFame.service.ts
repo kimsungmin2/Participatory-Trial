@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { OnlineBoards } from './entities/online_board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, Repository } from 'typeorm';
 import { OnlineBoardLikeHallOfFames } from './entities/online_boardLike_of_fame.entity';
 import { OnlineBoardViewHallOfFames } from './entities/online_boardVIew_of_fame.entity';
 import { Cron } from '@nestjs/schedule';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 
 @Injectable()
 export class OnlineBoardHallOfFameService {
@@ -181,12 +182,56 @@ export class OnlineBoardHallOfFameService {
   }
 
   // 명예전당 좋아요 조회 매서드
-  async getLikeRecentHallOfFame() {
-    return await this.onlineBoardLikeHallOfFames.find();
+  async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto) {
+    let onlineBoardLikeHallOfFames: OnlineBoardLikeHallOfFames[];
+
+    const totalItems = await this.onlineBoardLikeHallOfFames.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      onlineBoardLikeHallOfFames = await this.onlineBoardLikeHallOfFames.find({
+        skip,
+        take: limit,
+        order: {
+          totallike: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '명에의 전당을 불러오는 도중오류가발생했습니다.'
+      )
+    }
+    return {
+      onlineBoardLikeHallOfFames,
+      totalItems,
+    }
   }
 
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame() {
-    return await this.onlineBoardViewHallOfFames.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto) {
+    let onlineBoardViewHallOfFames: OnlineBoardViewHallOfFames[];
+    
+    const totalItems = await this.onlineBoardViewHallOfFames.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      onlineBoardViewHallOfFames = await this.onlineBoardViewHallOfFames.find({
+        skip,
+        take: limit,
+        order: {
+          totalview: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '명예의 전당을 불러오는 도중오류가발생했습니다.'
+      )
   }
+  return {
+    onlineBoardViewHallOfFames,
+    totalItems
+  }
+}
 }

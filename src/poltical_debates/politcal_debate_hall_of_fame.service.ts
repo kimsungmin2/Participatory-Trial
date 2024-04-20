@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, DataSource, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -6,6 +6,9 @@ import { PolticalDebateBoards } from "./entities/poltical_debate.entity";
 import { PolticalDebateVotes } from "./entities/polticalVote.entity";
 import { PolticalDebateHallOfFame } from "./entities/poltical_hall_of_fame.entity";
 import { PolticalDebateBoardsViewHallOfFames } from "./entities/polticalView_hall_of_fame.entity";
+import { PolticalVotesService } from "./poltical_debates_vote/poltical_debates_vote.service";
+import { PaginationQueryDto } from "src/humors/dto/get-humorBoard.dto";
+import { th } from "@faker-js/faker";
 
 @Injectable()
 export class PolticalDabateHallOfFameService {
@@ -18,20 +21,28 @@ export class PolticalDabateHallOfFameService {
         private polticalDebateHallOfFameRepository: Repository<PolticalDebateHallOfFame>,
         @InjectRepository(PolticalDebateBoardsViewHallOfFames)
         private polticalDebateBoardsViewHallOfFamesRepository: Repository<PolticalDebateBoardsViewHallOfFames>,
+        private readonly polticalVotesService: PolticalVotesService,
         private dataSource: DataSource,
     ){}
 
 
     // 명예의 전당 일요일 2시 20분에 업데이트
     @Cron('0 2 * * 1')
-    async updateHumorHallOfFame() {
+    async updatePolitcalHallOfFame() {
         const { start, end } = this.getLastWeekRange();
+
         const lastWeekVotes = await this.polticalDebateVotesRepository.find({
             where: {
                 createdAt: Between(start, end)
             },
         });
-        const lastWeekHumors = await this.polticalDebateBoardsRepository.find({
+
+        for (const vote of lastWeekVotes) {
+          await this.polticalVotesService.updateVoteCounts(vote.id)
+        }
+
+
+        const lastWeekPoltical = await this.polticalDebateBoardsRepository.find({
             where: {
                 createdAt: Between(start, end)
             }
@@ -42,7 +53,7 @@ export class PolticalDabateHallOfFameService {
         const hallOfFameData = this.aggVotesForHallOfFame(lastWeekVotes)
 
         // 조회수 데이터 가공
-        const viewHallOfFameData = this.aggVotesViewForHallOfFame(lastWeekHumors)
+        const viewHallOfFameData = this.aggVotesViewForHallOfFame(lastWeekPoltical)
 
          // 업데이트
         // 투표 명전 업데이트
@@ -186,13 +197,56 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     }
 
     // 명예전당 투표수 조회 매서드
-async getRecentHallOfFame(){
-    return await this.polticalDebateHallOfFameRepository.find();
+async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let polticalDebateHallOfFame : PolticalDebateHallOfFame[];
+
+    const totalItems = await this.polticalDebateHallOfFameRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page -1) * limit;
+      polticalDebateHallOfFame = await this.polticalDebateHallOfFameRepository.find({
+        skip,
+        take: limit,
+        order: {
+          totalVotes:'DESC'
+        }
+      });
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+      );
+    }
+    return {
+      polticalDebateHallOfFame,
+      totalItems
+    }
   }
   
   
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame(){
-      return await this.polticalDebateBoardsViewHallOfFamesRepository.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let polticalDebateBoardsViewHallOfFames: PolticalDebateBoardsViewHallOfFames[]
+    const totalItems = await this.polticalDebateBoardsViewHallOfFamesRepository.count();
+    try{
+      const { page, limit } =paginationQueryDto
+      const skip = (page - 1) * limit;
+      polticalDebateBoardsViewHallOfFames = await this.polticalDebateBoardsViewHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          totalview: 'DESC',
+        }
+      });
+    }catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+      )
+    }
+      return {
+        polticalDebateBoardsViewHallOfFames,
+        totalItems
+      }
     }
 }

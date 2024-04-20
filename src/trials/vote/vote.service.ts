@@ -18,7 +18,7 @@ export class VotesService {
   constructor(
     @InjectRepository(EachVote)
     private eachVoteRepository: Repository<EachVote>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private dataSource: DataSource,
   ) {}
   // userCode 난수 생성 함수
@@ -42,28 +42,28 @@ export class VotesService {
   }
 
   
-  // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
-  private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
-    if (userId) {
-      return null;
-    }
-    let userCode = req.cookies['user-code'];
-    if (userCode) {
-      return userCode;
-    }
-    const userKey = req.ip;
+  // // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
+  // private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
+  //   if (userId) {
+  //     return null;
+  //   }
+  //   let userCode = req.cookies['user-code'];
+  //   if (userCode) {
+  //     return userCode;
+  //   }
+  //   const userKey = req.ip;
 
-    userCode = await this.cacheManager.get<string>(userKey);
-    if (!userCode) {
-      userCode = this.generateUserCode();
-      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
-      req.res.cookie('user-code', userCode, {
-        maxAge: 1000 * 24 * 60 * 60,
-        httpOnly: true,
-      });
-    }
-    return userCode;
-  }
+  //   userCode = await this.cacheManager.get<string>(userKey);
+  //   if (!userCode) {
+  //     userCode = this.generateUserCode();
+  //     await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
+  //     req.res.cookie('user-code', userCode, {
+  //       maxAge: 1000 * 24 * 60 * 60,
+  //       httpOnly: true,
+  //     });
+  //   }
+  //   return userCode;
+  // }
   // 투표 중복 검증 and 투표수 업데이트 함수
   private async validationAndSaveVote(
     {
