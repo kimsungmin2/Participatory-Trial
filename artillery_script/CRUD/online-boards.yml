@@ -41,6 +41,14 @@ scenarios:
           capture:
             json: '$.data.id'
             as: 'boardId'
+      - get:
+          url: 'http://localhost:3000/online-boards'
+      - get:
+          url: 'http://localhost:3000/online-boards/{{boardId}}'
+      - get:
+          url: 'http://localhost:3000/online-boards/HallofFame/likes'
+      - get:
+          url: 'http://localhost:3000/online-boards/HallofFame/views'
       - patch:
           url: 'http://localhost:3000/online-boards/{{ boardId }}'
           formData:
@@ -53,6 +61,8 @@ scenarios:
           capture:
             json: '$.data.id'
             as: 'commentId'
+      - get:
+          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments'
       - patch:
           url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
           json:

@@ -25,7 +25,6 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { VoteForDto } from '../dto/vote.dto';
 import { Users } from '../../users/entities/user.entity';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 
 @ApiTags('재판 투표')
 @Controller('trials/vote')

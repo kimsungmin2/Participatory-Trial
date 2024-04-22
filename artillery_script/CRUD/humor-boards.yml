@@ -30,34 +30,46 @@ config:
     # metrics-by-endpoint: {}
     fake-data: {}
 scenarios:
-  - name: 'online board and comment api test'
+  - name: 'humors board and comment api test'
     flow:
       - post:
-          url: 'http://localhost:3000/online-boards'
+          url: 'http://localhost:3000/humors'
           formData:
             title: '{{ $randFullName() }}'
             content: '{{ $randFullName() }}'
+            title1: '{{ $randFullName() }}'
+            title2: '{{ $randFullName() }}'
             files: ''
           capture:
             json: '$.data.id'
             as: 'boardId'
-      - patch:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}'
-          formData:
-            title: '{{ $randFullName() }}'
-            content: '{{ $randFullName() }}'
+      - get:
+          url: 'http://localhost:3000/humors'
+      - get:
+          url: 'http://localhost:3000/humors/{{boardId}}'
+      - get:
+          url: 'http://localhost:3000/humors/HallofFame/votes'
+      - get:
+          url: 'http://localhost:3000/humors/HallofFame/likes'
+      - get:
+          url: 'http://localhost:3000/humors/HallofFame/views'
       - post:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments'
+          url: 'http://localhost:3000/humors/{{boardId}}/comments'
           json:
             content: '{{ $randFullName() }}'
           capture:
             json: '$.data.id'
             as: 'commentId'
       - patch:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+          url: 'http://localhost:3000/humors/{{boardId}}'
+          formData:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+      - patch:
+          url: 'http://localhost:3000/humors/{{boardId}}/comments/{{ commentId }}'
           json:
             content: '{{ $randFullName() }}'
       - delete:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+          url: 'http://localhost:3000/humors/{{boardId}}/comments/{{ commentId }}'
       - delete:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}'
+          url: 'http://localhost:3000/humors/{{boardId}}'

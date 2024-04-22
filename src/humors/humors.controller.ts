@@ -36,9 +36,9 @@ import { BoardType } from '../s3/board-type';
 import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
-import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { Request } from 'express';
 import { HumorSeedService } from './humor-seeed.service';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -100,7 +100,6 @@ export class HumorsController {
     @UserInfo() user: Users,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(files);
     const createdBoard = await this.humorsService.createHumorBoardAndVotes(
       createHumorBoardDto,
       voteTitleDto,

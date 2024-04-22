@@ -11,18 +11,21 @@ import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
 import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
-import { UpdateVoteDto } from 'src/trials/vote/dto/updateDto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { S3Service } from '../s3/s3.service';
 import Redis from 'ioredis';
 import { BoardType } from '../s3/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { NotFound } from '@aws-sdk/client-s3';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 
 @Injectable()
 export class PolticalDebatesService {
+  static createSubject(polticalId: number, voteDto: VoteTitleDto): any {
+    throw new Error('Method not implemented.');
+  }
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
@@ -156,7 +159,6 @@ export class PolticalDebatesService {
         },
       });
     } catch (err) {
-      console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
@@ -292,9 +294,6 @@ export class PolticalDebatesService {
       return vote;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
-      console.log('vs 생성 오류:', error);
-
       throw new InternalServerErrorException('vs 생성 중 오류가 발생했습니다.');
     } finally {
       await queryRunner.release();

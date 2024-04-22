@@ -30,34 +30,48 @@ config:
     # metrics-by-endpoint: {}
     fake-data: {}
 scenarios:
-  - name: 'online board and comment api test'
+  - name: 'poltical-debates board and comment api test'
     flow:
       - post:
-          url: 'http://localhost:3000/online-boards'
-          formData:
+          url: 'http://localhost:3000/poltical-debates'
+          json:
             title: '{{ $randFullName() }}'
             content: '{{ $randFullName() }}'
-            files: ''
+            trialTime: '{{ $randFullName() }}'
+            title1: '{{ $randFullName() }}'
+            title2: '{{ $randFullName() }}'
           capture:
-            json: '$.data.id'
+            json: '$.data.newVote.polticalId'
             as: 'boardId'
+      - get:
+          url: 'http://localhost:3000/poltical-debates'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/my'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/HallofFame/votes'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/HallofFame/views'
       - patch:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}'
-          formData:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}'
+          json:
             title: '{{ $randFullName() }}'
             content: '{{ $randFullName() }}'
       - post:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments'
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments'
           json:
             content: '{{ $randFullName() }}'
           capture:
             json: '$.data.id'
             as: 'commentId'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
       - patch:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
           json:
             content: '{{ $randFullName() }}'
       - delete:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}/comments/{{ commentId }}'
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
       - delete:
-          url: 'http://localhost:3000/online-boards/{{ boardId }}'
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}'

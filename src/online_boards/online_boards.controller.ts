@@ -31,12 +31,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service';
-import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
-import { BoardType } from 'src/s3/board-type';
 import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import { start } from 'repl';
+import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @ApiTags('자유 게시판')
 @Controller('online-boards')

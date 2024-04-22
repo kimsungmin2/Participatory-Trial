@@ -138,6 +138,7 @@ describe('OnlineBoardCommentService', () => {
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
+      onlineBoardComment: new OnlineBoards(),
     };
 
     jest.spyOn(usersService, 'findById').mockResolvedValue(userInfo);

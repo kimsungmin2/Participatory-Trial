@@ -32,11 +32,11 @@ import { Users } from '../users/entities/user.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
-import { VoteTitleDto } from 'src/trials/vote/dto/voteDto';
-import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
-import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { start } from 'repl';
+import { BoardType } from '../s3/board-type';
+import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')

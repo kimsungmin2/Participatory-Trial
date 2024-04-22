@@ -76,11 +76,7 @@ export class Users {
   )
   polticalDebateComments: PolticalDebateComments[];
 
-  @OneToMany(
-    () => EachVote,
-    (eachVote) => eachVote.user,
-    { cascade: true },
-  )
+  @OneToMany(() => EachVote, (eachVote) => eachVote.user, { cascade: true })
   eachVote: EachVote[];
 
   @OneToMany(
@@ -88,14 +84,12 @@ export class Users {
     (eachPolticalVote) => eachPolticalVote.user,
     { cascade: true },
   )
-  eachPolticalVote: EachPolticalVote[]
+  eachPolticalVote: EachPolticalVote[];
 
-  @OneToMany(
-    () => EachHumorVote,
-    (eachHumorVote) => eachHumorVote.user,
-    { cascade: true },
-  )
-  eachHumorVote: EachHumorVote[]
+  @OneToMany(() => EachHumorVote, (eachHumorVote) => eachHumorVote.user, {
+    cascade: true,
+  })
+  eachHumorVote: EachHumorVote[];
   @OneToMany(() => HumorLike, (humorLike) => humorLike.user, {
     cascade: true,
   })
