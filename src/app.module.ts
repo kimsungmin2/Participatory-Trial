@@ -31,6 +31,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 import { SearchModule } from './search/search.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ServerApiVersion } from 'typeorm';
 console.log(__dirname);
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -81,6 +83,7 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     }),

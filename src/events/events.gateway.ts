@@ -83,7 +83,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    console.log('채팅 생성 드가자');
     const userId = socket.userId;
     const { channelType, roomId, message } = data;
     try {
@@ -100,6 +99,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userName: user,
       });
     } catch (error) {
+      console.log(error);
       socket.emit('error', '채팅 생성에 실패하였습니다.');
     }
   }
@@ -116,10 +116,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() socket: CustomSocket,
   ) {
     const userCode = socket.id;
+    console.log(userCode);
     const userId = socket.userId;
+    console.log(userId);
     const { channelType, roomId, voteFor } = data;
     try {
-      console.log(channelType);
       if (channelType === 'trials') {
         await this.votesService.addVoteUserorNanUser(
           userCode,

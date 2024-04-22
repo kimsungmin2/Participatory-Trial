@@ -10,14 +10,12 @@ export class WsJwtGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const socket = context.switchToWs().getClient();
     const cookies = socket.handshake.headers.cookie;
-    console.log(socket.handshake);
     if (!cookies) {
-      console.log('왜안되냐고');
       throw new WsException('인증되지않음');
     }
-    console.log(3);
 
     const authToken = this.parseCookie(cookies, 'authorization');
+    console.log(authToken);
 
     if (!authToken) {
       throw new WsException('인증 토큰이 없음');
@@ -35,7 +33,7 @@ export class WsJwtGuard implements CanActivate {
       );
 
       socket.userId = decoded['sub'];
-
+      console.log('통과 ㅋ ');
       return true;
     } catch (error) {
       throw new WsException('인증 실패');

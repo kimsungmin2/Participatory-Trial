@@ -1,0 +1,27 @@
+config:
+  target: https://meet-go.vercel.app/
+  phases:
+    - duration: 30
+      arrivalRate: 100
+      name: Warm up phase
+    - duration: 30
+      arrivalRate: 150
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 200
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  # processor: './processCookies.js'
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+  plugins:
+    ensure: {}
+    apdex: {}
+scenarios:
+  - name: 'online board and comment api test'
+    flow:
+      - get:
+          url: 'https://meet-go.vercel.app/'

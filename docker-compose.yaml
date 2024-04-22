@@ -16,31 +16,11 @@ services:
     restart: always
     ports:
       - '6379:6379'
-  elasticsearch:
-    image: my-custom-elasticsearch:latest
-    user: '1000:1000'
-    volumes:
-      - type: bind
-        source: ./elasticsearch/data
-        target: /usr/share/elasticsearch/data
-    ports:
-      - '9200:9200'
-      - '9300:9300'
-    environment:
-      - 'discovery.type=single-node'
-      - 'ELASTIC_PASSWORD=0000'
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.9.3
-    restart: always
-    depends_on:
-      - elasticsearch
-    ports:
-      - '5601:5601'
   logstash:
     image: docker.elastic.co/logstash/logstash:7.9.3
+    env_file:
+      - .env
     restart: always
-    depends_on:
-      - elasticsearch
     volumes:
       - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./logstash/pipeline:/usr/share/logstash/pipeline
@@ -60,7 +40,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro # 도커 정보에 접근하기 위함
       - ./logs:/usr/share/filebeat/logs:ro
     depends_on:
-      - elasticsearch
       - logstash
     command:
       [
@@ -73,22 +52,3 @@ services:
         'setup.kibana.host=kibana:5601',
       ]
     restart: always
-
-  # metricbeat:
-  #   image: docker.elastic.co/beats/metricbeat:7.9.3
-  #   user: root
-  #   volumes:
-  #     - ./metricbeat/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   depends_on:
-  #     - elasticsearch
-  #   command:
-  #     [
-  #       'metricbeat',
-  #       '-e',
-  #       '-E',
-  #       "output.elasticsearch.hosts=['elasticsearch:9200']",
-  #       '-E',
-  #       'setup.kibana.host=kibana:5601',
-  #     ]
-  #   restart: always

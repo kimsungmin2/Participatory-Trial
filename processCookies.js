@@ -27,3 +27,9 @@ module.exports = {
   extractCookie,
   setCookieHeader,
 };
+
+data: {
+  hallOfFAMEview: {
+    userid: 1;
+  }
+}

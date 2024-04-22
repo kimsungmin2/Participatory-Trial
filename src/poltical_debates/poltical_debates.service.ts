@@ -368,4 +368,8 @@ export class PolticalDebatesService {
       await queryRunner.release();
     }
   }
+
+  async sum() {
+    return 1 + 2;
+  }
 }
