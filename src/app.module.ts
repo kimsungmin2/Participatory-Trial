@@ -34,6 +34,7 @@ import { ServerApiVersion } from 'mongodb';
 // import { CacheConfigService } from './cache/config';
 // import { RedisIoAdapter } from './cache/redis.adpter';
 // import { CacheConfigService } from './cache/cache.config';
+import { AlarmModule } from './alarm/alarm.module';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -78,9 +79,9 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
-    // MongooseModule.forRoot(process.env.MONGODB_URI, {
-    //   serverApi: ServerApiVersion.v1,
-    // }),
+    MongooseModule.forRoot(process.env.MONGODB_URI, {
+      serverApi: ServerApiVersion.v1,
+    }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     UsersModule,
@@ -94,6 +95,7 @@ export const typeOrmModuleOptions = {
     RedisModule,
     EventsModule,
     ChatsModule,
+    AlarmModule,
   ],
   controllers: [AppController],
   providers: [AppService],

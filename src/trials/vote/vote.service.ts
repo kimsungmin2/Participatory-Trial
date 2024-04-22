@@ -74,12 +74,12 @@ export class VotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       voteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       voteId: number;
       voteFor: boolean;
     },
@@ -88,7 +88,7 @@ export class VotesService {
     // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
     const isExistingVote = userId
       ? await queryRunner.manager.findOneBy(EachVote, { userId, voteId })
-      : await queryRunner.manager.findOneBy(EachVote, { userCode, voteId });
+      : await queryRunner.manager.findOneBy(EachVote, { ip, voteId });
 
     // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
@@ -103,14 +103,13 @@ export class VotesService {
     }
     const voteData = this.eachVoteRepository.create({
       userId,
-      userCode,
+      ip,
       voteId,
       voteFor,
     });
     await queryRunner.manager.save(EachVote, voteData);
   }
 
-  // 카운팅 함수
   private async updateVoteCount(
     voteId: number,
     voteFor: boolean,
@@ -129,7 +128,7 @@ export class VotesService {
 
   // 투표하기
   async addVoteUserorNanUser(
-    userCode: string,
+    ip: string,
     userId: number | null,
     voteId: number,
     voteFor: boolean,
@@ -142,7 +141,7 @@ export class VotesService {
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, userCode, voteId, voteFor },
+        { userId, ip, voteId, voteFor },
         queryRunner,
       );
       await this.updateVoteCount(voteId, voteFor, queryRunner);

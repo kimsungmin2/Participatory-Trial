@@ -9,7 +9,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { WsJwtGuard } from '../utils/guard/ws.guard';
+import { OptionalWsJwtGuard } from '../utils/guard/ws.guard';
 import { ChatsService } from '../chats/chats.service';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
@@ -35,13 +35,25 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {}
 
   async onModuleInit() {
-    await this.redisSubClient.subscribe('notifications');
+    await this.redisSubClient.subscribe('notifications', 'userNotifications');
     this.redisSubClient.on('message', (channel, message) => {
-      if (channel === 'notifications') {
-        this.server.emit('notification', message);
-        console.log(message);
+      switch (channel) {
+        case 'notifications':
+          this.server.emit('notification', message);
+          console.log('Notification:', message);
+          break;
+        case 'userNotifications':
+          const data = JSON.parse(message);
+          const userId = data.userId;
+          this.server.to(`user:${userId}`).emit('userNotification', data);
+          break;
       }
     });
+  }
+
+  @SubscribeMessage('userNotifications')
+  userSendNotification(@MessageBody() message: string) {
+    this.server.emit('userNotifications', message);
   }
 
   handleNotificationMessage(channel: string, message: string) {
@@ -53,14 +65,19 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('join')
   async handleJoinMessage(
     @MessageBody() data: { roomId: number; channelType: string },
-    @ConnectedSocket() socket: Socket,
+    @ConnectedSocket() socket: CustomSocket,
   ) {
     const { roomId, channelType } = data;
 
     await socket.join(`${channelType}:${roomId}`);
   }
 
-  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('userConnect')
+  handleConnection(@ConnectedSocket() socket: CustomSocket) {
+    console.log(socket.userId);
+  }
+
+  @UseGuards(OptionalWsJwtGuard)
   @SubscribeMessage('createChat')
   async handleCreateChat(
     @MessageBody()
@@ -91,7 +108,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
+  @UseGuards(OptionalWsJwtGuard)
   @SubscribeMessage('createVote')
   async handleCreateVote(
     @MessageBody()
@@ -102,14 +119,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    const userCode = socket.id;
     const userId = socket.userId;
     const { channelType, roomId, voteFor } = data;
     try {
-      console.log(channelType);
+      const ip = socket.request.connection.remoteAddress;
       if (channelType === 'trials') {
         await this.votesService.addVoteUserorNanUser(
-          userCode,
+          ip,
           userId,
           roomId,
           voteFor,
@@ -201,9 +217,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.emit('error', '채팅 메시지 조회에 실패하였습니다.');
     }
   }
-
-  @SubscribeMessage('userConnect')
-  handleConnection(socket: CustomSocket) {}
 
   @SubscribeMessage('userDisconnect')
   async handleDisconnect(@ConnectedSocket() socket: CustomSocket) {}

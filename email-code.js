@@ -1,18 +1,49 @@
 const Redis = require('ioredis');
-const cluster = new Redis.Cluster([
+const cluster = new Redis.Cluster(
+  [
+    {
+      host: 'localhost',
+      port: 6380,
+    },
+    {
+      host: 'localhost',
+      port: 6381,
+    },
+    {
+      host: 'localhost',
+      port: 6382,
+    },
+  ],
   {
-    port: 6380,
-    host: '127.0.0.1',
+    natMap: {
+      '172.23.0.7:6380': {
+        host: 'localhost',
+        port: 6380,
+      },
+      '172.23.0.3:6381': {
+        host: 'localhost',
+        port: 6381,
+      },
+      '172.23.0.6:6382': {
+        host: 'localhost',
+        port: 6382,
+      },
+      '172.23.0.4:6383': {
+        host: 'localhost',
+        port: 6383,
+      },
+      '172.23.0.5:6384': {
+        host: 'localhost',
+        port: 6384,
+      },
+      '172.23.0.2:6385': {
+        host: 'localhost',
+        port: 6385,
+      },
+    },
+    scaleReads: 'slave',
   },
-  {
-    port: 6381,
-    host: '127.0.0.1',
-  },
-  {
-    port: 6382,
-    host: '127.0.0.1',
-  },
-]);
+);
 cluster.on('connect', function () {
   console.log('Redis client connected');
 });
@@ -26,8 +57,9 @@ process.on('exit', () => {
 module.exports = {
   fetchCodeByEmail: function (context, events, done) {
     const email = context.vars.email;
+
     // Redis 클라이언트 연결 상태 확인
-    if (cluster.isOpen) {
+    if (cluster.status === 'ready') {
       cluster.get(email, function (err, code) {
         console.log(code);
         if (err) {

@@ -13,10 +13,11 @@ import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-// import { ChatDocument } from '../schemas/chat.schemas';
+import { ChatDocument } from '../schemas/chat.schemas';
+import { AlarmService } from '../alarm/alarm.service';
 
 @Injectable()
-export class ChatsService {
+export class ChatsService implements OnModuleInit {
   constructor(
     @InjectRepository(UserInfos)
     private usersInfoRepository: Repository<UserInfos>,
@@ -28,7 +29,8 @@ export class ChatsService {
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
-    // @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
+    @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
+    private readonly alarmService: AlarmService,
   ) {}
 
   async publishNotification(message: string) {
@@ -36,120 +38,138 @@ export class ChatsService {
     await this.redisDataClient.publish(channelName, message);
   }
 
-  // async onModuleInit() {
-  //   this.handleScheduledTasks();
-  // }
+  async userPublishNotification(message: string) {
+    const channelName = 'userNotifications';
+    await this.redisDataClient.publish(channelName, message);
+  }
 
-  // @Interval(1000 * 60)
-  // async handleScheduledTasks() {
-  //   // await this.redisConnection();
+  async onModuleInit() {
+    this.handleScheduledTasks();
+  }
 
-  //   for (const channelType of Object.values(ChannelType)) {
-  //     let cursor = '0';
-  //     const tasks = [];
+  @Interval(1000 * 60)
+  async handleScheduledTasks() {
+    // await this.redisConnection();
 
-  //     do {
-  //       const [nextCursor, keys] = await this.redisDataClient.scan(
-  //         cursor,
-  //         'MATCH',
-  //         `${channelType}:*`,
-  //         'COUNT',
-  //         100,
-  //       );
-  //       cursor = nextCursor;
+    for (const channelType of Object.values(ChannelType)) {
+      let cursor = '0';
+      const tasks = [];
 
-  //       if (keys.length === 0) continue;
+      do {
+        const [nextCursor, keys] = await this.redisDataClient.scan(
+          cursor,
+          'MATCH',
+          `${channelType}:*`,
+          'COUNT',
+          100,
+        );
+        cursor = nextCursor;
 
-  //       for (const key of keys) {
-  //         tasks.push(this.processKey(key));
+        if (keys.length === 0) continue;
 
-  //         if (tasks.length >= 500) {
-  //           await Promise.all(tasks.splice(0, 500));
-  //         }
-  //       }
-  //     } while (cursor !== '0');
+        for (const key of keys) {
+          tasks.push(this.processKey(key));
 
-  //     await Promise.all(tasks);
-  //   }
-  // }
+          if (tasks.length >= 500) {
+            await Promise.all(tasks.splice(0, 500));
+          }
+        }
+      } while (cursor !== '0');
 
-  // async processKey(key: string) {
-  //   const retainCount = 50;
-  //   const messages = await this.redisDataClient.lrange(
-  //     key,
-  //     0,
-  //     -retainCount - 1,
-  //   );
+      await Promise.all(tasks);
+    }
+  }
 
-  //   if (messages.length > 0) {
-  //     const [channelType, roomId] = key.split(':');
+  async processKey(key: string) {
+    const retainCount = 50;
+    const messages = await this.redisDataClient.lrange(
+      key,
+      0,
+      -retainCount - 1,
+    );
 
-  //     await this.saveMessagesToDatabase(messages, channelType, +roomId);
+    if (messages.length > 0) {
+      const [channelType, roomId] = key.split(':chat:');
 
-  //     await this.redisDataClient.ltrim(key, -retainCount, -1);
-  //   }
-  // }
+      await this.saveMessagesToDatabase(messages, channelType, +roomId);
 
-  // async saveMessagesToDatabase(
-  //   messages: string[],
-  //   channelType: string,
-  //   roomId: number,
-  // ) {
-  //   const chats = [];
-  //   for (const message of messages) {
-  //     const parsedMessage = JSON.parse(message);
-  //     const user = await this.usersInfoRepository.findOne({
-  //       where: { id: parsedMessage.userId },
-  //       select: ['nickName'],
-  //     });
-  //     chats.push(
-  //       new this.chatModel({
-  //         message: parsedMessage.message,
-  //         userId: parsedMessage.userId,
-  //         RoomId: roomId,
-  //         timestamp: new Date(parsedMessage.timestamp),
-  //         userName: user ? user.nickName : 'Unknown User',
-  //         channelType: channelType,
-  //       }),
-  //     );
-  //   }
-  //   try {
-  //     await this.chatModel.insertMany(chats);
-  //   } catch (error) {
-  //     console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error);
-  //   }
-  // }
+      await this.redisDataClient.ltrim(key, -retainCount, -1);
+    }
+  }
+
+  async saveMessagesToDatabase(
+    messages: string[],
+    channelType: string,
+    roomId: number,
+  ) {
+    const chats = [];
+    for (const message of messages) {
+      const parsedMessage = JSON.parse(message);
+      const user = await this.usersInfoRepository.findOne({
+        where: { id: parsedMessage.userId },
+        select: ['nickName'],
+      });
+
+      chats.push(
+        new this.chatModel({
+          message: parsedMessage.message,
+          userId: parsedMessage.userId,
+          RoomId: roomId,
+          timestamp: parsedMessage.timestamp,
+          userName: user ? user.nickName : 'Unknown User',
+          channelType: channelType,
+        }),
+      );
+    }
+    try {
+      await this.chatModel.insertMany(chats);
+    } catch (error) {
+      console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error);
+    }
+  }
+
   async createChannelChat(
     channelType: string,
-    userId: number,
+    userId: number | null,
     message: string,
     roomId: number,
   ) {
     try {
-      let userName = await this.redisDataClient.get(`userName:${userId}`);
+      let userName = '익명';
 
-      if (!userName) {
-        const user = await this.usersInfoRepository.findOne({
-          where: { id: userId },
-          select: ['nickName'],
-        });
-
-        if (user) {
-          userName = user.nickName;
-          await this.redisDataClient.set(
-            `userName:${userId}`,
-            userName,
-            'EX',
-            60 * 60 * 24,
-          );
-        } else {
-          throw new Error('유저가 없음');
+      if (userId) {
+        userName = await this.redisDataClient.get(`userName:${userId}`);
+        if (!userName) {
+          const user = await this.usersInfoRepository.findOne({
+            where: { id: userId },
+            select: ['nickName'],
+          });
+          if (user) {
+            userName = user.nickName;
+            await this.redisDataClient.set(
+              `userName:${userId}`,
+              userName,
+              'EX',
+              60 * 60 * 24,
+            );
+          } else {
+            throw new Error('유저가 없음');
+          }
         }
+      }
+
+      if (userId) {
+        await this.alarmService.createAlarm(
+          userId,
+          channelType,
+          roomId,
+          'chat',
+        );
       }
 
       const chat = new Chat();
       chat.message = message;
-      chat.userId = userId;
+      chat.userId = userId || undefined;
       chat.RoomId = roomId;
       chat.timestamp = new Date();
       chat.userName = userName;
@@ -194,8 +214,6 @@ export class ChatsService {
     page: number = 0,
     limit: number = 50,
   ): Promise<Chat[]> {
-    // await this.redisConnection();
-
     const channelKey = `${channelType}:chat:${roomId}`;
     const redisMessageCount = await this.redisDataClient.llen(channelKey);
 
@@ -214,28 +232,15 @@ export class ChatsService {
       }
 
       if (redisMessageCount < limit || page > 0) {
-        let channelChatsRepository: Repository<any>;
-        switch (channelType) {
-          case 'trials':
-            channelChatsRepository = this.trialsChatRepository;
-            break;
-          case 'humors':
-            channelChatsRepository = this.humorsChatRepository;
-            break;
-          case 'poltical-debates':
-            channelChatsRepository = this.polticalsChatRepository;
-            break;
-        }
-
         const dbStartIndex =
           page > 0 ? page * limit - Math.min(redisMessageCount, limit) : 0;
 
-        const dbChatMessages = await channelChatsRepository.find({
-          where: { roomId: roomId },
-          order: { timestamp: 'ASC' },
-          skip: dbStartIndex,
-          take: limit,
-        });
+        const dbChatMessages = await this.chatModel
+          .find({ RoomId: roomId })
+          .sort({ timestamp: 'asc' })
+          .skip(dbStartIndex)
+          .limit(limit)
+          .exec();
 
         if (page === 0 && chats.length > 0) {
           chats = [...chats, ...dbChatMessages];
