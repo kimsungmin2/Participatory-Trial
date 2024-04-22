@@ -83,6 +83,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     },
     @ConnectedSocket() socket: CustomSocket,
   ) {
+    console.log('채팅 생성 드가자');
     const userId = socket.userId;
     const { channelType, roomId, message } = data;
     try {
@@ -96,7 +97,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(`${channelType}:${roomId}`).emit('message', {
         userId,
         message,
-        userName: user.nickName,
+        userName: user,
       });
     } catch (error) {
       socket.emit('error', '채팅 생성에 실패하였습니다.');

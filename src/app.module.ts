@@ -45,6 +45,8 @@ export const typeOrmModuleOptions = {
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
+    retryAttempts: 5,
+    retryDelay: 2000,
   }),
   inject: [ConfigService],
 };

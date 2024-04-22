@@ -1,0 +1,228 @@
+{
+  "aggregate": {
+    "counters": {
+      "vusers.created_by_name.0": 8100,
+      "vusers.created": 8100,
+      "errors.Error: Invalid namespace": 8100,
+      "vusers.failed": 8100
+    },
+    "rates": {},
+    "firstCounterAt": 1713464195828,
+    "lastCounterAt": 1713464316890,
+    "firstMetricAt": 1713464195828,
+    "lastMetricAt": 1713464316890,
+    "period": 1713464310000,
+    "summaries": {},
+    "histograms": {}
+  },
+  "intermediate": [
+    {
+      "counters": {
+        "vusers.created_by_name.0": 79,
+        "vusers.created": 79,
+        "errors.Error: Invalid namespace": 79,
+        "vusers.failed": 79
+      },
+      "rates": {},
+      "firstCounterAt": 1713464195828,
+      "lastCounterAt": 1713464199998,
+      "firstMetricAt": 1713464195828,
+      "lastMetricAt": 1713464199998,
+      "period": "1713464190000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 243,
+        "vusers.created": 243,
+        "errors.Error: Invalid namespace": 242,
+        "vusers.failed": 242
+      },
+      "rates": {},
+      "firstCounterAt": 1713464200036,
+      "lastCounterAt": 1713464209999,
+      "firstMetricAt": 1713464200036,
+      "lastMetricAt": 1713464209999,
+      "period": "1713464200000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 291,
+        "vusers.created": 291,
+        "errors.Error: Invalid namespace": 292,
+        "vusers.failed": 292
+      },
+      "rates": {},
+      "firstCounterAt": 1713464210002,
+      "lastCounterAt": 1713464219961,
+      "firstMetricAt": 1713464210002,
+      "lastMetricAt": 1713464219961,
+      "period": "1713464210000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 341,
+        "vusers.created": 341,
+        "errors.Error: Invalid namespace": 341,
+        "vusers.failed": 341
+      },
+      "rates": {},
+      "firstCounterAt": 1713464220005,
+      "lastCounterAt": 1713464229978,
+      "firstMetricAt": 1713464220005,
+      "lastMetricAt": 1713464229978,
+      "period": "1713464220000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 393,
+        "vusers.created": 393,
+        "errors.Error: Invalid namespace": 393,
+        "vusers.failed": 393
+      },
+      "rates": {},
+      "firstCounterAt": 1713464230022,
+      "lastCounterAt": 1713464239998,
+      "firstMetricAt": 1713464230022,
+      "lastMetricAt": 1713464239998,
+      "period": "1713464230000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 441,
+        "vusers.created": 441,
+        "errors.Error: Invalid namespace": 441,
+        "vusers.failed": 441
+      },
+      "rates": {},
+      "firstCounterAt": 1713464240026,
+      "lastCounterAt": 1713464249963,
+      "firstMetricAt": 1713464240026,
+      "lastMetricAt": 1713464249963,
+      "period": "1713464240000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 673,
+        "vusers.created": 673,
+        "errors.Error: Invalid namespace": 673,
+        "vusers.failed": 673
+      },
+      "rates": {},
+      "firstCounterAt": 1713464250021,
+      "lastCounterAt": 1713464259999,
+      "firstMetricAt": 1713464250021,
+      "lastMetricAt": 1713464259999,
+      "period": "1713464250000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "errors.Error: Invalid namespace": 1000,
+        "vusers.failed": 1000
+      },
+      "rates": {},
+      "firstCounterAt": 1713464260006,
+      "lastCounterAt": 1713464269998,
+      "firstMetricAt": 1713464260006,
+      "lastMetricAt": 1713464269998,
+      "period": "1713464260000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "errors.Error: Invalid namespace": 1000,
+        "vusers.failed": 1000
+      },
+      "rates": {},
+      "firstCounterAt": 1713464270006,
+      "lastCounterAt": 1713464279999,
+      "firstMetricAt": 1713464270006,
+      "lastMetricAt": 1713464279999,
+      "period": "1713464270000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "errors.Error: Invalid namespace": 1000,
+        "vusers.failed": 1000
+      },
+      "rates": {},
+      "firstCounterAt": 1713464280006,
+      "lastCounterAt": 1713464289998,
+      "firstMetricAt": 1713464280006,
+      "lastMetricAt": 1713464289998,
+      "period": "1713464280000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "errors.Error: Invalid namespace": 1000,
+        "vusers.failed": 1000
+      },
+      "rates": {},
+      "firstCounterAt": 1713464290006,
+      "lastCounterAt": 1713464299999,
+      "firstMetricAt": 1713464290006,
+      "lastMetricAt": 1713464299999,
+      "period": "1713464290000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 1000,
+        "vusers.created": 1000,
+        "errors.Error: Invalid namespace": 1000,
+        "vusers.failed": 1000
+      },
+      "rates": {},
+      "firstCounterAt": 1713464300006,
+      "lastCounterAt": 1713464309999,
+      "firstMetricAt": 1713464300006,
+      "lastMetricAt": 1713464309999,
+      "period": "1713464300000",
+      "summaries": {},
+      "histograms": {}
+    },
+    {
+      "counters": {
+        "vusers.created_by_name.0": 639,
+        "vusers.created": 639,
+        "errors.Error: Invalid namespace": 639,
+        "vusers.failed": 639
+      },
+      "rates": {},
+      "firstCounterAt": 1713464310006,
+      "lastCounterAt": 1713464316890,
+      "firstMetricAt": 1713464310006,
+      "lastMetricAt": 1713464316890,
+      "period": "1713464310000",
+      "summaries": {},
+      "histograms": {}
+    }
+  ]
+}

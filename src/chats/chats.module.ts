@@ -25,16 +25,16 @@ import Redis from 'ioredis';
       provide: 'REDIS_DATA_CLIENT',
       useFactory: () =>
         new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
+          host: 'localhost',
+          port: 6379,
         }),
     },
     {
       provide: 'REDIS_SUB_CLIENT',
       useFactory: () =>
         new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
+          host: 'localhost',
+          port: 6379,
         }),
     },
   ],
