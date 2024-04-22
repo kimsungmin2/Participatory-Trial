@@ -100,7 +100,6 @@ export class HumorsController {
     @UserInfo() user: Users,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(files);
     const createdBoard = await this.humorsService.createHumorBoardAndVotes(
       createHumorBoardDto,
       voteTitleDto,
