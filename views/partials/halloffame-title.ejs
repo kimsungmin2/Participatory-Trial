@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <link rel="stylesheet" href="/css/board-style.css" />
+</head>
+<body>
+  <div class="board_title">
+    <% if (halloffameType === 'trialsHallofFameVotes') { %>
+      <span> 재판 명예의 전당(투표수)</span>
+    <% } else if (halloffameType === 'trialsHallofFameLikes') { %>
+      <span> 재판 명예의 전당(좋아요수)</span>
+    <% } else if (halloffameType === 'trialsHallofFameViews') { %>
+      <span> 재판 명예의 전당(조회수)</span>
+    <% } else if (halloffameType === 'humorsHallofFameVotes') { %>
+      <span> 유머 게시판 명예의 전당(투표수)</span>
+    <% } else if (halloffameType === 'humorsHallofFameLikes') { %>
+      <span>유머 게시판 명예의 전당(좋아요수)</span>
+    <% } else if (halloffameType === 'humorsHallofFameViews') { %>
+      <span>유머 게시판 명예의 전당(조회수)</span>
+    <% } else if (halloffameType === 'polticalHallofFameVotes') { %>
+      <span>정치 게시판 명예의 전당(투표수)</span>
+    <% } else if (halloffameType === 'polticalHallofFameViews') { %>
+      <span>정치 게시판 명예의 전당(조회수)</span>
+    <% } else if (halloffameType === 'onlineBoardHallofFameLikes') { %>
+      <span>자유 게시판 명예의 전당(좋아요수)</span>
+    <% } else { %>
+      <span>자유 게시판 명예의 전당(조회수)</span>
+      <% } %>
+  </div>
+</body>
+</html>

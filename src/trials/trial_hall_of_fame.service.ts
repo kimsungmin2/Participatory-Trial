@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Trials } from "./entities/trial.entity";
 import { Between, DataSource, Repository } from "typeorm";
@@ -107,21 +107,25 @@ private getThisMonthRange(){
 }
 
 // 투표 데이터 집계 매서드(좋아요 수 기준)
-private async aggVotesLikeForHallOfFame(trials: Trials[]){
+private async aggVotesLikeForHallOfFame(trials: Trials[]) {
   const { start, end } = this.getThisMonthRange();
 
   const candidates = await this.trialsRepository
-  .createQueryBuilder("trial")
-  .select(['trial.id', 'trial.title', 'trial.content'])
-  .addSelect("trial.like", "likes")
-  .where('trial.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-  .having("likes >= :minlikes", { minlikes: 100 }) // 투표 수 100 이상인 것만 조회
-  .orderBy('likes', "DESC")
-  .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
-  .groupBy("trial.id")
-  .getRawMany();
+    .createQueryBuilder("trial") // 'trial'을 alias로 사용
+    .select([
+      'trial.id', 
+      'trial.title', 
+      'trial.userId', 
+      'trial.content', 
+      'trial.like AS likes' // 'like' 속성을 'likes'로 셀렉트
+    ])
+    .where('trial.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
+    .andWhere("trial.like >= :minlikes", { minlikes: 100 }) // 'like' 속성을 기준으로 필터링
+    .orderBy('trial.like', "DESC") // 'like' 속성을 기준으로 정렬
+    .limit(1000)
+    .getRawMany();
 
-  return candidates
+  return candidates;
 }
 
 // 투표 데이터 집계 매서드(조회수 수 기준)
@@ -148,11 +152,12 @@ private async aggVotesForHallOfFame(votes: Votes[]){
 
   const candidates = await this.votesRepository
   .createQueryBuilder("vote")
-  .select(['vote.id', 'vote.title1', 'vote.title2'])
-  .addSelect("vote.voteCount1 + vote.voteCount2", "totalVotes")
+  .leftJoinAndSelect("vote.trial", "trial") // vote와 trial을 조인
+  .select(['vote.id', 'vote.title1', 'vote.title2', 'trial.userId', 'trial.content'])
+  .addSelect("vote.voteCount1 + vote.voteCount2", "total")
   .where('vote.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-  .having("totalVotes >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
-  .orderBy('totalVotes', "DESC")
+  .having("total >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
+  .orderBy('total', "DESC")
   .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
   .groupBy("vote.id")
   .getRawMany();
@@ -166,14 +171,17 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
   await queryRunner.connect();
   await queryRunner.startTransaction();
   try{
+
+    await queryRunner.manager.delete(TrialHallOfFames, {});
+
   // 한번에 저장
     const newHallOfFameEntries = hallOfFameData.map(data => {
     const newHallOfFameEntry = new TrialHallOfFames();
     newHallOfFameEntry.id = data.id // vote table의 id임다
-    newHallOfFameEntry.userId = data.trial.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
+    newHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
     newHallOfFameEntry.title = `${data.title1} Vs ${data.title2}`
-    newHallOfFameEntry.content = data.trial.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-    newHallOfFameEntry.totalVotes = data.voteCount1 + data.voteCount2;
+    newHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
+    newHallOfFameEntry.total = data.total;
     newHallOfFameEntry.createdAt = new Date();
     newHallOfFameEntry.updatedAt = new Date();
     return newHallOfFameEntry;
@@ -190,35 +198,37 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
   }
 }
 
+// // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(좋아요)
+private async updateLikeHallOfFameDatabase(hallOfFameData: any) {
+  const queryRunner = this.dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+  try {
 
-// DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(좋아요)
-private async updateLikeHallOfFameDatabase(hallOfFameData: any){
-const queryRunner = this.dataSource.createQueryRunner();
-await queryRunner.connect();
-await queryRunner.startTransaction();
-try{
-// 한번에 저장
-  const newLikeHallOfFameEntries = hallOfFameData.map(data => {
-  const newLikeHallOfFameEntry = new TrialLikeHallOfFames();
-  newLikeHallOfFameEntry.id = data.id // vote table의 id임다
-  newLikeHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
-  newLikeHallOfFameEntry.title = data.title;
-  newLikeHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-  newLikeHallOfFameEntry.totallike = data.like;
-  newLikeHallOfFameEntry.createdAt = new Date();
-  newLikeHallOfFameEntry.updatedAt = new Date();
-  return newLikeHallOfFameEntry;
-});
-  // DB에 새로운 명전 저장
-  await queryRunner.manager.save(TrialLikeHallOfFames, newLikeHallOfFameEntries)
+    await queryRunner.manager.delete(TrialLikeHallOfFames, {});
 
-  await queryRunner.commitTransaction();
-} catch (err) {
-  console.log(err);
-  await queryRunner.rollbackTransaction();
-} finally {
-  await queryRunner.release();
-}
+    const newLikeHallOfFameEntries = hallOfFameData.map(data => {
+      const newLikeHallOfFameEntry = new TrialLikeHallOfFames();
+      // Trials 엔티티의 데이터를 기반으로 새 TrialLikeHallOfFames 인스턴스 생성
+      newLikeHallOfFameEntry.id = data.id; // Trials 테이블의 id
+      newLikeHallOfFameEntry.userId = data.userId; // Trials에서 userId 가져옴
+      newLikeHallOfFameEntry.title = data.title; // Trials에서 title 가져옴
+      newLikeHallOfFameEntry.content = data.content; // Trials에서 content 가져옴
+      newLikeHallOfFameEntry.total = data.likes; // Trials에서 like 수 가져옴
+      newLikeHallOfFameEntry.createdAt = new Date();
+      newLikeHallOfFameEntry.updatedAt = new Date();
+      return newLikeHallOfFameEntry;
+    });
+
+    await queryRunner.manager.save(TrialLikeHallOfFames, newLikeHallOfFameEntries);
+
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    console.log(err);
+    await queryRunner.rollbackTransaction();
+  } finally {
+    await queryRunner.release();
+  }
 }
 
 
@@ -228,6 +238,9 @@ const queryRunner = this.dataSource.createQueryRunner();
 await queryRunner.connect();
 await queryRunner.startTransaction();
 try{
+
+  await queryRunner.manager.delete(TrialViewHallOfFames, {});
+
 // 한번에 저장
   const newViewHallOfFameEntries = hallOfFameData.map(data => {
   const newViewHallOfFameEntry = new TrialViewHallOfFames();
@@ -235,7 +248,7 @@ try{
   newViewHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
   newViewHallOfFameEntry.title = data.title;
   newViewHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-  newViewHallOfFameEntry.totalview = data.like;
+  newViewHallOfFameEntry.total = data.views;
   newViewHallOfFameEntry.createdAt = new Date();
   newViewHallOfFameEntry.updatedAt = new Date();
   return newViewHallOfFameEntry;
@@ -265,7 +278,7 @@ async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
       skip,
       take: limit,
       order: {
-        totalVotes: 'DESC'
+        total: 'DESC'
       }
     });
   } catch (err) {
@@ -293,7 +306,7 @@ async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
       skip,
       take: limit,
       order : {
-        totallike: 'DESC'
+        total: 'DESC'
       }
     });
   } catch (err) {
@@ -320,7 +333,7 @@ async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
       skip,
       take: limit,
       order: {
-        totalview: 'DESC'
+        total: 'DESC'
       }
     });
   } catch(err) {
@@ -333,5 +346,43 @@ async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
       trialViewHallOfFames,
       totalItems
     }
+  }
+
+
+  // 특정 명전 투표 조회
+  async findOneBytrialHallofFameVote(id: number) {
+
+    const OneHallOfTrialVote = await this.trialHallOfFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfTrialVote) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfTrialVote }
+  }
+
+  // 특정 명전 좋아요 조회
+  async findOneBytrialHallofFameLike(id: number) {
+
+    const OneHallOfTrialLikes = await this.trialHallOfLikeFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfTrialLikes) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfTrialLikes }
+  }
+
+  // 특정 명전 조회수 조회
+  async findOneBytrialHallofFameViews(id: number) {
+
+    const OneHallOfTrialLikes = await this.trialHallOfViewFamesRepository.findOneBy({ id });
+    console.log(OneHallOfTrialLikes)
+
+    if(!OneHallOfTrialLikes) {
+      throw new NotFoundException(`검색한 명예의 전당이 없습니다.${id}`)
+    }
+
+    return { OneHallOfTrialLikes }
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, DataSource, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -123,11 +123,12 @@ private async aggVotesForHallOfFame(polticalDebateVotes: PolticalDebateVotes[]){
   
     const candidates = await this.polticalDebateVotesRepository
     .createQueryBuilder("polticalDebateBoardVote")
-    .select(['polticalDebateBoardVote.id', 'polticalDebateBoardVote.title1', 'polticalDebateBoardVote.title2'])
-    .addSelect("polticalDebateBoardVote.voteCount1 + polticalDebateBoardVote.voteCount2", "totalVotes")
+    .leftJoinAndSelect("polticalDebateBoardVote.polticalDebateBoards", "polticalDebateBoards") // vote와 trial을 조인
+    .select(['polticalDebateBoardVote.id', 'polticalDebateBoardVote.title1', 'polticalDebateBoardVote.title2', 'polticalDebateBoards.userId', 'polticalDebateBoards.content'])
+    .addSelect("polticalDebateBoardVote.voteCount1 + polticalDebateBoardVote.voteCount2", "total")
     .where('polticalDebateBoardVote.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-    .having("totalVotes >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
-    .orderBy('totalVotes', "DESC")
+    .having("total >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
+    .orderBy('total', "DESC")
     .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
     .groupBy("polticalDebateBoardVote.id")
     .getRawMany();
@@ -142,13 +143,14 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.startTransaction();
     try{
     // 한번에 저장
+    await queryRunner.manager.delete(PolticalDebateHallOfFame, {});
       const newHallOfFameEntries = hallOfFameData.map(data => {
       const newHallOfFameEntry = new PolticalDebateHallOfFame();
       newHallOfFameEntry.id = data.id // vote table의 id임다
-      newHallOfFameEntry.userId = data.polticalDebateBoards.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
+      newHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newHallOfFameEntry.title = `${data.title1} Vs ${data.title2}`
-      newHallOfFameEntry.content = data.polticalDebateBoards.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newHallOfFameEntry.totalVotes = data.voteCount1 + data.voteCount2;
+      newHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
+      newHallOfFameEntry.total = data.total;
       newHallOfFameEntry.createdAt = new Date();
       newHallOfFameEntry.updatedAt = new Date();
       return newHallOfFameEntry;
@@ -172,6 +174,8 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try{
+    await queryRunner.manager.delete(PolticalDebateBoardsViewHallOfFames, {});
+
     // 한번에 저장
       const newViewHallOfFameEntries = hallOfFameData.map(data => {
       const newViewHallOfFameEntry = new PolticalDebateBoardsViewHallOfFames();
@@ -179,7 +183,7 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
       newViewHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newViewHallOfFameEntry.title = data.title;
       newViewHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newViewHallOfFameEntry.totalview = data.like;
+      newViewHallOfFameEntry.total = data.views;
       newViewHallOfFameEntry.createdAt = new Date();
       newViewHallOfFameEntry.updatedAt = new Date();
       return newViewHallOfFameEntry;
@@ -208,7 +212,7 @@ async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
         skip,
         take: limit,
         order: {
-          totalVotes:'DESC'
+          total:'DESC'
         }
       });
     } catch(err) {
@@ -235,7 +239,7 @@ async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
         skip,
         take: limit,
         order: {
-          totalview: 'DESC',
+          total: 'DESC',
         }
       });
     }catch(err) {
@@ -249,4 +253,29 @@ async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
         totalItems
       }
     }
+
+     // 특정 명전 투표 조회
+    async findOneByPoliteHallofFameVote(id: number) {
+
+    const OneHallOfPoliteVote = await this.polticalDebateHallOfFameRepository.findOneBy({ id });
+
+    if(!OneHallOfPoliteVote) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfPoliteVote }
+  }
+
+   // 특정 명전 투표 조회
+   async findOneByPoliteHallofFameView(id: number) {
+
+    const OneHallOfPoliteView = await this.polticalDebateBoardsViewHallOfFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfPoliteView) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfPoliteView }
+  }
+    
 }

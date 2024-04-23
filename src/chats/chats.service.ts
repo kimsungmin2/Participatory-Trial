@@ -12,7 +12,7 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { ChatDocument } from 'src/cats/schemas/chat.schemas';
+// import { ChatDocument } from 'src/cats/schemas/chat.schemas';
 import { Model } from 'mongoose';
 import { th } from '@faker-js/faker';
 
@@ -29,7 +29,7 @@ export class ChatsService implements OnModuleInit {
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
-    @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
+    // @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
   ) {}
 
   async publishNotification(message: string) {
@@ -105,17 +105,17 @@ export class ChatsService implements OnModuleInit {
         select: ['nickName'],
       });
 
-      chats.push(new this.chatModel({
-        message: parsedMessage.message,
-        userId: parsedMessage.userId,
-        RoomId: roomId,
-        timestamp: new Date(parsedMessage.timestamp),
-        userName: user ? user.nickName : 'Unknown User',
-        channelType: channelType,
-      }));
+      // chats.push(new this.chatModel({
+      //   message: parsedMessage.message,
+      //   userId: parsedMessage.userId,
+      //   RoomId: roomId,
+      //   timestamp: new Date(parsedMessage.timestamp),
+      //   userName: user ? user.nickName : 'Unknown User',
+      //   channelType: channelType,
+      // }));
     }
     try {
-      await this.chatModel.insertMany(chats);
+      // await this.chatModel.insertMany(chats);
     }catch(error) {
       console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error)
     }

@@ -10,7 +10,7 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import Redis from 'ioredis';
 import { RedisIoAdapter } from '../cache/redis.adpter';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CatSchema } from 'src/cats/schemas/chat.schemas';
+// import { CatSchema } from 'src/cats/schemas/chat.schemas';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { CatSchema } from 'src/cats/schemas/chat.schemas';
       HumorsChat,
       PolticalsChat,
     ]),
-    MongooseModule.forFeature([{ name: 'Chat', schema: CatSchema }])
+    // MongooseModule.forFeature([{ name: 'Chat', schema: CatSchema }])
   ],
   providers: [
     ChatsService,

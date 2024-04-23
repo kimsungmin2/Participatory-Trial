@@ -42,6 +42,8 @@ import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { Request } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaginateQueryDto } from 'src/search/dto/paginateQuery.dto';
+import { HalloffameType } from 'src/s3/halloffame-type';
+import { PaginationQueryHallOfFameDto } from 'src/humors/dto/get-pagenation.dto';
 
 @ApiTags('재판')
 @Controller('trials')
@@ -493,8 +495,9 @@ export class TrialsController {
     example: 10,
   })
   @Get('HallofFame/votes')
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
   async getRecentHallOfFame(
-    @Query() paginationQueryDto:PaginationQueryDto,
+    @Query() paginationQueryDto:PaginationQueryHallOfFameDto,
     @Req() req: Request,
   ) {
     const { trialHallOfFames, totalItems } = await this.trialHallOfFameService.getRecentHallOfFame(paginationQueryDto);
@@ -513,7 +516,8 @@ export class TrialsController {
       currentPage,
       startPage,
       endPage,
-      isLoggedIn: req['isLoggedIn']
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameVotes
     };
   }
 
@@ -534,8 +538,9 @@ export class TrialsController {
     example: 10,
   })
   @Get('HallofFame/likes')
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
   async getRecentLikeHallOfFame(
-    @Query() paginationQueryDto:PaginationQueryDto,
+    @Query() paginationQueryDto:PaginationQueryHallOfFameDto,
     @Req() req: Request,
   ) {
     const { trialLikeHallOfFames, totalItems } = await this.trialHallOfFameService.getLikeRecentHallOfFame(paginationQueryDto);
@@ -554,7 +559,8 @@ export class TrialsController {
       currentPage,
       startPage,
       endPage,
-      isLoggedIn: req['isLoggedIn']
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameLikes
     };
   }
 
@@ -575,8 +581,9 @@ export class TrialsController {
     example: 10,
   })
   @Get('HallofFame/views')
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
   async getRecentViewHallOfFame(
-    @Query() paginationQueryDto: PaginationQueryDto,
+    @Query() paginationQueryDto: PaginationQueryHallOfFameDto,
     @Req() req: Request,
   ) {
     const { trialViewHallOfFames, totalItems } = await this.trialHallOfFameService.getViewRecentHallOfFame(paginationQueryDto)
@@ -595,10 +602,76 @@ export class TrialsController {
       currentPage,
       startPage,
       endPage,
-      isLoggedIn: req['isLoggedIn']
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameViews
     };
   }
 
+  // 특정 명예의 전당 조회 투표수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/votes/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameVote(@Param('hallOfFameId') id: number, @Req() req: Request) {
+    const data = await this.trialHallOfFameService.findOneBytrialHallofFameVote(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameVotes,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 특정 명예의 전당 조회 좋아요수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/likes/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameLike(@Param('hallOfFameId') id: number, @Req() req: Request) {
+    const data = await this.trialHallOfFameService.findOneBytrialHallofFameLike(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameLikes,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+ 
+  // 특정 명예의 전당 조회 조회수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/views/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameViews(@Param('hallOfFameId') id: number, @Req() req: Request) {
+    const data = await this.trialHallOfFameService.findOneBytrialHallofFameViews(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameViews,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
 
   // 판례 조회 API
   @Get('cases')

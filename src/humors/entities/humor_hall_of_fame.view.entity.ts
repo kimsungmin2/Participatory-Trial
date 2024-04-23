@@ -26,8 +26,8 @@ import {
     @Column({ type: 'varchar', nullable: false })
     content: string;
   
-    @Column({ type: 'varchar'})
-    totalview: number;
+    @Column({ type: 'int'})
+    total: number;
     
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;

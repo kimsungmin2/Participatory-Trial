@@ -39,6 +39,8 @@ import { BoardType } from 'src/s3/board-type';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { start } from 'repl';
 import { th } from '@faker-js/faker';
+import { HalloffameType } from 'src/s3/halloffame-type';
+import { PaginationQueryHallOfFameDto } from 'src/humors/dto/get-pagenation.dto';
 
 @ApiTags('정치 토론')
 @Controller('poltical-debates')
@@ -283,9 +285,9 @@ export class PolticalDebatesController {
     example: 10,
   })
   @Get('HallofFame/votes')
-  @Render('board.ejs')
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
   async getRecentHallOfFame(
-    @Query() paginationQueryDto:PaginationQueryDto,
+    @Query() paginationQueryDto:PaginationQueryHallOfFameDto,
     @Req() req: Request,
   ) {
     const { polticalDebateHallOfFame, totalItems }= await this.polticalDabateHallOfFameService.getRecentHallOfFame(paginationQueryDto)
@@ -304,7 +306,8 @@ export class PolticalDebatesController {
       currentPage,
       startPage,
       endPage,
-      isLoggedIn: req['isLoggedIn']
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.PolticalHallofFameVotes
     };
   }
 
@@ -325,8 +328,9 @@ export class PolticalDebatesController {
     example: 10,
   })
   @Get('HallofFame/views')
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
   async getRecentViewHallOfFame(
-    @Query() paginationQueryDto: PaginationQueryDto,
+    @Query() paginationQueryDto: PaginationQueryHallOfFameDto,
     @Req() req: Request,
   ) {
     const { polticalDebateBoardsViewHallOfFames, totalItems } = await this.polticalDabateHallOfFameService.getViewRecentHallOfFame(paginationQueryDto);
@@ -345,7 +349,52 @@ export class PolticalDebatesController {
       currentPage,
       startPage,
       endPage,
-      isLoggedIn: req['isLoggedIn']
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.PolticalHallofFameViews
+    };
+  }
+
+  // 특정 명예의 전당 조회 투표수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/votes/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneByPoliteHallofFameVote(@Param('hallOfFameId') id: number, @Req() req: Request) {
+    const data = await this.polticalDabateHallOfFameService.findOneByPoliteHallofFameVote(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.PolticalHallofFameVotes,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 특정 명예의 전당 조회 투표수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/views/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneByPoliteHallofFameView(@Param('hallOfFameId') id: number, @Req() req: Request) {
+    const data = await this.polticalDabateHallOfFameService.findOneByPoliteHallofFameView(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.PolticalHallofFameViews,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 }
