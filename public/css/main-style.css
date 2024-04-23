@@ -194,6 +194,10 @@ a {
   font-size: 24px;
 }
 
+.right-align-item {
+  margin-left: auto;
+}
+
 .search {
   position: relative;
   width: 50%;
@@ -218,4 +222,31 @@ input {
   margin: 0;
   background: transparent;
   border: transparent;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.notification.show {
+  transform: translateY(0); /* 알림창 보여줌 */
+}
+
+.hidden {
+  display: none;
 }

@@ -10,9 +10,7 @@ import {
   HttpStatus,
   Get,
 } from '@nestjs/common';
-import { UserInfo } from 'src/utils/decorator/userInfo.decorator';
 import { userInfo } from 'os';
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { Request } from 'express';
 import {
   ApiBearerAuth,
@@ -23,9 +21,10 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Users } from '../../users/entities/user.entity';
-import { VoteForDto } from 'src/trials/dto/vote.dto';
-import { IsVoteGuard } from 'src/trials/guards/isvote.guard';
 import { HumorVotesService } from './humors_votes.service';
+import { UserInfo } from '../../utils/decorator/userInfo.decorator';
+import { VoteForDto } from '../../trials/dto/vote.dto';
+import { UserInfos } from '../../users/entities/user-info.entity';
 
 @ApiTags('유머 투표')
 @Controller('humors/vote')

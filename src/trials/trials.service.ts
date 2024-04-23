@@ -71,14 +71,12 @@ export class TrialsService {
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial);
       const trialId = savedTrial.id;
-
       const vote = {
         title1,
         title2,
         trialId,
       };
       const newVote = queryRunner.manager.create(Votes, vote);
-
       const savedVote = await queryRunner.manager.save(Votes, newVote);
       const trialDate = new Date(trialTime);
       // 5. 불 큐로 지연시간 후 찍어줌
@@ -92,7 +90,6 @@ export class TrialsService {
       );
       // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
-
       return { savedTrial, savedVote };
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -189,22 +186,24 @@ export class TrialsService {
       // 4. 수정한거 저장
       await queryRunner.manager.save(Trials, OneTrials);
 
-      // 5. 트랜잭션 종료
-      await queryRunner.commitTransaction();
+      //     // 5. 트랜잭션 종료
+      //     await queryRunner.commitTransaction();
 
       return OneTrials;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
-      console.log('재판 수정 에러:', error);
-
-      throw new InternalServerErrorException(
-        '재판 수정 중 오류가 발생했습니다.',
-      );
-    } finally {
-      await queryRunner.release();
     }
   }
+
+  //     console.log('재판 수정 에러:', error);
+
+  //     throw new InternalServerErrorException(
+  //       '재판 수정 중 오류가 발생했습니다.',
+  //     );
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   // 내 재판 삭제
   async deleteTrials(id: number) {

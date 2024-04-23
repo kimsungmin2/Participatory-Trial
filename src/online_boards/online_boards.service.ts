@@ -10,22 +10,20 @@ import { OnlineBoards } from './entities/online_board.entity';
 import { Like, Repository } from 'typeorm';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { UsersService } from '../users/users.service';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { S3Service } from '../s3/s3.service';
 import { BoardType } from '../s3/board-type';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
 export class OnlineBoardsService {
   constructor(
     @InjectRepository(OnlineBoards)
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
-    private readonly usersService: UsersService,
-    private s3Service: S3Service,
-    @InjectRedis()
-    private readonly redis: Redis,
+    private readonly s3Service: S3Service,
+    private readonly redisService: RedisService,
   ) {}
 
   // 자유게시판 게시글 작성
@@ -72,7 +70,7 @@ export class OnlineBoardsService {
         title: true,
         view: true,
         like: true,
-        createdAt: true,
+        created_at: true,
       },
     });
 
@@ -90,7 +88,7 @@ export class OnlineBoardsService {
         skip,
         take: limit,
         order: {
-          createdAt: 'DESC',
+          created_at: 'DESC',
         },
       });
     } catch (err) {
@@ -98,9 +96,6 @@ export class OnlineBoardsService {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
-    }
-    if (onlineBoards.length === 0) {
-      throw new NotFoundException('더이상 게시물이 없습니다!');
     }
     return {
       onlineBoards,
@@ -130,7 +125,9 @@ export class OnlineBoardsService {
     }
     let cachedView: number;
     try {
-      cachedView = await this.redis.incr(`online:${id}:view`);
+      cachedView = await this.redisService
+        .getCluster()
+        .incr(`online:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',
@@ -173,10 +170,6 @@ export class OnlineBoardsService {
     const foundBoard = await this.onlineBoardsRepository.findOne({
       where: { id: boardId },
     });
-
-    if (!foundBoard) {
-      throw new NotFoundException('해당 게시물이 존재하지 않습니다.');
-    }
 
     return foundBoard;
   }

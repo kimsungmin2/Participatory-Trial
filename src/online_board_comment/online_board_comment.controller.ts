@@ -23,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CommentOwnerGuard } from './guards/online_board_comment.guard';
+import { BoardIdValidationPipe } from '../online_boards/pipes/exist-board.pipe';
 
 @ApiTags('자유 게시판 댓글')
 @UseGuards(AuthGuard('jwt'))
@@ -40,12 +41,13 @@ export class OnlineBoardCommentController {
     description: ' 자유 게시판 ID',
     type: Number,
   })
-  @Post(':onlineBoardId')
+  @Post()
   async create(
-    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
+    console.log(userInfo);
     const comment = await this.onlineBoardCommentService.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,
@@ -59,8 +61,10 @@ export class OnlineBoardCommentController {
     };
   }
 
-  @Get(':onlineBoardId')
-  async findAll(@Param() onlineBoardId: number) {
+  @Get()
+  async findAll(
+    @Param('onlineBoardId', BoardIdValidationPipe) onlineBoardId: number,
+  ) {
     const comments =
       await this.onlineBoardCommentService.findAllComments(onlineBoardId);
 
@@ -74,10 +78,12 @@ export class OnlineBoardCommentController {
   @UseGuards(CommentOwnerGuard)
   @Patch(':commentId')
   async update(
-    @Param() commentId,
+    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('commentId') commentId: number,
     @Body() updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto,
   ) {
     const comment = await this.onlineBoardCommentService.updateComment(
+      onlineBoardId,
       commentId,
       updateOnlineBoardCommentDto,
     );
@@ -100,8 +106,11 @@ export class OnlineBoardCommentController {
   })
   @UseGuards(CommentOwnerGuard)
   @Delete(':commentId')
-  async remove(@Param() commentId: number) {
-    this.onlineBoardCommentService.removeComment(commentId);
+  async remove(
+    @Param('onlineBoardId') onlineBoardId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    this.onlineBoardCommentService.removeComment(onlineBoardId, commentId);
 
     return {
       statusCode: HttpStatus.OK,

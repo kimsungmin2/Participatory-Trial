@@ -1,0 +1,45 @@
+config:
+  target: 'http://localhost:3000/'
+  socketio:
+    transports: ['websocket']
+    extraHeaders:
+      cookie: 'authorization=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjksImlhdCI6MTcxMzYxMTc3NywiZXhwIjoxNzU2ODExNzc3fQ.88NUy1QFWuH5uu7psUXz24KyN4zMRVPN7NdfhbthWfw'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: 'ramp up'
+    - duration: 60
+      arrivalRate: 20
+      name: 'spike load'
+scenarios:
+  - engine: 'socketio'
+    flow:
+      - emit:
+          channel: 'join'
+          data:
+            roomId: 1
+            channelType: 'trials'
+            think: 1
+      - loop:
+          - emit:
+              channel: 'createChat'
+              data:
+                roomId: 1
+                message: 'Message number {{ $randomNumber(1, 10000) }}'
+                channelType: 'trials'
+          - think: 30
+            count: 3
+      # - emit:
+      #     channel: 'createVote'
+      #     data:
+      #       roomId: 1
+      #       voteFor: true
+      #       channelType: 'trials'
+      # - think: 1
+      #   count: 1
+      - emit:
+          channel: 'leaveRoom'
+          data:
+            roomId: 1
+            userId: 1
+            channelType: 'trials'

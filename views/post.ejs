@@ -21,7 +21,6 @@
     <%- include('partials/nav') %>
     <header>
       <%- include('partials/board-title') %>
-      <%= JSON.stringify(data)  %>
       <hr width="70%" color="lightskyblue" size="2" style="margin-left: 30px; height: 3px;" />
       <div class="post_title">
         <% if (boardType !== "trial") {%>
@@ -30,9 +29,14 @@
           <span><%= data.OneTrials.title  %></span>
           <% } %>
         <div>
+          <% if (boardType !== "trial") {%>
           <span>조회수:<%= data.view  %></span>
           <% if (boardType !== 'polticalDebate') { %>
-          <span>좋아요:<%= data.like  %></span>
+            <span id="likeCount">좋아요:<%= data.like %></span>
+          <% } %>
+          <% } else { %>
+            <span>조회수:<%= data.OneTrials.view  %></span>
+              <span id="likeCount">좋아요:<%= data.OneTrials.like %></span>
           <% } %>
         </div>
         
@@ -46,6 +50,8 @@
           <button id="update" data-post-id="<%= data.OneTrials.id %>">수정</button>
           <button id="delete" data-post-id="<%= data.OneTrials.id %>">삭제</button>
           <% } %>
+
+        
       </div>
     </div>
       <hr width="100%" color="grey" size="1"style="margin-left: 30px;"" />
@@ -77,9 +83,16 @@
       </div>
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
-      <div class="like_button">
-        <button id="like" href="/<% data.id %>">좋아요</button>
-      </div>
+        <% if (boardType !== 'trial') { %>
+          <%= boardType %>
+        <div class="like_button">
+          <button id="like" class="like" href="/<% data.id %>">좋아요</button>
+        </div>
+        <% } else if (boardType === "trial") { %>
+          <div class="like_button">
+          <button id="like" class="like">좋아요</button>
+        </div>
+      <% } %>
       <% } %>
       <!--게시글 댓글-->
       <% 
@@ -96,23 +109,61 @@
               break;
           }
       %>
-      <% if (boardType !== 'trial') {%>
-      <div>
-          <p style="font-size: 30px;">댓글: <%= data[boardComment].length  %>개</p>
-          <div class="content_container">
-            <% for (let i = 0; i < data[boardComment].length; i++)  {%>
-              <div class="content">
-                
-              <p>작성자: <%= data[boardComment][i].userId %></p>
-              <p><%= data[boardComment][i].content %></p>
-              <p>작성일: <%= data[boardComment][i].createdAt %></p>
-              <button class="modify"">수정</button>
-              <button class="delete-comment"">삭제</button>
-              </div>
+              <% if (boardType === 'humor') { %>
+                <%= JSON.stringify(data.hummorComment) %>
+                <p style="font-size: 30px;">댓글: <%= data.humorComment.length  %>개</p>
+                <div class="content_container">
+                  <% for (let i = 0; i < data.humorComment.length; i++)  {%>
+                    <div class="content">
+                    <p>작성자: <%= data.humorComment[i].userId %></p>
+                    <p><%= data.humorComment[i].content %></p>
+                    <p>작성일: <%= data.humorComment[i].createdAt %></p>
+                    <button class="modify" data-comment-id="<%= data.humorComment[i].id %>">수정</button>
+                    <button class="delete" data-comment-id="<%= data.humorComment[i].id %>">삭제</button>
+                    </div>
+                    <% } %>
+                  </div>
+              <% } else if (boardType === 'onlineBoard') { %>
+                <p style="font-size: 30px;">댓글: <%= data.onlineBoardComment.length  %>개</p>
+                <div class="content_container">
+                  <% for (let i = 0; i < data.onlineBoardComment.length; i++)  {%>
+                    <div class="content">
+                    <p>작성자: <%= data.onlineBoardComment[i].userId %></p>
+                    <p><%= data.onlineBoardComment[i].content %></p>
+                    <p>작성일: <%= data.onlineBoardComment[i].createdAt %></p>
+                    <button class="modify" data-comment-id="<%= data.onlineBoardComment[i].id %>">수정</button>
+                    <button class="delete" data-comment-id="<%= data.onlineBoardComment[i].id %>">삭제</button>
+                      
+                    </div>
+                    <% } %>
+                </div>
+              <% } else if (boardType === 'polticalDebate') { %>
+                <p style="font-size: 30px;">댓글: <%= data.polticalDebateComments.length  %>개</p>
+                <div class="content_container">
+                  <% for (let i = 0; i < data.polticalDebateComments.length; i++)  {%>
+                    <div class="content">
+                    <p>작성자: <%= data.polticalDebateComments[i].userId %></p>
+                    <p><%= data.polticalDebateComments[i].content %></p>
+                    <p>작성일: <%= data.polticalDebateComments[i].createdAt %></p>
+                    <button class="modify" data-comment-id="<%= data.polticalDebateComments[i].id %>">수정</button>
+                    <button class="delete" data-comment-id="<%= data.polticalDebateComments[i].id %>">삭제</button>
+                    </div>
+                    <% } %>
+                </div>
               <% } %>
+      <% if(boardType !== "trial") {%>
+      <div class="comment-form">
+        <h2>댓글 작성</h2>
+        <form id="commentForm">
+          <div class="form-group">
+            <label for="commentContent">댓글 내용</label>
+            <textarea class="form-control" id="commentContent" rows="3"></textarea>
           </div>
+          <button type="submit" class="btn btn-primary">작성</button>
+        </form>
       </div>
       <% } %>
+    
     </header>
     <script>
 
@@ -132,16 +183,52 @@
           boardName = 'trials';
             break;
         }
-document.getElementById("update").addEventListener("click", function() {
+document.getElementById("update").addEventListener("click", function(e) {
+  e.preventDefault();
   const postId = this.getAttribute("data-post-id");
-  // 이 버튼의 데이터 속성에서 게시물 ID를 가져옵니다.
-  // 게시물 수정 페이지 URL로 리다이렉트합니다.
-  // 예시 URL 구조: "edit-post.html?id=123"
-  window.location.href = `/${boardName}/update/${postId}`;
+
+  fetch(`/${boardName}/update/${postId}`)
+        .then(response => {
+          if(response.ok) {
+            window.location.href = `/${boardName}/update/${postId}`
+          } else if (response.status === 401) {
+            return response.json()
+          }
+        })
+        .then(data => {
+          if (data && data.message) {
+            alert('로그인해야 합니다!')
+          }
+        })
+});
+
+document.getElementById("update").addEventListener("click", function(e) {
+  e.preventDefault();
+  const postId = this.getAttribute("data-post-id");
+
+  fetch(`/${boardName}/update/${postId}`)
+        .then(response => {
+          if(response.ok) {
+            window.location.href = `/${boardName}/update/${postId}`
+          } else if (response.status === 401) {
+          alert('로그인 후 사용해주세요.')
+        } else if (response.status === 403) {
+          alert('다른 사용자의 게시물은 삭제할 수 없습니다.')
+        }
+        else if (response.status === 404) {
+          alert('다른 사용자의 게시물은 삭제할 수 없습니다.')
+        }
+        })
+        .then(data => {
+          if (data && data.message) {
+            alert('로그인해야 합니다!')
+          }
+        })
 });
 
 
   const deleteButton = document.getElementById('delete'); 
+  
   
   deleteButton.addEventListener('click', function(event) {
     const postId = deleteButton.getAttribute('data-post-id'); 
@@ -159,8 +246,10 @@ document.getElementById("update").addEventListener("click", function() {
         if (response.ok) {
           alert('게시물이 삭제되었습니다.');
           window.location.href = `/${boardName}`; 
-        } else {
-          throw new Error('Network response was not ok.');
+        } else if (response.status === 401) {
+          alert('로그인 후 사용해주세요.')
+        } else if (response.status === 403) {
+          alert('다른 사용자의 게시물은 삭제할 수 없습니다.')
         }
       })
       .catch(error => {
@@ -169,6 +258,156 @@ document.getElementById("update").addEventListener("click", function() {
       });
     }
   });
+        document.querySelectorAll('.modify').forEach(button => {
+      button.addEventListener('click', function() {
+        
+        let contentContainer = this.parentElement;
+        let commentContentElement = contentContainer.querySelector('p:nth-child(2)');
+      
+        commentContentElement.contentEditable = true;
+        commentContentElement.focus();
+        commentContentElement.style.border = "1px solid #ccc";
+        
+        this.innerText = "등록";
+
+        this.removeEventListener('click', arguments.callee);
+        this.addEventListener('click', function() {
+          let newCommentContent = commentContentElement.innerText;
+          let currentUrl = window.location.href
+          let commentId = this.getAttribute('data-comment-id');
+          const postId = "<%= data.id%>"
+          console.log(commentId);
+          console.log(currentUrl);
+          fetch(`${currentUrl}/comments/${commentId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              content: newCommentContent
+            })
+          })
+          .then(response => {
+            if (response.ok) {
+              console.log('댓글 수정 완료!');
+              location.reload();
+            } else if(response.status === 403 || response.status === 401 ) {
+              response.json().then(data => {
+                alert(data.message)
+              })
+            }
+            else {
+              console.error('댓글 수정 실패');
+            }
+          })
+          .catch(error => {
+          alert('서버 에러', error);
+          });
+        });
+      });
+    });
+
+    // 삭제
+    document.querySelectorAll('.delete').forEach(button => {
+  button.addEventListener('click', function() {
+    let contentContainer = this.parentElement;
+    let commentId = this.getAttribute('data-comment-id');
+    let currentUrl = window.location.href;
+
+    fetch(`${currentUrl}/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => {
+      if (response.ok) {
+        contentContainer.remove();
+        location.reload();
+      }else if(response.status === 403 || response.status === 401) {
+        response.json().then(data => {
+                alert(data.message)
+              })
+      } else {
+        console.error('댓글 삭제 실패');
+      }
+    })
+    .catch(error => {
+      alert('서버 에러', error);
+    });
+  });
+});
+  
+// 등록
+if (boardName !== "trials") {
+  document.getElementById('commentForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  let commentContent = document.getElementById('commentContent').value;
+  let currentUrl = window.location.href;
+
+  fetch(`${currentUrl}/comments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      content: commentContent
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      location.reload();
+    } else {
+      alert('댓글 작성 실패');
+    }
+  })
+  .catch(error => {
+    alert('서버 에러', error);
+  });
+});
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+        const socket = io('http://localhost:3000');
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        const extractedChannelType = segments[1];
+        const roomId = segments[2];
+        const likeBtn = document.getElementById('like');
+        const ChannelType = {
+            trials: 'trials',
+            humors: 'humors',
+            polticals: 'poltical-debates',
+        };
+        let channelType;
+        if (Object.values(ChannelType).includes(extractedChannelType)) {
+          channelType = extractedChannelType;
+        } else {
+        }
+likeBtn.addEventListener('click', function() {
+  console.log(1);
+          socket.emit('like', {
+            channelType,
+            roomId,
+          });
+          likeBtn.disabled = true;
+          setTimeout(function() {
+            likeBtn.disabled = false;
+          }, 3000);
+        });
+        socket.on('likesUpdated', function(data) {
+          if (data.id == roomId) {
+            const likeCountElement = document.querySelector('#likeCount');
+            const previousLikes = parseInt(likeCountElement.textContent.split(':')[1]);
+            likeCountElement.textContent = `좋아요:${data.likes}`;
+            if (data.likes < previousLikes) {
+              alert('좋아요를 취소하였습니다.');
+            }
+          }
+        });
+      })
+
     </script>
   </body>
 </html>

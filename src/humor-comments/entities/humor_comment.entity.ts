@@ -36,7 +36,7 @@ export class HumorComments {
   @JoinColumn({ name: 'humorBoardId', referencedColumnName: 'id' })
   humorBoard: HumorBoards;
 
-  @ManyToOne(() => Users, (user) => user.humorComment)
-  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
-  user: Users;
+  // @ManyToOne(() => Users, (user) => user.humorComment)
+  // @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
+  // user: Users;
 }

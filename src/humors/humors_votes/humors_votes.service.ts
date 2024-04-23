@@ -10,13 +10,14 @@ import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Request } from 'express';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { EachHumorVote } from '../entities/UservoteOfHumorVote.entity';
+import { HumorVotes } from '../entities/HumorVote.entity';
 
 @Injectable()
 export class HumorVotesService {
   constructor(
     @InjectRepository(EachHumorVote)
     private eachHumorVoteRepository: Repository<EachHumorVote>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private dataSource: DataSource,
   ) {}
 
@@ -43,30 +44,30 @@ export class HumorVotesService {
   }
 
   // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
-  private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
-    if (userId) {
-      return null;
-    }
+  // private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
+  //   if (userId) {
+  //     return null;
+  //   }
 
-    let userCode = req.cookies['user-code'];
+  //   let userCode = req.cookies['user-code'];
 
-    if (userCode) {
-      return userCode;
-    }
-    const userKey = req.ip;
-    // 레디스에서 찾기
-    userCode = await this.cacheManager.get<string>(userKey);
+  //   if (userCode) {
+  //     return userCode;
+  //   }
+  //   const userKey = req.ip;
+  //   // 레디스에서 찾기
+  //   userCode = await this.cacheManager.get<string>(userKey);
 
-    if (!userCode) {
-      userCode = this.generateUserCode();
-      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60); // 밀리초 단위임
-      req.res.cookie('user-code', userCode, {
-        maxAge: 1000 * 24 * 60 * 60,
-        httpOnly: true,
-      });
-    }
-    return userCode;
-  }
+  //   if (!userCode) {
+  //     userCode = this.generateUserCode();
+  //     await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60); // 밀리초 단위임
+  //     req.res.cookie('user-code', userCode, {
+  //       maxAge: 1000 * 24 * 60 * 60,
+  //       httpOnly: true,
+  //     });
+  //   }
+  //   return userCode;
+  // }
 
   // 투표 중복 검증 and 투표수 업데이트 함수
   private async validationAndSaveVote(
@@ -116,7 +117,6 @@ export class HumorVotesService {
 
   // 투표하기
   async addHumorVoteUserorNanUser(
-    userCode: string,
     userId: number,
     humorVoteId: number,
     voteFor: boolean,
@@ -235,5 +235,33 @@ export class HumorVotesService {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
+  }
+
+  async updateVoteCounts(humorVoteId: number) {
+    const result = await this.dataSource
+      .getRepository(EachHumorVote)
+      .createQueryBuilder('eachHumorVote')
+      .select(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END)',
+        'voteCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'voteCount2',
+      )
+      .where('eachHumorVote.humorVoteId = :humorVoteId', { humorVoteId })
+      .andWhere('eachHumorVote.userCode IS NULL')
+      .getRawOne();
+
+    const voteCount1 = parseInt(result.voteCount1, 10);
+    const voteCount2 = parseInt(result.voteCount2, 10);
+
+    await this.dataSource
+      .getRepository(HumorVotes)
+      .createQueryBuilder()
+      .update(HumorVotes)
+      .set({ voteCount1: voteCount1, voteCount2: voteCount2 })
+      .where('id = :humorVoteId', { humorVoteId })
+      .execute();
   }
 }

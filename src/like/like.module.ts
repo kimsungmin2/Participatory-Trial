@@ -8,8 +8,8 @@ import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
-import { Trials } from 'src/trials/entities/trial.entity';
-import { TrialLike } from 'src/trials/entities/trials.like.entity';
+import { Trials } from '../trials/entities/trial.entity';
+import { TrialLike } from '../trials/entities/trials.like.entity';
 
 @Module({
   imports: [

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>명예의 전당</title>
+  <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <link rel="stylesheet" href="/css/board-style.css" />
+</head>
+<body>
+    <%- include('partials/nav')  %>
+    <% 
+    let hallOfFameName;
+    let boardName;
+  switch (halloffameType) {
+    case 'trialsHallofFameVotes':
+      hallOfFameName = 'HallofFame/votes'
+      boardName = 'trials'
+      break;
+    case 'trialsHallofFameLikes':
+      hallOfFameName = 'HallofFame/likes';
+      boardName = 'trials'
+      break;
+    case 'trialsHallofFameViews':
+      hallOfFameName = 'HallofFame/views';
+      boardName = 'trials'
+      break;
+    case 'humorsHallofFameVotes':
+      hallOfFameName = 'HallofFame/votes';
+      boardName = 'humors'
+      break;
+    case 'humorsHallofFameLikes':
+      hallOfFameName = 'HallofFame/likes';
+      boardName = 'humors'
+      break;
+    case 'humorsHallofFameViews':
+      hallOfFameName = 'HallofFame/views';
+      boardName = 'humors'
+      break;
+    case 'polticalHallofFameVotes':
+      hallOfFameName = 'HallofFame/votes';
+      boardName = 'poltical-debates';
+      break;
+    case 'polticalHallofFameViews':
+      hallOfFameName = 'HallofFame/views';
+      boardName = 'poltical-debates';
+      break;
+    case 'onlineBoardHallofFameLikes':
+      hallOfFameName = 'HallofFame/likes';
+      boardName = 'online-boards';
+      break;
+    case 'onlineBoardHallofFameViews':
+      hallOfFameName = 'HallofFame/views';
+      boardName = 'online-boards';
+      break;
+  }
+    %>
+  </div>
+
+  <header>
+    <%- include('partials/halloffame-title') %>
+
+    <hr width="70%" color="black" size="2" style="margin-left: 30px" />
+    
+    <div class="cards-container">
+      <% if (data.length !== 0) {%>
+      <% for (let i = 0; i < data.length; i++) {  %>
+      <div class="card">
+          <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= hallOfFameName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
+        <div class="card-stats">
+          <div>작성자: <%= data[i].userId %></div>
+          <div>Total : <%= data[i].total %></div>
+        </div>
+      </div>
+      <% } %>
+    <% } else { %>
+      <p class="no_posts">명예의 전당에 올라갈 게시물이 없습니다!</p>
+      <% } %>
+    </div>
+    <div class="pagination">
+      <%
+      // 페이지 링크를 위한 기본 URL 설정
+      let baseUrl = '';
+      switch (halloffameType) {
+        case 'trialsHallofFameVotes':
+          baseUrl = '/trials/HallofFame/votes?page=';
+          break;
+        case 'trialsHallofFameLikes':
+          baseUrl = '/trials/HallofFame/likes?page=';
+          break;
+        case 'trialsHallofFameViews':
+          baseUrl = '/trials/HallofFame/views?page=';
+          break;
+        case 'humorsHallofFameVotes':
+          baseUrl = '/humors/HallofFame/votes?page=';
+          break;
+        case 'humorsHallofFameLikes':
+          baseUrl = '/humors/HallofFame/likes?page=';
+          break;
+        case 'humorsHallofFameViews':
+          baseUrl = '/humors/HallofFame/views?page=';
+          break;
+        case 'polticalHallofFameVotes':
+          hallOfFameName = '/poltical-debates/HallofFame/votes?page=';
+          break;
+        case 'polticalHallofFameViews':
+          hallOfFameName = '/poltical-debates/HallofFame/views?page=';
+          break;
+        case 'onlineBoardHallofFameLikes':
+          hallOfFameName = '/online-boards/HallofFame/likes?page=';
+          break;
+        case 'onlineBoardHallofFameViews':
+          hallOfFameName = '/online-boards/HallofFame/views?page=';
+          break;
+      }
+
+      const prevGroupPage = startPage > 1 ? startPage - 1 : null;
+      const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
+      %>
+      <% if (prevGroupPage) { %>
+        <a href="<%= baseUrl + (prevGroupPage - 9) %>">« 이전</a>
+      <% } %>
+      
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <% if (i === currentPage) { %>
+          <span class="current-page-number">[<%= i %>]</span>
+        <% } else { %>
+          <a href="<%= baseUrl + i %>"><%= i %></a>
+        <% } %>
+      <% } %>
+      
+      <% if (nextGroupPage) { %>
+        <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
+      <% } %>
+      
+    </div>
+    
+

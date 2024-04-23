@@ -33,10 +33,11 @@ export class LikeService {
     @InjectRepository(TrialLike)
     private trialsLikeRepository: Repository<TrialLike>,
   ) {}
+
   async like(
-    boardId: number,
-    userId: number,
     boardType: string,
+    userId: number,
+    boardId: number,
   ): Promise<string> {
     //boardId 아이디
     //boardType 어떤 게시판

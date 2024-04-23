@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
-
 import { setupSwagger } from './utils/swagger';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -12,7 +11,6 @@ import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
 
 async function bootstrap() {
   process.on('unhandledRejection', (reason, promise) => {
-    console.log(reason);
     winstonLogger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 

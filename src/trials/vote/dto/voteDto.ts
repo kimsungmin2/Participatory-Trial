@@ -19,4 +19,6 @@ export class VoteTitleDto {
   @IsString({ message: '찬성 주장은 문자열로 입력 해주세요.' })
   @IsNotEmpty({ message: '찬성 주장을 입력 해주세요.' })
   title2: string;
+  static title1: any;
+  static title2: any;
 }

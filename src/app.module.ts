@@ -1,4 +1,3 @@
-import { CacheConfigService } from './cache/cache.config';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,26 +11,37 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import { HumorCommentsModule } from './humor-comments/humor-comments.module';
-import { S3Module } from './s3/s3.module';
-import { LikeModule } from './like/like.module';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { SchedulerModule } from './scheduler/scheduler.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import { Users } from './users/entities/user.entity';
+import { UserInfos } from './users/entities/user-info.entity';
+import { Trials } from './trials/entities/trial.entity';
+import { Votes } from './trials/entities/vote.entity';
+import { OnlineBoards } from './online_boards/entities/online_board.entity';
+import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
+import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
 import { BullModule } from '@nestjs/bull';
 import { VoteModule } from './trials/vote/vote.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
 import { EventsModule } from './events/events.module';
 import { ChatsModule } from './chats/chats.module';
-
-import { WinstonModule } from 'nest-winston';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
-import { SearchModule } from './search/search.module';
+import { join } from 'path';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { RedisModule } from './cache/redis.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ServerApiVersion } from 'mongodb';
+// import { CacheConfigService } from './cache/config';
+// import { RedisIoAdapter } from './cache/redis.adpter';
+// import { CacheConfigService } from './cache/cache.config';
+import { AlarmModule } from './alarm/alarm.module';
+import { HumorCommentsModule } from './humor-comments/humor-comments.module';
 import { OnlineBoardCommentModule } from './online_board_comment/online_board_comment.module';
-console.log(__dirname);
+import { WinstonModule } from 'nest-winston/dist/winston.module';
+import { SearchModule } from './search/search.module';
+import { LikeModule } from './like/like.module';
+import { S3Module } from './s3/s3.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { CacheConfigService } from './cache/cache.config';
+
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
@@ -41,7 +51,6 @@ export const typeOrmModuleOptions = {
     username: configService.get('DB_USERNAME'),
     password: configService.get('DB_PASSWORD'),
     database: configService.get('DB_NAME'),
-    // autoLoadEntities: true, // entity를 등록하지 않아도 자동적으로 불러온다.
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
     logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
@@ -64,11 +73,14 @@ export const typeOrmModuleOptions = {
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
+        DB_SLAVE_HOST: Joi.string().required(),
+        DB_SLAVE_USERNAME: Joi.string().required(),
+        DB_SLAVE_PASSWORD: Joi.string().required(),
       }),
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
-    }),
+      rootPath: join(__dirname, '..', 'public'),
+    }), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
     CacheModule.registerAsync({
       isGlobal: true,
       useClass: CacheConfigService,
@@ -79,16 +91,8 @@ export const typeOrmModuleOptions = {
         port: 6379,
       },
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // `public` 폴더가 프로젝트 루트에 위치한다고 가정
-    }),
-
-    RedisModule.forRootAsync({
-      useFactory: () => ({
-        type: 'single',
-        url: process.env.REDIS_URL,
-        options: {},
-      }),
+    MongooseModule.forRoot(process.env.MONGODB_URI, {
+      serverApi: ServerApiVersion.v1,
     }),
     ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
@@ -111,14 +115,18 @@ export const typeOrmModuleOptions = {
     OnlineBoardCommentModule,
     WinstonModule,
     SearchModule,
+    RedisModule,
+    EventsModule,
+    ChatsModule,
+    AlarmModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: HttpLoggingInterceptor,
-    },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: HttpLoggingInterceptor,
+    // },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,
