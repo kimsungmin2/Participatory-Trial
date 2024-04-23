@@ -46,10 +46,10 @@ export class Trials {
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updated_at: Date;
+  updatedAt: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
-  deleted_at: Date;
+  deletedAt: Date;
 
   @ManyToOne(() => Users, (user) => user.trial, {
     onDelete: 'CASCADE',

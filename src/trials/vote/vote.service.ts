@@ -12,12 +12,13 @@ import { Request } from 'express';
 import { EachVote } from '../entities/Uservote.entity';
 import { VoteTitleDto } from './dto/voteDto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { th } from '@faker-js/faker';
 @Injectable()
 export class VotesService {
   constructor(
     @InjectRepository(EachVote)
     private eachVoteRepository: Repository<EachVote>,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private dataSource: DataSource,
   ) {}
   // userCode 난수 생성 함수
@@ -41,28 +42,28 @@ export class VotesService {
   }
 
   
-  // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
-  private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
-    if (userId) {
-      return null;
-    }
-    let userCode = req.cookies['user-code'];
-    if (userCode) {
-      return userCode;
-    }
-    const userKey = req.ip;
+  // // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
+  // private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
+  //   if (userId) {
+  //     return null;
+  //   }
+  //   let userCode = req.cookies['user-code'];
+  //   if (userCode) {
+  //     return userCode;
+  //   }
+  //   const userKey = req.ip;
 
-    userCode = await this.cacheManager.get<string>(userKey);
-    if (!userCode) {
-      userCode = this.generateUserCode();
-      await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
-      req.res.cookie('user-code', userCode, {
-        maxAge: 1000 * 24 * 60 * 60,
-        httpOnly: true,
-      });
-    }
-    return userCode;
-  }
+  //   userCode = await this.cacheManager.get<string>(userKey);
+  //   if (!userCode) {
+  //     userCode = this.generateUserCode();
+  //     await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60);
+  //     req.res.cookie('user-code', userCode, {
+  //       maxAge: 1000 * 24 * 60 * 60,
+  //       httpOnly: true,
+  //     });
+  //   }
+  //   return userCode;
+  // }
   // 투표 중복 검증 and 투표수 업데이트 함수
   private async validationAndSaveVote(
     {
@@ -210,5 +211,28 @@ export class VotesService {
       vote1Percentage: `${vote1Percentage.toFixed(2)}%`,
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
+  }
+
+
+  async updateVoteCounts(voteId: number) {
+    const result = await this.dataSource
+      .getRepository(EachVote)
+      .createQueryBuilder('eachVote')
+      .select('SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END)', 'voteCount1')
+      .addSelect('SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)', 'voteCount2')
+      .where('eachVote.voteId = :voteId', { voteId })
+      .andWhere('eachVote.userCode IS NULL')
+      .getRawOne();
+  
+    const voteCount1 = parseInt(result.voteCount1, 10);
+    const voteCount2 = parseInt(result.voteCount2, 10);
+  
+    await this.dataSource
+      .getRepository(Votes)
+      .createQueryBuilder()
+      .update(Votes)
+      .set({ voteCount1: voteCount1, voteCount2: voteCount2 })
+      .where('id = :voteId', { voteId })
+      .execute();
   }
 }

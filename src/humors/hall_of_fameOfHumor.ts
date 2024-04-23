@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { HumorBoards } from "./entities/humor-board.entity";
 import { Between, DataSource, Repository } from "typeorm";
@@ -7,6 +7,9 @@ import { HumorsHallOfFame } from "./entities/humor_hall_of_fame.entity";
 import { HumorsLikeHallOfFames } from "./entities/humor_hall_of_fame.like.entity";
 import { HumorsViewHallOfFames } from "./entities/humor_hall_of_fame.view.entity";
 import { Cron, CronExpression } from "@nestjs/schedule";
+import { PaginationQueryDto } from "./dto/get-humorBoard.dto";
+import { th } from "@faker-js/faker";
+import { HumorVotesService } from "./humors_votes/humors_votes.service";
 
 @Injectable()
 export class HumorHallOfFameService {
@@ -21,6 +24,7 @@ export class HumorHallOfFameService {
         private humorsLikeHallOfFamesRepository: Repository<HumorsLikeHallOfFames>,
         @InjectRepository(HumorsViewHallOfFames)
         private humorsViewHallOfFamesRepository: Repository<HumorsViewHallOfFames>,
+        private readonly humorVotesService: HumorVotesService,
         private dataSource: DataSource,
     ){}
 
@@ -29,16 +33,24 @@ export class HumorHallOfFameService {
     @Cron('0 2 * * 1')
     async updateHumorHallOfFame() {
         const { start, end } = this.getLastWeekRange();
+
+        
         const lastWeekVotes = await this.humorVotesRepository.find({
             where: {
                 createdAt: Between(start, end)
             },
         });
+        
+        for(const vote of lastWeekVotes) {
+          await this.humorVotesService.updateVoteCounts(vote.id)
+        }
+
         const lastWeekHumors = await this.humorsRepository.find({
-            where: {
-                createdAt: Between(start, end)
-            }
+           where: {
+              createdAt: Between(start, end)
+          }
         })
+        
 
         // 투표 기반으로 명예의 전당 집계
         // 투표 수 데이터 가공
@@ -99,13 +111,17 @@ private async aggVotesLikeForHallOfFame(humorBoards: HumorBoards[]){
   
     const candidates = await this.humorsRepository
     .createQueryBuilder("humor")
-    .select(['humor.id', 'humor.title', 'humor.content'])
-    .addSelect("humor.like", "likes")
+    .select([
+      'humor.id', 
+      'humor.title', 
+      'humor.userId', 
+      'humor.content', 
+      'humor.like AS likes' // 'like' 속성을 'likes'로 셀렉트
+    ])
     .where('humor.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-    .having("likes >= :minlikes", { minlikes: 100 }) // 투표 수 100 이상인 것만 조회
-    .orderBy('likes', "DESC")
-    .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
-    .groupBy("humor.id")
+    .andWhere("humor.like >= :minlikes", { minlikes: 100 }) // 'like' 속성을 기준으로 필터링
+    .orderBy('humor.like', "DESC") // 'like' 속성을 기준으로 정렬
+    .limit(1000)
     .getRawMany();
   
     return candidates
@@ -135,11 +151,12 @@ private async aggVotesForHallOfFame(humorVotes: HumorVotes[]){
   
     const candidates = await this.humorVotesRepository
     .createQueryBuilder("humorVote")
-    .select(['humorVote.id', 'humorVote.title1', 'humorVote.title2'])
+    .leftJoinAndSelect("humorVote.humorBoards", "humorBoards") // vote와 trial을 조인
+    .select(['humorVote.id', 'humorVote.title1', 'humorVote.title2', 'humorVote.userId', 'humorVote.content'])
     .addSelect("humorVote.voteCount1 + humorVote.voteCount2", "totalVotes")
     .where('humorVote.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-    .having("totalVotes >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
-    .orderBy('totalVotes', "DESC")
+    .having("total >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
+    .orderBy('total', "DESC")
     .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
     .groupBy("humorVote.id")
     .getRawMany();
@@ -154,13 +171,15 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.startTransaction();
     try{
     // 한번에 저장
+    await queryRunner.manager.delete(HumorsHallOfFame, {});
+
       const newHallOfFameEntries = hallOfFameData.map(data => {
       const newHallOfFameEntry = new HumorsHallOfFame();
       newHallOfFameEntry.id = data.id // vote table의 id임다
-      newHallOfFameEntry.userId = data.humorBoards.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
+      newHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newHallOfFameEntry.title = `${data.title1} Vs ${data.title2}`
-      newHallOfFameEntry.content = data.humorBoards.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newHallOfFameEntry.totalVotes = data.voteCount1 + data.voteCount2;
+      newHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
+      newHallOfFameEntry.total = data.total;
       newHallOfFameEntry.createdAt = new Date();
       newHallOfFameEntry.updatedAt = new Date();
       return newHallOfFameEntry;
@@ -183,6 +202,8 @@ private async updateLikeHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try{
+    await queryRunner.manager.delete(HumorsLikeHallOfFames, {});
+
     // 한번에 저장
       const newLikeHallOfFameEntries = hallOfFameData.map(data => {
       const newLikeHallOfFameEntry = new HumorsLikeHallOfFames();
@@ -190,7 +211,7 @@ private async updateLikeHallOfFameDatabase(hallOfFameData: any){
       newLikeHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newLikeHallOfFameEntry.title = data.title;
       newLikeHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newLikeHallOfFameEntry.totallike = data.like;
+      newLikeHallOfFameEntry.total = data.likes;
       newLikeHallOfFameEntry.createdAt = new Date();
       newLikeHallOfFameEntry.updatedAt = new Date();
       return newLikeHallOfFameEntry;
@@ -213,6 +234,8 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try{
+    await queryRunner.manager.delete(HumorsViewHallOfFames, {});
+
     // 한번에 저장
       const newViewHallOfFameEntries = hallOfFameData.map(data => {
       const newViewHallOfFameEntry = new HumorsViewHallOfFames();
@@ -220,7 +243,7 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
       newViewHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newViewHallOfFameEntry.title = data.title;
       newViewHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newViewHallOfFameEntry.totalview = data.like;
+      newViewHallOfFameEntry.total = data.views;
       newViewHallOfFameEntry.createdAt = new Date();
       newViewHallOfFameEntry.updatedAt = new Date();
       return newViewHallOfFameEntry;
@@ -238,18 +261,122 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     }
 
     // 명예전당 투표수 조회 매서드
-async getRecentHallOfFame(){
-    return await this.humorsHallOfFameRepository.find();
+async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto
+){
+  let humorsHallOfFame:HumorsHallOfFame[];
+
+  const totalItems = await this.humorsHallOfFameRepository.count();
+  try{
+    const { page, limit } = paginationQueryDto;
+    const skip = (page - 1) * limit;
+    humorsHallOfFame = await this.humorsHallOfFameRepository.find({
+      skip,
+      take: limit,
+      order :{
+        total: 'DESC'
+      }
+    });
+  } catch (err) {
+    console.log(err.message);
+    throw new InternalServerErrorException(
+      "명예의 전당을 불러오는 도중오류가 발생했습니다"
+    );
+  }
+    return {
+      humorsHallOfFame,
+      totalItems
+    }
   }
   
   
   // 명예전당 좋아요 조회 매서드
-  async getLikeRecentHallOfFame(){
-      return await this.humorsLikeHallOfFamesRepository.find();
+  async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let humorsLikeHallOfFames : HumorsLikeHallOfFames[];
+
+    const totalItems = await this.humorsLikeHallOfFamesRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      humorsLikeHallOfFames = await this.humorsLikeHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          total: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중오류가발생했습니다."
+      );
+    }
+      return {
+        humorsLikeHallOfFames,
+        totalItems,
+      }
     }
   
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame(){
-      return await this.humorsViewHallOfFamesRepository.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let humorsViewHallOfFames:HumorsViewHallOfFames[];
+
+    const totalItems = await this.humorsViewHallOfFamesRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      humorsViewHallOfFames = await this.humorsViewHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          total:'DESC'
+        }
+      });
+    } catch(err) {
+      console.log(err.message)
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는도중 오류가 발생했습니다."
+      )
     }
+      return {
+        humorsViewHallOfFames,
+        totalItems
+      }
+    }
+
+  // 특정 명전 투표 조회
+  async findOneByhumorHallofFameVote(id: number) {
+
+    const OneHallOfHumorVote = await this.humorsHallOfFameRepository.findOneBy({ id });
+
+    if(!OneHallOfHumorVote) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfHumorVote }
+  }
+
+  // 특정 명전 좋아요 조회
+  async findOneByhumorHallofFameLike(id: number) {
+
+    const OneHallOfHumorLikes = await this.humorsLikeHallOfFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfHumorLikes) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfHumorLikes }
+  }
+
+  // 특정 명전 조회수 조회
+  async findOneByhumorHallofFameViews(id: number) {
+
+    const OneHallOfTrialViews = await this.humorsViewHallOfFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfTrialViews) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfTrialViews }
+  }
+
 }

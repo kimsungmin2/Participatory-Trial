@@ -11,6 +11,11 @@ import { PolticalsChat } from '../events/entities/polticalsChat.entity';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { InjectModel } from '@nestjs/mongoose';
+// import { ChatDocument } from 'src/cats/schemas/chat.schemas';
+import { Model } from 'mongoose';
+import { th } from '@faker-js/faker';
+
 @Injectable()
 export class ChatsService implements OnModuleInit {
   constructor(
@@ -23,83 +28,96 @@ export class ChatsService implements OnModuleInit {
     @InjectRepository(PolticalsChat)
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
-    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
+    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
+    // @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
   ) {}
   async publishNotification(message: string) {
     const channelName = 'notifications';
     await this.redisDataClient.publish(channelName, message);
   }
   async onModuleInit() {
-    // this.handleScheduledTasks();
-    console.log(`hello`);
+    this.handleScheduledTasks();
   }
-  // @Interval(1000 * 60)
-  // async handleScheduledTasks() {
-  //   // await this.redisConnection();
-  //   for (const channelType of Object.values(ChannelType)) {
-  //     let cursor = '0';
-  //     const tasks = [];
-  //     do {
-  //       const [nextCursor, keys] = await this.redisDataClient.scan(
-  //         cursor,
-  //         'MATCH',
-  //         `${channelType}:*`,
-  //         'COUNT',
-  //         100,
-  //       );
-  //       cursor = nextCursor;
-  //       if (keys.length === 0) continue;
-  //       for (const key of keys) {
-  //         tasks.push(this.processKey(key));
-  //         if (tasks.length >= 500) {
-  //           await Promise.all(tasks.splice(0, 500));
-  //         }
-  //       }
-  //     } while (cursor !== '0');
-  //     await Promise.all(tasks);
-  //   }
-  // }
-  // async processKey(key: string) {
-  //   const retainCount = 50;
-  //   const messages = await this.redisDataClient.lrange(
-  //     key,
-  //     0,
-  //     -retainCount - 1,
-  //   );
-  //   if (messages.length > 0) {
-  //     const [channelType, roomId] = key.split(':');
-  //     await this.saveMessagesToDatabase(messages, channelType, +roomId, key);
-  //     await this.redisDataClient.ltrim(key, -retainCount, -1);
-  //   }
-  // }
-  // async saveMessagesToDatabase(
-  //   messages: string[],
-  //   channelType: string,
-  //   roomId: number,
-  //   redisKey: string,
-  // ) {
-  //   let channelChatsRepository: Repository<any>;
-  //   let ChatEntity:
-  //     | typeof TrialsChat
-  //     | typeof HumorsChat
-  //     | typeof PolticalsChat;
-  //   switch (channelType) {
-  //     case 'trials':
-  //       channelChatsRepository = this.trialsChatRepository;
-  //       ChatEntity = TrialsChat;
-  //       break;
-  //     case 'humors':
-  //       channelChatsRepository = this.humorsChatRepository;
-  //       ChatEntity = HumorsChat;
-  //       break;
-  //     case 'polticals':
-  //       channelChatsRepository = this.polticalsChatRepository;
-  //       ChatEntity = PolticalsChat;
-  //       break;
-  //   }
-  //   const chats = [];
-  //   for (const message of messages) {
-  //     const parsedMessage = JSON.parse(message);
+
+  @Interval(1000 * 60)
+  async handleScheduledTasks() {
+    // await this.redisConnection();
+
+    for (const channelType of Object.values(ChannelType)) {
+      let cursor = '0';
+      const tasks = [];
+
+      do {
+        const [nextCursor, keys] = await this.redisDataClient.scan(
+          cursor,
+          'MATCH',
+          `${channelType}:*`,
+          'COUNT',
+          100,
+        );
+        cursor = nextCursor;
+
+        if (keys.length === 0) continue;
+
+        for (const key of keys) {
+          tasks.push(this.processKey(key));
+
+          if (tasks.length >= 500) {
+            await Promise.all(tasks.splice(0, 500));
+          }
+        }
+      } while (cursor !== '0');
+
+      await Promise.all(tasks);
+    }
+  }
+
+  async processKey(key: string) {
+    const retainCount = 50;
+    const messages = await this.redisDataClient.lrange(
+      key,
+      0,
+      -retainCount - 1,
+    );
+
+    if (messages.length > 0) {
+      const [channelType, roomId] = key.split(':');
+
+      await this.saveMessagesToDatabase(messages, channelType, +roomId);
+
+      await this.redisDataClient.ltrim(key, -retainCount, -1);
+    }
+  }
+
+  async saveMessagesToDatabase(
+    messages: string[],
+    channelType: string,
+    roomId: number,
+  ) {
+    const chats = [];
+
+    for (const message of messages) {
+      const parsedMessage = JSON.parse(message);
+      const user = await this.usersInfoRepository.findOne({
+        where: { id: parsedMessage.userId },
+        select: ['nickName'],
+      });
+
+      // chats.push(new this.chatModel({
+      //   message: parsedMessage.message,
+      //   userId: parsedMessage.userId,
+      //   RoomId: roomId,
+      //   timestamp: new Date(parsedMessage.timestamp),
+      //   userName: user ? user.nickName : 'Unknown User',
+      //   channelType: channelType,
+      // }));
+    }
+    try {
+      // await this.chatModel.insertMany(chats);
+    } catch (error) {
+      console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error);
+    }
+  }
 
   //     const user = await this.usersInfoRepository.findOne({
   //       where: { id: parsedMessage.userId },
@@ -155,7 +173,8 @@ export class ChatsService implements OnModuleInit {
       chat.userId = userId;
       chat.RoomId = roomId;
       chat.timestamp = new Date();
-      chat.userName = userName;
+      // chat.userName = user.nickName;
+
       const chatKey = `${channelType}:chat:${roomId}`;
       const chatValue = JSON.stringify(chat);
       await this.redisDataClient.rpush(chatKey, chatValue);

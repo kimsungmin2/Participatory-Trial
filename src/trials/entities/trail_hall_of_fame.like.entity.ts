@@ -27,8 +27,8 @@ export class TrialLikeHallOfFames {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'varchar'})
-  totallike: number;
+  @Column({ type: 'int'})
+  total: number;
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

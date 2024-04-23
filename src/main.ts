@@ -11,7 +11,6 @@ import { CheckLoggedIn } from './utils/middlewares/is_logged-in.mddileware';
 
 async function bootstrap() {
   process.on('unhandledRejection', (reason, promise) => {
-    console.log(reason);
     winstonLogger.error('Unhandled Rejection at:', promise, 'reason:', reason);
   });
 

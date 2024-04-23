@@ -16,6 +16,7 @@ import * as _ from 'lodash';
 import { Users } from '../users/entities/user.entity';
 import { VerifiCation } from './dto/verification.dto';
 import { CACHE_MANAGER, Cache, CacheKey } from '@nestjs/cache-manager';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +27,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly dataSource: DataSource,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly redisService: RedisService,
   ) {}
 
   async validateUser(email: string) {
@@ -53,11 +54,9 @@ export class AuthService {
       expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
 
-    await this.cacheManager.set(
-      refreshTokenCacheKey,
-      refreshToken,
-      1000 * 60 * 60 * 24 * 7,
-    );
+    await this.redisService
+      .getCluster()
+      .set(refreshTokenCacheKey, refreshToken, 'EX', 60 * 60 * 24 * 7);
 
     return { accessToken };
   }
@@ -92,8 +91,11 @@ export class AuthService {
 
   async AuthenticationNumberCache(email: string) {
     const code = Math.floor(Math.random() * 900000) + 100000;
-
-    await this.cacheManager.set(email, code, 1000 * 60 * 60 * 3);
+    const emailCode = await this.redisService.getCluster().get(email);
+    if (emailCode) {
+      await this.redisService.getCluster().del(email);
+    }
+    await this.redisService.getCluster().set(email, code, 'EX', 60 * 60 * 3);
 
     await this.emailService.queueVerificationEmail(email, code);
   }
@@ -109,11 +111,15 @@ export class AuthService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     const existingUser = await this.usersService.findByEmail(email);
+
     if (existingUser) {
-      throw new ConflictException(
-        '이미 해당 이메일로 가입된 사용자가 있습니다!',
-      );
+      if (existingUser.emailVerified === true) {
+        throw new ConflictException(
+          '이미 해당 이메일로 가입된 사용자가 있습니다!',
+        );
+      }
     }
+
     if (password !== passwordConfirm) {
       throw new UnauthorizedException(
         '비밀번호가 체크비밀번호와 일치하지 않습니다.',
@@ -123,6 +129,11 @@ export class AuthService {
     try {
       const hashedPassword = await hash(password, 10);
 
+      await queryRunner.manager
+        .getRepository(UserInfos)
+        .delete(existingUser.id);
+
+      await queryRunner.manager.getRepository(Users).delete(existingUser.id);
       const user = await queryRunner.manager.getRepository(Users).save({});
 
       const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
@@ -133,7 +144,6 @@ export class AuthService {
         birth: birth,
         user: user,
       });
-
       await queryRunner.commitTransaction();
 
       await this.AuthenticationNumberCache(email);
@@ -141,13 +151,14 @@ export class AuthService {
       return userInfo;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
   async verifiCationEmail(verifiCation: VerifiCation) {
-    const code = await this.cacheManager.get<number>(verifiCation.email);
+    const code = await this.redisService.getCluster().get(verifiCation.email);
 
     const user = await this.usersService.findByEmail(verifiCation.email);
     if (!user) {
@@ -160,13 +171,13 @@ export class AuthService {
       );
     }
 
-    if (code !== verifiCation.code) {
+    if (code !== verifiCation.code.toString()) {
       throw new ConflictException('인증 코드가 일치하지 않습니다.');
     }
 
     await this.usersInfoRepository.update(user.id, { emailVerified: true });
 
-    await this.cacheManager.del(verifiCation.email);
+    await this.redisService.getCluster().del(verifiCation.email);
   }
 
   async login(email: string, password: string) {
@@ -198,18 +209,16 @@ export class AuthService {
     });
     const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
 
-    await this.cacheManager.set(
-      refreshTokenCacheKey,
-      refreshToken,
-      1000 * 60 * 60 * 24 * 7,
-    );
+    await this.redisService
+      .getCluster()
+      .set(refreshTokenCacheKey, refreshToken, 'EX', 60 * 60 * 24 * 7);
     return { accessToken };
   }
 
   async refreshToken(oldRefreshToken: string) {
-    const userId = await this.cacheManager.get(
-      `refresh_token:${oldRefreshToken}`,
-    );
+    const userId = await this.redisService
+      .getCluster()
+      .get(`refresh_token:${oldRefreshToken}`);
     if (!userId) throw new UnauthorizedException('리프레시 토큰이 없음니다');
 
     const accessToken = this.jwtService.sign(
@@ -221,12 +230,17 @@ export class AuthService {
       { expiresIn: 1000 * 60 * 60 * 24 * 7 },
     );
 
-    await this.cacheManager.del(`refresh_token:${oldRefreshToken}`);
-    await this.cacheManager.set(
-      `refresh_token:${refreshToken}`,
-      refreshToken,
-      1000 * 60 * 60 * 24 * 7,
-    );
+    await this.redisService
+      .getCluster()
+      .del(`refresh_token:${oldRefreshToken}`);
+    await this.redisService
+      .getCluster()
+      .set(
+        `refresh_token:${refreshToken}`,
+        refreshToken,
+        'EX',
+        60 * 60 * 24 * 7,
+      );
 
     return { accessToken, refreshToken };
   }

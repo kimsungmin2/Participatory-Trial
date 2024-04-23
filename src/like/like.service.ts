@@ -33,6 +33,7 @@ export class LikeService {
     @InjectRepository(TrialLike)
     private trialsLikeRepository: Repository<TrialLike>,
   ) {}
+
   async like(
     boardType: string,
     userId: number,

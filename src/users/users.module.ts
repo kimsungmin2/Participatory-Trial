@@ -8,6 +8,7 @@ import { UserInfos } from './entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { RedisModule } from '../cache/redis.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { JwtModule } from '@nestjs/jwt';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Users, UserInfos]),
+    RedisModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],

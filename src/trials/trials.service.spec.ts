@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TrialsService } from './trials.service';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { getQueueToken } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { title } from 'process';
@@ -22,231 +22,108 @@ import { EachVote } from './entities/Uservote.entity';
 import { connect } from 'http2';
 import { release } from 'os';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Votes } from './entities/vote.entity';
+import { Readable } from 'stream';
+import { S3Service } from '../s3/s3.service';
+import { NotFoundException } from '@nestjs/common';
 
-jest.mock('trial-queue', () => {
-  return {
-    __esModule: true,
-    TrialsService: jest.fn().mockImplementation(() => ({
-      trailQueue: {
-        add: jest.fn().mockRejectedValue(true),
-      },
-    })),
-  };
-});
 const mockedUser: Users = {
-  id: 1,
-  role: Role.User,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  userInfo: new UserInfos(),
-  onlineBoard: [new OnlineBoards()],
-  onlineBoardComment: [new OnlineBoardComments()],
-  trial: [new Trials()],
-  humorBoard: [new HumorBoards()],
-  humorComment: [new HumorComments()],
-  polticalDebateBoards: [new PolticalDebateBoards()],
-  polticalDebateComments: [new PolticalDebateComments()],
-  eachPolticalVote: [new EachPolticalVote()],
-  eachHumorVote: [new EachHumorVote()],
-  humorLike: [new HumorLike()],
-  onlineBoardLike: [new OnlineBoardLike()],
-  eachVote: [new EachVote()],
-  trialsChat: [],
-};
+    id: 1,
+    role: Role.User,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    userInfo: new UserInfos(),
+    onlineBoard: [new OnlineBoards()],
+    onlineBoardComment: [new OnlineBoardComments()],
+    trial: [new Trials()],
+    humorBoard: [new HumorBoards()],
+    humorComment: [new HumorComments()],
+    polticalDebateBoards: [new PolticalDebateBoards()],
+    polticalDebateComments: [new PolticalDebateComments()],
+    humorLike: [],
+    onlineBoardLike: [],
+    eachVote: [],
+    eachHumorVote: [],
+    eachPolticalVote: [],
+    trialsChat: [],
+  };
 
 const mockedTrial: Trials = {
   id: 1,
-  content: 'Test Content',
   userId: 1,
   title: 'Test Title',
+  content: 'Test Content',
   view: 1,
   like: 1,
   top_comments: 'Test Top Comment',
   is_time_over: false,
-  createdAt: new Date(),
-  updated_at: new Date(),
+  createdAt : new Date(),
+  updatedAt : new Date(),
+  deletedAt: new Date(),
   user: null,
   vote: null,
   trialLike: null,
-  deleted_at: null,
-};
+}
 
-describe('TrialsService', () => {
-  let service: TrialsService;
-  let dataSource: DataSource;
-  let trialQueue: Queue;
+const mockVote = {
+    trialId: 1,
+    title1: '할머니',
+    title2: '은가누',
+  } as Votes;
 
-  const userId = 1;
-  const createTrialDto = {
-    title: 'Test title',
-    content: 'Test Content',
-    trialTime: new Date(),
-  };
-  const voteTitleDto = {
-    title1: 'Test title1',
-    title2: 'Test title2',
-  };
-
-  const mockTrialRepository = {
-    findOne: jest.fn(),
-    update: jest.fn(),
-    find: jest.fn(),
-  };
-
-  const mockPanryeRepository = {
-    find: jest.fn(),
-  };
-
-  const mockQueryRunner = {
-    connect: jest.fn(),
-    startTransaction: jest.fn(),
-    commitTransaction: jest.fn(),
-    rollbackTransaction: jest.fn(),
-    release: jest.fn(),
-    manager: {
-      create: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
+const mockFile: Express.Multer.File[] = [
+    {
+      fieldname: 'file',
+      originalname: 'testfile.txt',
+      encoding: '7bit',
+      mimetype: 'text/plain',
+      size: 128,
+      destination: './upload',
+      filename: 'testfile.txt',
+      path: './upload/testfile.txt',
+      buffer: Buffer.from('Hello World'),
+      stream: Readable.from(Buffer.from('Hello World')),
     },
-    createQueryBuilder: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      from: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      getMany: jest.fn().mockResolvedValue([]),
-    })),
-  };
-
-  const mockDataSource = {
-    mockQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
-  };
-
-  const mockUserRepository = {};
-
-  const mockTrialsRepository = {};
-
-  const mockUserInfosRepository = {};
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        TrialsService,
-        {
-          provide: getQueueToken('trial-queue'),
-          useValue: {
-            add: jest.fn(),
+  ];
+  
+  describe('TrialsService', () => {
+    let service: TrialsService;
+    let mockTrialsRepository: Partial<Record<keyof Repository<Trials>, jest.Mock>>;
+  
+    beforeEach(async () => {
+      mockTrialsRepository = {
+        findOneBy: jest.fn(),
+      };
+  
+      const module: TestingModule = await Test.createTestingModule({
+        providers: [
+          TrialsService,
+          {
+            provide: getRepositoryToken(Trials),
+            useValue: mockTrialsRepository,
           },
-        },
-        {
-          provide: getRepositoryToken(Users),
-          useValue: mockUserRepository,
-        },
-        {
-          provide: getRepositoryToken(Trials),
-          useValue: mockTrialsRepository,
-        },
-        {
-          provide: getRepositoryToken(UserInfos),
-          useValue: mockUserInfosRepository,
-        },
-        {
-          provide: DataSource,
-          useValue: {
-            createQueryRunner: () => ({
-              connect: jest.fn(),
-              startTransaction: jest.fn(),
-              manager: {
-                create: jest.fn(),
-                save: jest.fn(),
-                delete: jest.fn(),
-              },
-              commitTransaction: jest.fn(),
-              rollbackTransaction: jest.fn(),
-              release: jest.fn(),
-            }),
-            createQueryBuilder: jest.fn(() => ({
-              select: jest.fn().mockReturnThis(),
-              from: jest.fn().mockReturnThis(),
-              where: jest.fn().mockReturnThis(),
-              getMany: jest.fn().mockResolvedValue([]),
-            })),
-          },
-        },
-      ],
-    }).compile();
-
-    service = module.get<TrialsService>(TrialsService);
-    dataSource = module.get<DataSource>(DataSource);
-    trialQueue = module.get<Queue>(getQueueToken('trial-queue'));
+        ],
+      }).compile();
+  
+      service = module.get<TrialsService>(TrialsService);
+    });
+  
+    describe('findByUserTrials', () => {
+      it('should return trials if they exist', async () => {
+        const userId = 1;
+        const expectedTrial = mockedTrial; // 예상되는 재판 정보를 여기에 넣으세요
+        mockTrialsRepository.findOneBy.mockResolvedValue(expectedTrial);
+  
+        const result = await service.findByUserTrials(userId);
+        expect(result).toEqual(expectedTrial);
+        expect(mockTrialsRepository.findOneBy).toHaveBeenCalledWith({ userId });
+      });
+  
+      it('should throw NotFoundException if no trials are found', async () => {
+        const userId = 1;
+        mockTrialsRepository.findOneBy.mockResolvedValue(null);
+  
+        await expect(service.findByUserTrials(userId)).rejects.toThrow(NotFoundException);
+      });
+    });
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('재판과 재판에 대한 투표가 성공적으로 생성되었습니다.', async () => {
-    const userId = 1;
-    const createTrialDto = {
-      title: 'Test title',
-      content: 'Test Content',
-      trialTime: new Date(),
-    };
-    const voteTitleDto = {
-      title1: 'Test title1',
-      title2: 'Test title2',
-    };
-
-    const mockTrial = {
-      id: 1,
-      ...createTrialDto,
-      userId,
-    };
-    const mockVote = {
-      id: 1,
-      ...voteTitleDto,
-      trialId: 1,
-    };
-
-    // Mock 설정을 테스트 내부에서 진행합니다.
-    const mockSave = dataSource.createQueryRunner().manager.save as jest.Mock;
-    mockSave.mockResolvedValueOnce(mockTrial).mockResolvedValueOnce(mockVote);
-
-    const result = await service.createTrial(
-      userId,
-      createTrialDto,
-      voteTitleDto,
-    );
-    expect(result).toEqual({ savedTrial: mockTrial, savedVote: mockVote });
-    expect(trialQueue.add).toHaveBeenCalledWith(
-      'updateTimeDone',
-      {
-        trialId: mockTrial.id,
-      },
-      expect.any(Object),
-    );
-  });
-
-  it('생성이 실패 하였습니다.', async () => {
-    // 에러
-    const mockError = dataSource.createQueryRunner().manager.save as jest.Mock;
-    mockError.mockRejectedValue(new Error('Mock Error'));
-
-    const userId = 1;
-    const createTrialDto = {
-      title: 'Test title',
-      content: 'Test Content',
-      trialTime: new Date(),
-    };
-    const voteTitleDto = {
-      title1: 'Test Title1',
-      title2: 'Test Title2',
-    };
-
-    await expect(
-      service.createTrial(userId, createTrialDto, voteTitleDto),
-    ).rejects.toThrow('재판과 주표 생성 중 오류가 발생했습니다.');
-
-    expect(
-      dataSource.createQueryRunner().rollbackTransaction,
-    ).toHaveBeenCalled();
-  });
-});

@@ -31,7 +31,7 @@
         <div>
           <span>조회수:<%= data.view  %></span>
           <% if (boardType !== 'polticalDebate') { %>
-          <span>좋아요:<%= data.like  %></span>
+            <span id="likeCount">좋아요:<%= data.like %></span>
           <% } %>
         </div>
         
@@ -79,7 +79,7 @@
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
       <div class="like_button">
-        <button id="like" href="/<% data.id %>">좋아요</button>
+        <button id="like" class="like" href="/<% data.id %>">좋아요</button>
       </div>
       <% } %>
       <!--게시글 댓글-->

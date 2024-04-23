@@ -35,6 +35,8 @@
         }
     %>
 
+  </div>
+
     <header>
       <%- include('partials/board-title') %>
 
@@ -76,6 +78,7 @@
             baseUrl = '/trials?page=';
             break;
         }
+
         const prevGroupPage = startPage > 1 ? startPage - 1 : null;
         const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
         %>

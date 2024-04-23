@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Between, DataSource, Repository } from "typeorm";
 import { Cron, CronExpression } from "@nestjs/schedule";
@@ -6,6 +6,9 @@ import { PolticalDebateBoards } from "./entities/poltical_debate.entity";
 import { PolticalDebateVotes } from "./entities/polticalVote.entity";
 import { PolticalDebateHallOfFame } from "./entities/poltical_hall_of_fame.entity";
 import { PolticalDebateBoardsViewHallOfFames } from "./entities/polticalView_hall_of_fame.entity";
+import { PolticalVotesService } from "./poltical_debates_vote/poltical_debates_vote.service";
+import { PaginationQueryDto } from "src/humors/dto/get-humorBoard.dto";
+import { th } from "@faker-js/faker";
 
 @Injectable()
 export class PolticalDabateHallOfFameService {
@@ -18,20 +21,28 @@ export class PolticalDabateHallOfFameService {
         private polticalDebateHallOfFameRepository: Repository<PolticalDebateHallOfFame>,
         @InjectRepository(PolticalDebateBoardsViewHallOfFames)
         private polticalDebateBoardsViewHallOfFamesRepository: Repository<PolticalDebateBoardsViewHallOfFames>,
+        private readonly polticalVotesService: PolticalVotesService,
         private dataSource: DataSource,
     ){}
 
 
     // 명예의 전당 일요일 2시 20분에 업데이트
     @Cron('0 2 * * 1')
-    async updateHumorHallOfFame() {
+    async updatePolitcalHallOfFame() {
         const { start, end } = this.getLastWeekRange();
+
         const lastWeekVotes = await this.polticalDebateVotesRepository.find({
             where: {
                 createdAt: Between(start, end)
             },
         });
-        const lastWeekHumors = await this.polticalDebateBoardsRepository.find({
+
+        for (const vote of lastWeekVotes) {
+          await this.polticalVotesService.updateVoteCounts(vote.id)
+        }
+
+
+        const lastWeekPoltical = await this.polticalDebateBoardsRepository.find({
             where: {
                 createdAt: Between(start, end)
             }
@@ -42,7 +53,7 @@ export class PolticalDabateHallOfFameService {
         const hallOfFameData = this.aggVotesForHallOfFame(lastWeekVotes)
 
         // 조회수 데이터 가공
-        const viewHallOfFameData = this.aggVotesViewForHallOfFame(lastWeekHumors)
+        const viewHallOfFameData = this.aggVotesViewForHallOfFame(lastWeekPoltical)
 
          // 업데이트
         // 투표 명전 업데이트
@@ -112,11 +123,12 @@ private async aggVotesForHallOfFame(polticalDebateVotes: PolticalDebateVotes[]){
   
     const candidates = await this.polticalDebateVotesRepository
     .createQueryBuilder("polticalDebateBoardVote")
-    .select(['polticalDebateBoardVote.id', 'polticalDebateBoardVote.title1', 'polticalDebateBoardVote.title2'])
-    .addSelect("polticalDebateBoardVote.voteCount1 + polticalDebateBoardVote.voteCount2", "totalVotes")
+    .leftJoinAndSelect("polticalDebateBoardVote.polticalDebateBoards", "polticalDebateBoards") // vote와 trial을 조인
+    .select(['polticalDebateBoardVote.id', 'polticalDebateBoardVote.title1', 'polticalDebateBoardVote.title2', 'polticalDebateBoards.userId', 'polticalDebateBoards.content'])
+    .addSelect("polticalDebateBoardVote.voteCount1 + polticalDebateBoardVote.voteCount2", "total")
     .where('polticalDebateBoardVote.createdAt BETWEEN :start AND :end', { start: start.toISOString(), end: end.toISOString() })
-    .having("totalVotes >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
-    .orderBy('totalVotes', "DESC")
+    .having("total >= :minTotalVotes", { minTotalVotes: 100 }) // 투표 수 100 이상인 것만 조회
+    .orderBy('total', "DESC")
     .limit(1000)// 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
     .groupBy("polticalDebateBoardVote.id")
     .getRawMany();
@@ -131,13 +143,14 @@ private async updateHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.startTransaction();
     try{
     // 한번에 저장
+    await queryRunner.manager.delete(PolticalDebateHallOfFame, {});
       const newHallOfFameEntries = hallOfFameData.map(data => {
       const newHallOfFameEntry = new PolticalDebateHallOfFame();
       newHallOfFameEntry.id = data.id // vote table의 id임다
-      newHallOfFameEntry.userId = data.polticalDebateBoards.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
+      newHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newHallOfFameEntry.title = `${data.title1} Vs ${data.title2}`
-      newHallOfFameEntry.content = data.polticalDebateBoards.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newHallOfFameEntry.totalVotes = data.voteCount1 + data.voteCount2;
+      newHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
+      newHallOfFameEntry.total = data.total;
       newHallOfFameEntry.createdAt = new Date();
       newHallOfFameEntry.updatedAt = new Date();
       return newHallOfFameEntry;
@@ -161,6 +174,8 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try{
+    await queryRunner.manager.delete(PolticalDebateBoardsViewHallOfFames, {});
+
     // 한번에 저장
       const newViewHallOfFameEntries = hallOfFameData.map(data => {
       const newViewHallOfFameEntry = new PolticalDebateBoardsViewHallOfFames();
@@ -168,7 +183,7 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
       newViewHallOfFameEntry.userId = data.userId // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
       newViewHallOfFameEntry.title = data.title;
       newViewHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-      newViewHallOfFameEntry.totalview = data.like;
+      newViewHallOfFameEntry.total = data.views;
       newViewHallOfFameEntry.createdAt = new Date();
       newViewHallOfFameEntry.updatedAt = new Date();
       return newViewHallOfFameEntry;
@@ -186,13 +201,81 @@ private async updateViewHallOfFameDatabase(hallOfFameData: any){
     }
 
     // 명예전당 투표수 조회 매서드
-async getRecentHallOfFame(){
-    return await this.polticalDebateHallOfFameRepository.find();
+async getRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let polticalDebateHallOfFame : PolticalDebateHallOfFame[];
+
+    const totalItems = await this.polticalDebateHallOfFameRepository.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page -1) * limit;
+      polticalDebateHallOfFame = await this.polticalDebateHallOfFameRepository.find({
+        skip,
+        take: limit,
+        order: {
+          total:'DESC'
+        }
+      });
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+      );
+    }
+    return {
+      polticalDebateHallOfFame,
+      totalItems
+    }
   }
   
   
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame(){
-      return await this.polticalDebateBoardsViewHallOfFamesRepository.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto){
+    let polticalDebateBoardsViewHallOfFames: PolticalDebateBoardsViewHallOfFames[]
+    const totalItems = await this.polticalDebateBoardsViewHallOfFamesRepository.count();
+    try{
+      const { page, limit } =paginationQueryDto
+      const skip = (page - 1) * limit;
+      polticalDebateBoardsViewHallOfFames = await this.polticalDebateBoardsViewHallOfFamesRepository.find({
+        skip,
+        take: limit,
+        order: {
+          total: 'DESC',
+        }
+      });
+    }catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        "명예의 전당을 불러오는 도중 오류가 발생했습니다."
+      )
     }
+      return {
+        polticalDebateBoardsViewHallOfFames,
+        totalItems
+      }
+    }
+
+     // 특정 명전 투표 조회
+    async findOneByPoliteHallofFameVote(id: number) {
+
+    const OneHallOfPoliteVote = await this.polticalDebateHallOfFameRepository.findOneBy({ id });
+
+    if(!OneHallOfPoliteVote) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfPoliteVote }
+  }
+
+   // 특정 명전 투표 조회
+   async findOneByPoliteHallofFameView(id: number) {
+
+    const OneHallOfPoliteView = await this.polticalDebateBoardsViewHallOfFamesRepository.findOneBy({ id });
+
+    if(!OneHallOfPoliteView) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfPoliteView }
+  }
+    
 }
