@@ -117,7 +117,6 @@ export class HumorVotesService {
 
   // 투표하기
   async addHumorVoteUserorNanUser(
-    userCode: string,
     userId: number,
     humorVoteId: number,
     voteFor: boolean,
@@ -242,15 +241,21 @@ export class HumorVotesService {
     const result = await this.dataSource
       .getRepository(EachHumorVote)
       .createQueryBuilder('eachHumorVote')
-      .select('SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END)', 'voteCount1')
-      .addSelect('SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)', 'voteCount2')
+      .select(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END)',
+        'voteCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'voteCount2',
+      )
       .where('eachHumorVote.humorVoteId = :humorVoteId', { humorVoteId })
       .andWhere('eachHumorVote.userCode IS NULL')
       .getRawOne();
-  
+
     const voteCount1 = parseInt(result.voteCount1, 10);
     const voteCount2 = parseInt(result.voteCount2, 10);
-  
+
     await this.dataSource
       .getRepository(HumorVotes)
       .createQueryBuilder()

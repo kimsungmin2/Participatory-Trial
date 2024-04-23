@@ -12,9 +12,9 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
-// import { ChatDocument } from 'src/cats/schemas/chat.schemas';
 import { Model } from 'mongoose';
-import { th } from '@faker-js/faker';
+import { ChatDocument } from '../schemas/chat.schemas';
+import { FcmService } from '../alarm/fcm.service';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -28,13 +28,21 @@ export class ChatsService implements OnModuleInit {
     @InjectRepository(PolticalsChat)
     private readonly polticalsChatRepository: Repository<PolticalsChat>,
     private readonly dataSource: DataSource,
-    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis, // Redis 데이터 클라이언트를 주입
-    // @InjectModel(Chat.name) private chatModel: Model<ChatDocument>
+    @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
+    @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
+    private readonly alarmService: FcmService,
   ) {}
+
   async publishNotification(message: string) {
     const channelName = 'notifications';
     await this.redisDataClient.publish(channelName, message);
   }
+
+  async userPublishNotification(message: string) {
+    const channelName = 'userNotifications';
+    await this.redisDataClient.publish(channelName, message);
+  }
+
   async onModuleInit() {
     this.handleScheduledTasks();
   }
@@ -81,7 +89,7 @@ export class ChatsService implements OnModuleInit {
     );
 
     if (messages.length > 0) {
-      const [channelType, roomId] = key.split(':');
+      const [channelType, roomId] = key.split(':chat:');
 
       await this.saveMessagesToDatabase(messages, channelType, +roomId);
 
@@ -95,7 +103,6 @@ export class ChatsService implements OnModuleInit {
     roomId: number,
   ) {
     const chats = [];
-
     for (const message of messages) {
       const parsedMessage = JSON.parse(message);
       const user = await this.usersInfoRepository.findOne({
@@ -103,94 +110,84 @@ export class ChatsService implements OnModuleInit {
         select: ['nickName'],
       });
 
-      // chats.push(new this.chatModel({
-      //   message: parsedMessage.message,
-      //   userId: parsedMessage.userId,
-      //   RoomId: roomId,
-      //   timestamp: new Date(parsedMessage.timestamp),
-      //   userName: user ? user.nickName : 'Unknown User',
-      //   channelType: channelType,
-      // }));
+      chats.push(
+        new this.chatModel({
+          message: parsedMessage.message,
+          userId: parsedMessage.userId,
+          RoomId: roomId,
+          timestamp: parsedMessage.timestamp,
+          userName: user ? user.nickName : 'Unknown User',
+          channelType: channelType,
+        }),
+      );
     }
     try {
-      // await this.chatModel.insertMany(chats);
+      await this.chatModel.insertMany(chats);
     } catch (error) {
       console.log('몽고 디비 저장 중 오류가 발생했습니다.:', error);
     }
   }
 
-  //     const user = await this.usersInfoRepository.findOne({
-  //       where: { id: parsedMessage.userId },
-  //       select: ['nickName'],
-  //     });
-  //     const chat = new ChatEntity();
-  //     chat.message = parsedMessage.message;
-  //     chat.userId = parsedMessage.userId;
-  //     chat.roomId = roomId;
-  //     chat.timestamp = new Date(parsedMessage.timestamp);
-  //     chat.userName = user ? user.nickName : 'Unknown User';
-  //     chats.push(chat);
-  //   }
-  //   const queryRunner = this.dataSource.createQueryRunner();
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-  //   try {
-  //     await channelChatsRepository.save(chats);
-  //     await queryRunner.commitTransaction();
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
-  //   } finally {
-  //     await queryRunner.release();
-  //   }
-  // }
   async createChannelChat(
     channelType: string,
-    userId: number,
+    userId: number | null,
     message: string,
     roomId: number,
   ) {
     try {
-      let userName = await this.redisDataClient.get(`userName:${userId}`);
-      if (!userName) {
-        const user = await this.usersInfoRepository.findOne({
-          where: { id: userId },
-          select: ['nickName'],
-        });
-        if (user) {
-          userName = user.nickName;
-          await this.redisDataClient.set(
-            `userName:${userId}`,
-            userName,
-            'EX',
-            60 * 60 * 24,
-          );
-        } else {
-          throw new Error('유저가 없음');
+      let userName = '익명';
+
+      if (userId) {
+        userName = await this.redisDataClient.get(`userName:${userId}`);
+        if (!userName) {
+          const user = await this.usersInfoRepository.findOne({
+            where: { id: userId },
+            select: ['nickName'],
+          });
+          if (user) {
+            userName = user.nickName;
+            await this.redisDataClient.set(
+              `userName:${userId}`,
+              userName,
+              'EX',
+              60 * 60 * 24,
+            );
+          } else {
+            throw new Error('유저가 없음');
+          }
         }
       }
+
       const chat = new Chat();
       chat.message = message;
-      chat.userId = userId;
+      chat.userId = userId || undefined;
       chat.RoomId = roomId;
       chat.timestamp = new Date();
-      // chat.userName = user.nickName;
+      chat.userName = userName;
 
       const chatKey = `${channelType}:chat:${roomId}`;
       const chatValue = JSON.stringify(chat);
+
       await this.redisDataClient.rpush(chatKey, chatValue);
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
       await this.redisDataClient.publish(chatKey, chatValue);
+
+      // await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
+
       return userName;
     } catch (error) {
       throw error;
     }
   }
+
   // async redisConnection(attempt = 0) {
   //   const maxRetries = 3;
   //   const retryDelay = 1000;
+
   //   if (attempt >= maxRetries) {
   //     throw new Error('레디스 연결 실패: 최대 재시도 횟수 초과');
   //   }
+
   //   try {
   //     await this.redisDataClient.ping();
   //   } catch (error) {
@@ -208,10 +205,11 @@ export class ChatsService implements OnModuleInit {
     page: number = 0,
     limit: number = 50,
   ): Promise<Chat[]> {
-    // await this.redisConnection();
     const channelKey = `${channelType}:chat:${roomId}`;
     const redisMessageCount = await this.redisDataClient.llen(channelKey);
+
     let chats = [];
+
     try {
       if (page === 0) {
         const chatMessages = await this.redisDataClient.lrange(
@@ -223,27 +221,18 @@ export class ChatsService implements OnModuleInit {
           chats = chatMessages.map((message) => JSON.parse(message));
         }
       }
+
       if (redisMessageCount < limit || page > 0) {
-        let channelChatsRepository: Repository<any>;
-        switch (channelType) {
-          case 'trials':
-            channelChatsRepository = this.trialsChatRepository;
-            break;
-          case 'humors':
-            channelChatsRepository = this.humorsChatRepository;
-            break;
-          case 'poltical-debates':
-            channelChatsRepository = this.polticalsChatRepository;
-            break;
-        }
         const dbStartIndex =
           page > 0 ? page * limit - Math.min(redisMessageCount, limit) : 0;
-        const dbChatMessages = await channelChatsRepository.find({
-          where: { roomId: roomId },
-          order: { timestamp: 'ASC' },
-          skip: dbStartIndex,
-          take: limit,
-        });
+
+        const dbChatMessages = await this.chatModel
+          .find({ RoomId: roomId })
+          .sort({ timestamp: 'asc' })
+          .skip(dbStartIndex)
+          .limit(limit)
+          .exec();
+
         if (page === 0 && chats.length > 0) {
           chats = [...chats, ...dbChatMessages];
         } else {

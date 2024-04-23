@@ -3,14 +3,14 @@ import { ChatsService } from './chats.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TrialsChannels } from '../events/entities/trialsChannel.entity';
 import { TrialsChat } from '../events/entities/trialsChat.entity';
-import { Users } from '../users/entities/user.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { RedisIoAdapter } from '../cache/redis.adpter';
 import { HumorsChat } from '../events/entities/humorsChat.entity';
 import { PolticalsChat } from '../events/entities/polticalsChat.entity';
-import { UserInfos } from '../users/entities/user-info.entity';
-import Redis from 'ioredis';
-import { RedisIoAdapter } from '../cache/redis.adpter';
 import { MongooseModule } from '@nestjs/mongoose';
-// import { CatSchema } from 'src/cats/schemas/chat.schemas';
+import { CatSchema } from '../schemas/chat.schemas';
+import { AlarmService } from '../alarm/alarm.service';
+import { AlarmModule } from '../alarm/alarm.module';
 
 @Module({
   imports: [
@@ -21,7 +21,8 @@ import { MongooseModule } from '@nestjs/mongoose';
       HumorsChat,
       PolticalsChat,
     ]),
-    // MongooseModule.forFeature([{ name: 'Chat', schema: CatSchema }])
+    MongooseModule.forFeature([{ name: 'Chat', schema: CatSchema }]),
+    AlarmModule,
   ],
   providers: [
     ChatsService,
@@ -33,6 +34,6 @@ import { MongooseModule } from '@nestjs/mongoose';
       inject: [RedisIoAdapter],
     },
   ],
-  exports: [ChatsService],
+  exports: [ChatsService, RedisIoAdapter],
 })
 export class ChatsModule {}

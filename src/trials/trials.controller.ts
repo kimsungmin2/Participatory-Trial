@@ -229,7 +229,6 @@ export class TrialsController {
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
-  // @Render('vote.ejs')
   @Render('post.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
@@ -297,13 +296,14 @@ export class TrialsController {
       +trialsId,
       updateTrialDto,
     );
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: '재판 수정에 성공하였습니다.',
-      data,
-    };
   }
+
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: '재판 수정에 성공하였습니다.',
+  //     data,
+  //   };
+  // }
 
   // 내 재판 삭제 API
   @ApiOperation({ summary: ' 내 재판 게시물 삭제 API' })

@@ -20,6 +20,7 @@ import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { NotFound } from '@aws-sdk/client-s3';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
 export class PolticalDebatesService {
@@ -31,8 +32,7 @@ export class PolticalDebatesService {
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
     private readonly dataSource: DataSource,
     private s3Service: S3Service,
-    @InjectRedis()
-    private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
 
   /**
@@ -197,7 +197,9 @@ export class PolticalDebatesService {
     }
     let cachedView: number;
     try {
-      cachedView = await this.redis.incr(`poticalDebate:${id}:view`);
+      cachedView = await this.redisService
+        .getCluster()
+        .incr(`poticalDebate:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',

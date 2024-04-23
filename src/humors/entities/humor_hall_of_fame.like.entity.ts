@@ -20,8 +20,8 @@ import {
     @Column({ type: 'varchar', nullable: false })
     content: string;
   
-    @Column({ type: 'int'})
-    total: number;
+    @Column({ type: 'varchar'})
+    totallike: number;
     
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;

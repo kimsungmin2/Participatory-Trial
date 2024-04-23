@@ -17,6 +17,7 @@ import { Users } from '../users/entities/user.entity';
 import { VerifiCation } from './dto/verification.dto';
 import { CACHE_MANAGER, Cache, CacheKey } from '@nestjs/cache-manager';
 import { RedisService } from '../cache/redis.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -90,11 +91,21 @@ export class AuthService {
   }
 
   async AuthenticationNumberCache(email: string) {
+    console.log(3);
     const code = Math.floor(Math.random() * 900000) + 100000;
-    const emailCode = await this.redisService.getCluster().get(email);
+    let emailCode;
+    try {
+      console.log('레디스');
+      emailCode = await this.redisService.getCluster().get(email);
+      console.log('햄');
+    } catch (err) {
+      console.error(err);
+    }
+    console.log(emailCode);
     if (emailCode) {
       await this.redisService.getCluster().del(email);
     }
+    console.log(2);
     await this.redisService.getCluster().set(email, code, 'EX', 60 * 60 * 3);
 
     await this.emailService.queueVerificationEmail(email, code);
@@ -112,15 +123,15 @@ export class AuthService {
     await queryRunner.startTransaction();
     const existingUser = await this.usersService.findByEmail(email);
 
-    if (existingUser) {
-      if (existingUser.emailVerified === true) {
-        throw new ConflictException(
-          '이미 해당 이메일로 가입된 사용자가 있습니다!',
-        );
-      }
+    if (existingUser && existingUser.emailVerified) {
+      await queryRunner.release();
+      throw new ConflictException(
+        '이미 해당 이메일로 가입된 사용자가 있습니다!',
+      );
     }
 
     if (password !== passwordConfirm) {
+      await queryRunner.release();
       throw new UnauthorizedException(
         '비밀번호가 체크비밀번호와 일치하지 않습니다.',
       );
@@ -129,23 +140,24 @@ export class AuthService {
     try {
       const hashedPassword = await hash(password, 10);
 
-      await queryRunner.manager
-        .getRepository(UserInfos)
-        .delete(existingUser.id);
+      if (existingUser) {
+        await queryRunner.manager
+          .getRepository(UserInfos)
+          .delete(existingUser.id);
+        await queryRunner.manager.getRepository(Users).delete(existingUser.id);
+      }
 
-      await queryRunner.manager.getRepository(Users).delete(existingUser.id);
       const user = await queryRunner.manager.getRepository(Users).save({});
-
       const userInfo = await queryRunner.manager.getRepository(UserInfos).save({
-        id: user.id,
         email: email,
         password: hashedPassword,
         nickName: nickName,
         birth: birth,
         user: user,
       });
-      await queryRunner.commitTransaction();
 
+      await queryRunner.commitTransaction();
+      console.log(1);
       await this.AuthenticationNumberCache(email);
 
       return userInfo;
@@ -196,6 +208,7 @@ export class AuthService {
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
+
     const payload = { sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -208,6 +221,11 @@ export class AuthService {
       expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
     const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
+    // const newClientId = uuidv4();
+    // const clientsInfo = await this.usersService.updateClientsInfo({
+    //   userId: user.id,
+    //   clientId: newClientId,
+    // });
 
     await this.redisService
       .getCluster()

@@ -59,9 +59,6 @@ export class Users {
   @OneToMany(() => HumorBoards, (humorBoard) => humorBoard.user)
   humorBoard: HumorBoards[];
 
-  @OneToMany(() => HumorComments, (humorComment) => humorComment.user)
-  humorComment: HumorComments[];
-
   @OneToMany(
     () => PolticalDebateBoards,
     (polticalDebateBoards) => polticalDebateBoards.user,

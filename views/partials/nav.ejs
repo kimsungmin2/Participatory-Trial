@@ -66,12 +66,6 @@
         </ul>
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#" id="showNotifications">알림</a>
-            <div
-              id="notificationContainer"
-            ></div>
-        </li>
-          <li class="nav-item">
             <% if (isLoggedIn) { %>
               <a class="nav-link" id="logout" href="/logout">로그아웃</a>
             <% } else { %>
@@ -83,7 +77,7 @@
       </div>
     </div>
   </nav>
-  <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+  <!-- <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script> -->
   <script>
     document.getElementById('logout').addEventListener('click', function() {
       fetch('/logout', { method: 'POST' }) // /logout에 POST 요청
@@ -108,20 +102,17 @@
           const notificationsString = localStorage.getItem('notifications');
           return notificationsString ? JSON.parse(notificationsString) : [];
         }
+
         let notifications =
           JSON.parse(localStorage.getItem('notifications')) || [];
+
         function saveNotifications(notifications) {
           localStorage.setItem('notifications', JSON.stringify(notifications));
         }
-        const socket = io();
-        socket.on('notification', function (message) {
-          notifications.push(message);
-          if (notifications.length > 10) {
-            notifications.shift();
-          }
-          localStorage.setItem('notifications', JSON.stringify(notifications));
-          createNotification(message);
-        });
+
+        // const socket = io();
+
+    
         popupContainer.addEventListener('click', function (event) {
           if (
             event.target.tagName === 'A' &&
@@ -137,11 +128,14 @@
         const rect = this.getBoundingClientRect(); // 버튼의 위치 정보를 가져옴
         const top = rect.bottom + window.scrollY; // 버튼의 하단 위치에 맞춤
         const left = rect.left + window.scrollX; // 버튼의 왼쪽 정렬
+
         popupContainer.style.top = `${top}px`; // 상단 위치 설정
         popupContainer.style.left = `${left}px`; // 왼쪽 위치 설정
         popupContainer.style.display = 'block'; // 알림 컨테이너 표시
+
         const notifications = loadNotifications();
         popupContainer.innerHTML = '';
+
         notifications.forEach((notification) => {
             const notificationElement = document.createElement('a');
             notificationElement.href = '#';
@@ -185,7 +179,9 @@
           });
           notification.style.bottom = `${20 + offset}px`;
           notificationContainer.appendChild(notification);
+
           offset += 60;
+
           setTimeout(() => {
             notificationContainer.removeChild(notification);
             offset -= 60;

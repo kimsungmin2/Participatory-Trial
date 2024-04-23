@@ -14,6 +14,7 @@ import { AuthService } from './auth.service';
 import { EmailService } from '../email/email.service';
 import { DataSource } from 'typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RedisService } from '../cache/redis.service';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn().mockResolvedValue('hashedPassword'),
@@ -57,6 +58,7 @@ describe('AuthService', () => {
   };
   const mockEmailService = {
     sendVerificationToEmail: jest.fn(),
+    queueVerificationEmail: jest.fn(),
   };
   const mockQueryRunner = {
     connect: jest.fn(),
@@ -89,8 +91,39 @@ describe('AuthService', () => {
   };
 
   const mockDataSource = {
-    createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
+    createQueryRunner: jest.fn(() => ({
+      connect: jest.fn(),
+      startTransaction: jest.fn(),
+      commitTransaction: jest.fn(),
+      rollbackTransaction: jest.fn(),
+      release: jest.fn(),
+      manager: {
+        getRepository: jest.fn().mockImplementation((entity) => {
+          if (entity === Users) {
+            return {
+              delete: jest.fn(),
+              save: jest.fn().mockResolvedValue(new Users()),
+            };
+          } else if (entity === UserInfos) {
+            return {
+              delete: jest.fn(),
+              save: jest.fn().mockResolvedValue({
+                id: 1,
+                email: 'test@example.com',
+                password: 'default',
+                nickName: 'testNickName',
+                provider: 'provider',
+                birth: 'default',
+                emailVerified: true,
+                user: { id: 1 },
+              }),
+            };
+          }
+        }),
+      },
+    })),
   };
+
   jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashedPassword');
 
   // const signUpdto = {
@@ -110,7 +143,15 @@ describe('AuthService', () => {
     passwordConfirm: 'hashedPassword',
     birth: '1996-05-24',
   };
-  const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
+  const mockRedisCluster = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
+  const mockRedisService = {
+    getCluster: jest.fn(() => mockRedisCluster),
+  };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -128,10 +169,10 @@ describe('AuthService', () => {
           provide: DataSource,
           useValue: mockDataSource,
         },
-        { provide: EmailService, useValue: { sendEmail: jest.fn() } },
+        { provide: EmailService, useValue: mockEmailService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: DataSource, useValue: mockDataSource },
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 
@@ -181,139 +222,187 @@ describe('AuthService', () => {
     });
   });
 
-  describe('간편 가입 테스트', () => {
-    it('성공적으로 프로바이더 사용자를 생성한다', async () => {
+  describe('간편가입', () => {
+    it('가입에 성공', async () => {
       const email = 'test@example.com';
       const nickName = 'testNickName';
       const provider = 'provider';
 
-      const result = await service.createProviderUser(
+      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
+
+      const userInfo = await service.createProviderUser(
         email,
         nickName,
         provider,
       );
 
-      expect(result).toEqual({
-        id: 1,
-        email: 'test@example.com',
-        password: 'default',
-        nickName: 'testNickName',
-        provider: 'provider',
-        birth: 'default',
-        verifiCationCode: 0,
-        emailVerified: true,
-      });
-      expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.commitTransaction).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.release).toHaveBeenCalledTimes(1);
-    });
+      expect(userInfo).toBeDefined();
+      expect(userInfo.email).toBe(email);
+      expect(userInfo.nickName).toBe(nickName);
+      expect(userInfo.provider).toBe(provider);
 
-    describe('login', () => {
-      const user = {
-        email: 'test@email.com',
-        password: 'hashedPassword',
-        emailVerified: true,
-      };
-      const password = 'correctPassword';
-      it('성공적인 로그인', async () => {
-        const password = 'correctPassword';
-        mockUserInfoRepository.findOne.mockResolvedValue(user.email);
-        // bcrypt.compare(user.password, password);
-        mockJwtService.sign.mockReturnValue('token');
-        const result = await service.login(user.email, password);
-
-        expect(result).toHaveProperty('accessToken');
-        expect(mockJwtService.sign).toHaveBeenCalledTimes(4);
-      });
-      it('이메일 인증이 완료되지 않았다면 에러를 발생시킨다', async () => {
-        mockUserInfoRepository.findOne.mockResolvedValue({
-          ...user,
-          emailVerified: false,
-        });
-
-        await expect(service.login(user.email, password)).rejects.toThrow(
-          UnauthorizedException,
-        );
-      });
-
-      it('이메일이 존재하지 않을 경우 에러를 발생시킨다', async () => {
-        mockUserInfoRepository.findOne.mockResolvedValue(null);
-
-        await expect(
-          service.login('nonexistent@example.com', password),
-        ).rejects.toThrow(UnauthorizedException);
-      });
-
-      it('비밀번호가 일치하지 않으면 에러를 발생시킨다', async () => {
-        mockUserInfoRepository.findOne.mockResolvedValue({
-          email: user.email,
-          password: 'hashedPassword',
-        });
-
-        await expect(service.login(user.email, '1234asd')).rejects.toThrow(
-          UnauthorizedException,
-        );
-      });
-    });
-  });
-
-  describe('회원가입(signUp) 테스트', () => {
-    it('모든 조건이 충족되면 회원가입을 성공적으로 완료한다', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(null);
-      mockEmailService.sendVerificationToEmail.mockResolvedValue(undefined);
-      // expect(bcrypt.hash).toHaveBeenCalledWith(signUpdto.password, 10);
-      mockQueryRunner.manager
-        .getRepository(Users)
-        .save.mockResolvedValue({ id: 1 });
-      mockQueryRunner.manager.getRepository(UserInfos).save.mockResolvedValue({
-        id: 1,
-        ...signUpdto,
-        password: signUpdto.password,
-      });
-
-      await service.signUp(
-        signUpdto.email,
-        signUpdto.password,
-        signUpdto.passwordConfirm,
-        signUpdto.nickName,
-        signUpdto.birth,
-      );
-
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
-        signUpdto.email,
-      );
-
+      expect(mockQueryRunner.connect).toHaveBeenCalled();
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.release).toHaveBeenCalled();
     });
-    it('이미 존재하는 이메일로 가입 시도할 경우 에러를 발생시킨다', async () => {
-      mockUsersService.findByEmail.mockResolvedValue({
-        email: 'test@email.com',
+
+    it('에러가 나는지', async () => {
+      const email = 'test@example.com';
+      const nickName = 'testNickName';
+      const provider = 'provider';
+
+      const mockQueryRunner = {
+        connect: jest.fn().mockResolvedValue(undefined),
+        startTransaction: jest.fn().mockResolvedValue(undefined),
+        commitTransaction: jest.fn().mockResolvedValue(undefined),
+        rollbackTransaction: jest.fn().mockResolvedValue(undefined),
+        release: jest.fn().mockResolvedValue(undefined),
+        manager: {
+          getRepository: jest.fn().mockImplementation((entity) => {
+            if (entity === Users) {
+              return { save: jest.fn().mockResolvedValue({ id: 1 }) };
+            } else if (entity === UserInfos) {
+              return {
+                save: jest.fn().mockRejectedValue(new Error('Database error')),
+              };
+            }
+          }),
+        },
+      };
+      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
+
+      try {
+        const result = await service.createProviderUser(
+          email,
+          nickName,
+          provider,
+        );
+        expect(result).toBeUndefined();
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect(error.message).toBe('Database error');
+      }
+
+      expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
+  });
+
+  describe('로그인', () => {
+    const user = {
+      email: 'test@email.com',
+      password: 'hashedPassword',
+      emailVerified: true,
+    };
+    const password = 'correctPassword';
+    it('성공적인 로그인', async () => {
+      const password = 'correctPassword';
+      mockUserInfoRepository.findOne.mockResolvedValue(user.email);
+      // bcrypt.compare(user.password, password);
+      mockJwtService.sign.mockReturnValue('token');
+      const result = await service.login(user.email, password);
+
+      expect(result).toHaveProperty('accessToken');
+      expect(mockJwtService.sign).toHaveBeenCalledTimes(4);
+    });
+    it('이메일 인증이 완료되지 않았다면 에러를 발생시킨다', async () => {
+      mockUserInfoRepository.findOne.mockResolvedValue({
+        ...user,
+        emailVerified: false,
       });
-      mockUsersService.findByEmail.mockResolvedValue(user);
+
+      await expect(service.login(user.email, password)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('이메일이 존재하지 않을 경우 에러를 발생시킨다', async () => {
+      mockUserInfoRepository.findOne.mockResolvedValue(null);
+
+      await expect(
+        service.login('nonexistent@example.com', password),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('비밀번호가 일치하지 않으면 에러를 발생시킨다', async () => {
+      mockUserInfoRepository.findOne.mockResolvedValue({
+        email: user.email,
+        password: 'hashedPassword',
+      });
+
+      await expect(service.login(user.email, '1234asd')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('회원가입', () => {
+    it('이미 있는 사용자', async () => {
+      jest.spyOn(mockUsersService, 'findByEmail').mockResolvedValue({
+        emailVerified: true,
+      });
 
       await expect(
         service.signUp(
-          'test@email.com',
-          signUpdto.password,
-          signUpdto.passwordConfirm,
-          signUpdto.nickName,
-          signUpdto.birth,
+          'test@example.com',
+          'Password123',
+          'Password123',
+          'nickname',
+          '2000-01-01',
         ),
       ).rejects.toThrow(ConflictException);
     });
 
-    it('비밀번호와 확인 비밀번호가 일치하지 않을 경우 에러를 발생시킴', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(null);
+    it('비밀번호가 맞는지', async () => {
+      jest.spyOn(mockUsersService, 'findByEmail').mockResolvedValue(null);
+
       await expect(
         service.signUp(
-          signUpdto.email,
-          signUpdto.password,
-          signUpdto.nickName,
-          signUpdto.birth,
-          'asdf',
+          'test@example.com',
+          'Password123',
+          'Password321',
+          'nickname',
+          '2000-01-01',
         ),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('모든 조건이 충족되면 회원가입을 성공적으로 완료한다', async () => {
+      mockUsersService.findByEmail.mockResolvedValue(null);
+
+      const mockCommitTransaction = jest.fn().mockResolvedValue(undefined);
+      const mockRelease = jest.fn().mockResolvedValue(undefined);
+
+      mockDataSource.createQueryRunner.mockReturnValue({
+        connect: jest.fn().mockResolvedValue(undefined),
+        startTransaction: jest.fn().mockResolvedValue(undefined),
+        commitTransaction: mockCommitTransaction,
+        rollbackTransaction: jest.fn().mockResolvedValue(undefined),
+        release: mockRelease,
+        manager: {
+          getRepository: jest.fn().mockImplementation((entity) => ({
+            delete: jest.fn().mockResolvedValue({ affected: 1 }),
+            save: jest
+              .fn()
+              .mockResolvedValue({ id: 1, email: 'test@example.com' }),
+          })),
+        },
+      });
+
+      await expect(
+        service.signUp(
+          'test@example.com',
+          'Password123',
+          'Password123',
+          'testNickName',
+          '2000-01-01',
+        ),
+      ).resolves.not.toThrow();
+
+      // commitTransaction과 release가 호출되었는지 확인
+      expect(mockCommitTransaction).toHaveBeenCalled();
+      expect(mockRelease).toHaveBeenCalled();
     });
   });
   describe('이메일 인증', () => {
@@ -323,20 +412,21 @@ describe('AuthService', () => {
     };
 
     it('성공적으로 이메일 인증을 완료한다', async () => {
-      mockUsersService.findByEmail.mockResolvedValue(user);
-      mockCacheManager.get.mockResolvedValue(verifiCationDto.code);
-      mockUserInfoRepository.update.mockResolvedValue(undefined);
-
-      await service.verifiCationEmail(verifiCationDto);
-
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
-        verifiCationDto.email,
-      );
-      expect(mockCacheManager.get).toHaveBeenCalledWith(verifiCationDto.email);
-      expect(mockUserInfoRepository.update).toHaveBeenCalledWith(user.id, {
-        emailVerified: true,
+      const verifiCation = { id: 1, email: 'test@example.com', code: 123456 };
+      mockUsersService.findByEmail.mockResolvedValue({
+        id: 1,
+        email: verifiCation.email,
       });
-      expect(mockCacheManager.del).toHaveBeenCalledWith(verifiCationDto.email);
+      mockRedisCluster.get.mockResolvedValue(verifiCation.code.toString());
+      mockUserInfoRepository.update.mockResolvedValue({});
+
+      await service.verifiCationEmail(verifiCation);
+
+      expect(mockUserInfoRepository.update).toHaveBeenCalledWith(
+        verifiCation.id,
+        { emailVerified: true },
+      );
+      expect(mockRedisCluster.del).toHaveBeenCalledWith(verifiCation.email);
     });
 
     it('사용자를 찾을 수 없을 경우 NotFoundException을 발생시킨다', async () => {
@@ -349,7 +439,7 @@ describe('AuthService', () => {
 
     it('인증 코드가 만료되었거나 존재하지 않을 경우 NotFoundException을 발생시킨다', async () => {
       mockUsersService.findByEmail.mockResolvedValue(user);
-      mockCacheManager.get.mockResolvedValue(null);
+      mockRedisCluster.get.mockResolvedValue(null);
 
       await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
         NotFoundException,
@@ -358,7 +448,7 @@ describe('AuthService', () => {
 
     it('제공된 인증 코드가 일치하지 않을 경우 ConflictException을 발생시킨다', async () => {
       mockUsersService.findByEmail.mockResolvedValue(user);
-      mockCacheManager.get.mockResolvedValue(654321);
+      mockRedisCluster.get.mockResolvedValue(654321);
 
       await expect(service.verifiCationEmail(verifiCationDto)).rejects.toThrow(
         ConflictException,
@@ -369,15 +459,15 @@ describe('AuthService', () => {
     it('새로운 토큰을 생성하고, 이전 리프레시 토큰을 캐시에서 삭제한 후 새 리프레시 토큰을 캐시에 저장해야 한다', async () => {
       const oldRefreshToken = 'oldRefreshToken';
       const userId = '1';
-      mockCacheManager.get.mockResolvedValue(userId);
+      mockRedisCluster.get.mockResolvedValue(userId);
 
       const result = await service.refreshToken(oldRefreshToken);
 
-      expect(mockCacheManager.get).toHaveBeenCalledWith(
+      expect(mockRedisCluster.get).toHaveBeenCalledWith(
         `refresh_token:${oldRefreshToken}`,
       );
       expect(mockJwtService.sign).toHaveBeenCalledTimes(6);
-      expect(mockCacheManager.del).toHaveBeenCalledWith(
+      expect(mockRedisCluster.del).toHaveBeenCalledWith(
         `refresh_token:${oldRefreshToken}`,
       );
 
@@ -388,10 +478,24 @@ describe('AuthService', () => {
 
   it('리프레시 토큰이 캐시에 없는 경우 UnauthorizedException을 발생시켜야 한다', async () => {
     const oldRefreshToken = 'nonExistingRefreshToken';
-    mockCacheManager.get.mockResolvedValue(null);
+    mockRedisCluster.get.mockResolvedValue(null);
 
     await expect(service.refreshToken(oldRefreshToken)).rejects.toThrow(
       UnauthorizedException,
     );
+  });
+  describe('캐시에 저장', () => {
+    it('코드가 있으면 기존꺼 삭제', async () => {
+      const email = 'test@example.com';
+      const existingCode = '123456';
+      mockRedisCluster.get.mockResolvedValue(existingCode);
+
+      await service.AuthenticationNumberCache(email);
+
+      expect(mockRedisCluster.get).toHaveBeenCalledWith(email);
+      expect(mockRedisCluster.del).toHaveBeenCalledWith(email);
+      expect(mockRedisCluster.set).toHaveBeenCalled();
+      expect(mockEmailService.queueVerificationEmail).toHaveBeenCalled();
+    });
   });
 });

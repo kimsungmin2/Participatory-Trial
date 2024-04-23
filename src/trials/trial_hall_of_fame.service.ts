@@ -13,7 +13,7 @@ import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity'
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { th } from '@faker-js/faker';
 import { VotesService } from './vote/vote.service';
-import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 import { throwIfEmpty } from 'rxjs';
 
 @Injectable()

@@ -108,7 +108,6 @@ export class PolticalVotesService {
   }
   // 투표하기
   async addPolticalVoteUserorNanUser(
-    userCode: string,
     userId: number | null,
     polticalVoteId: number,
     voteFor: boolean,
@@ -222,15 +221,23 @@ export class PolticalVotesService {
     const result = await this.dataSource
       .getRepository(EachPolticalVote)
       .createQueryBuilder('eachPolticalVote')
-      .select('SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END)', 'voteCount1')
-      .addSelect('SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)', 'voteCount2')
-      .where('eachPolticalVote.polticalVoteId = :polticalVoteId', { polticalVoteId })
+      .select(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END)',
+        'voteCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
+        'voteCount2',
+      )
+      .where('eachPolticalVote.polticalVoteId = :polticalVoteId', {
+        polticalVoteId,
+      })
       .andWhere('eachPolticalVote.userCode IS NULL')
       .getRawOne();
-  
+
     const voteCount1 = parseInt(result.voteCount1, 10);
     const voteCount2 = parseInt(result.voteCount2, 10);
-  
+
     await this.dataSource
       .getRepository(PolticalDebateVotes)
       .createQueryBuilder()

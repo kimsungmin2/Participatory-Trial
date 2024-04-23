@@ -29,9 +29,14 @@
           <span><%= data.OneTrials.title  %></span>
           <% } %>
         <div>
+          <% if (boardType !== "trial") {%>
           <span>조회수:<%= data.view  %></span>
           <% if (boardType !== 'polticalDebate') { %>
             <span id="likeCount">좋아요:<%= data.like %></span>
+          <% } %>
+          <% } else { %>
+            <span>조회수:<%= data.OneTrials.view  %></span>
+              <span id="likeCount">좋아요:<%= data.OneTrials.like %></span>
           <% } %>
         </div>
         
@@ -78,9 +83,16 @@
       </div>
       <!--게시글 좋아요-->
       <% if (boardType !== 'polticalDebate') { %>
-      <div class="like_button">
-        <button id="like" class="like" href="/<% data.id %>">좋아요</button>
-      </div>
+        <% if (boardType !== 'trial') { %>
+          <%= boardType %>
+        <div class="like_button">
+          <button id="like" class="like" href="/<% data.id %>">좋아요</button>
+        </div>
+        <% } else if (boardType === "trial") { %>
+          <div class="like_button">
+          <button id="like" class="like">좋아요</button>
+        </div>
+      <% } %>
       <% } %>
       <!--게시글 댓글-->
       <% 
@@ -98,6 +110,7 @@
           }
       %>
               <% if (boardType === 'humor') { %>
+                <%= JSON.stringify(data.hummorComment) %>
                 <p style="font-size: 30px;">댓글: <%= data.humorComment.length  %>개</p>
                 <div class="content_container">
                   <% for (let i = 0; i < data.humorComment.length; i++)  {%>
@@ -216,6 +229,7 @@ document.getElementById("update").addEventListener("click", function(e) {
 
   const deleteButton = document.getElementById('delete'); 
   
+  
   deleteButton.addEventListener('click', function(event) {
     const postId = deleteButton.getAttribute('data-post-id'); 
     if (!postId) {
@@ -325,7 +339,8 @@ document.getElementById("update").addEventListener("click", function(e) {
 });
   
 // 등록
-document.getElementById('commentForm').addEventListener('submit', function(event) {
+if (boardName !== "trials") {
+  document.getElementById('commentForm').addEventListener('submit', function(event) {
   event.preventDefault();
 
   let commentContent = document.getElementById('commentContent').value;
@@ -351,7 +366,47 @@ document.getElementById('commentForm').addEventListener('submit', function(event
     alert('서버 에러', error);
   });
 });
+}
 
+document.addEventListener('DOMContentLoaded', function () {
+        const socket = io('http://localhost:3000');
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        const extractedChannelType = segments[1];
+        const roomId = segments[2];
+        const likeBtn = document.getElementById('like');
+        const ChannelType = {
+            trials: 'trials',
+            humors: 'humors',
+            polticals: 'poltical-debates',
+        };
+        let channelType;
+        if (Object.values(ChannelType).includes(extractedChannelType)) {
+          channelType = extractedChannelType;
+        } else {
+        }
+likeBtn.addEventListener('click', function() {
+  console.log(1);
+          socket.emit('like', {
+            channelType,
+            roomId,
+          });
+          likeBtn.disabled = true;
+          setTimeout(function() {
+            likeBtn.disabled = false;
+          }, 3000);
+        });
+        socket.on('likesUpdated', function(data) {
+          if (data.id == roomId) {
+            const likeCountElement = document.querySelector('#likeCount');
+            const previousLikes = parseInt(likeCountElement.textContent.split(':')[1]);
+            likeCountElement.textContent = `좋아요:${data.likes}`;
+            if (data.likes < previousLikes) {
+              alert('좋아요를 취소하였습니다.');
+            }
+          }
+        });
+      })
 
     </script>
   </body>

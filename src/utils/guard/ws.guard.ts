@@ -4,40 +4,36 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class WsJwtGuard implements CanActivate {
+export class OptionalWsJwtGuard implements CanActivate {
   constructor(private readonly configService: ConfigService) {}
 
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const socket = context.switchToWs().getClient();
     const cookies = socket.handshake.headers.cookie;
-    if (!cookies) {
-      throw new WsException('인증되지않음');
+
+    if (cookies) {
+      const authToken = this.parseCookie(cookies, 'authorization');
+
+      if (authToken) {
+        const rawToken = authToken.split('Bearer%20')[1];
+        if (rawToken) {
+          try {
+            const decoded = jwt.verify(
+              rawToken,
+              this.configService.get<string>('JWT_SECRET_KEY'),
+            );
+            socket.userId = decoded['sub'];
+
+            return true;
+          } catch (error) {
+            console.error('인증 실패:', error);
+
+            return false;
+          }
+        }
+      }
     }
-
-    const authToken = this.parseCookie(cookies, 'authorization');
-    console.log(authToken);
-
-    if (!authToken) {
-      throw new WsException('인증 토큰이 없음');
-    }
-
-    const rawToken = authToken.split('Bearer%20')[1];
-
-    if (!rawToken) {
-      throw new WsException('인증 토큰 형식이 잘못됨');
-    }
-    try {
-      const decoded = jwt.verify(
-        rawToken,
-        this.configService.get<string>('JWT_SECRET_KEY'),
-      );
-
-      socket.userId = decoded['sub'];
-      console.log('통과 ㅋ ');
-      return true;
-    } catch (error) {
-      throw new WsException('인증 실패');
-    }
+    return true;
   }
 
   private parseCookie(cookies: string, name: string): string | null {

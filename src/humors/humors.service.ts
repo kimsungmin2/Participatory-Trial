@@ -18,6 +18,7 @@ import Redis from 'ioredis';
 import { cache } from 'joi';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
 export class HumorsService {
@@ -27,8 +28,7 @@ export class HumorsService {
     @InjectRepository(HumorVotes)
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
-    @InjectRedis()
-    private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
 
   //게시물 생성
@@ -161,12 +161,15 @@ export class HumorsService {
         relations: ['humorComment', 'humorVotes'],
       },
     );
+    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
     let cachedView: number;
     try {
-      cachedView = await this.redis.incr(`humors:${id}:view`);
+      cachedView = await this.redisService
+        .getCluster()
+        .incr(`humors:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',
