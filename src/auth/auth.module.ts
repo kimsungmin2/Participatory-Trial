@@ -15,7 +15,7 @@ import { EmailService } from '../email/email.service';
 import { GoogleStrategy } from '../utils/strategy/google.strategy';
 import { EmailModule } from '../email/email.module';
 import { BullModule } from '@nestjs/bull';
-import { CacheModule } from '@nestjs/cache-manager';
+import { Clients } from '../users/entities/client.entity';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     BullModule.registerQueue({
       name: 'email',
     }),
-    TypeOrmModule.forFeature([Users, UserInfos]),
+    TypeOrmModule.forFeature([Users, UserInfos, Clients]),
     UsersModule,
     EmailModule,
   ],

@@ -14,7 +14,7 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatDocument } from '../schemas/chat.schemas';
-import { AlarmService } from '../alarm/alarm.service';
+import { FcmService } from '../alarm/fcm.service';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -30,7 +30,7 @@ export class ChatsService implements OnModuleInit {
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
-    private readonly alarmService: AlarmService,
+    private readonly alarmService: FcmService,
   ) {}
 
   async publishNotification(message: string) {
@@ -158,15 +158,6 @@ export class ChatsService implements OnModuleInit {
         }
       }
 
-      if (userId) {
-        await this.alarmService.createAlarm(
-          userId,
-          channelType,
-          roomId,
-          'chat',
-        );
-      }
-
       const chat = new Chat();
       chat.message = message;
       chat.userId = userId || undefined;
@@ -179,8 +170,9 @@ export class ChatsService implements OnModuleInit {
 
       await this.redisDataClient.rpush(chatKey, chatValue);
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
-
       await this.redisDataClient.publish(chatKey, chatValue);
+
+      await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
 
       return userName;
     } catch (error) {

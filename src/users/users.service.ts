@@ -7,6 +7,8 @@ import { Users } from './entities/user.entity';
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import * as Redis from 'ioredis';
 import { RedisService } from '../cache/redis.service';
+import { ClientsDto } from './dto/client.dto';
+import { Clients } from './entities/client.entity';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +18,8 @@ export class UsersService {
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
     private readonly redisService: RedisService,
+    @InjectRepository(Clients)
+    private clientsRepository: Repository<Clients>,
   ) {}
 
   async findByEmail(email: string): Promise<UserInfos> {
@@ -75,6 +79,37 @@ export class UsersService {
 
     return this.usersRepository.softDelete(id);
   }
+
+  async updateClientsInfo(clientsDto: ClientsDto) {
+    const { userId, clientId, pushToken } = clientsDto;
+
+    let clientsInfo = await this.clientsRepository.findOne({
+      where: { pushToken: pushToken, clientId: clientId, userId: userId },
+    });
+
+    let area;
+    let updateNeeded = false;
+
+    if (clientsInfo) {
+      const isUpdated = clientsInfo.pushToken !== pushToken;
+      if (isUpdated) {
+        console.log('변경 전', clientsInfo, clientsDto);
+        Object.assign(clientsInfo, clientsDto);
+        console.log('변경 후---------', clientsInfo, clientsDto);
+        updateNeeded = true;
+      }
+    } else {
+      clientsInfo = this.clientsRepository.create(clientsDto);
+      updateNeeded = true;
+    }
+
+    if (updateNeeded) {
+      await this.clientsRepository.save(clientsInfo);
+    }
+
+    return { clientsInfo, area };
+  }
+
   // async userReport(id: number, reportId: number, content: string) {
   //   const user = await this.usersInfoRepository.findOneBy({ id });
   //   if (!user) {

@@ -17,6 +17,7 @@ import { Users } from '../users/entities/user.entity';
 import { VerifiCation } from './dto/verification.dto';
 import { CACHE_MANAGER, Cache, CacheKey } from '@nestjs/cache-manager';
 import { RedisService } from '../cache/redis.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -196,6 +197,7 @@ export class AuthService {
     if (!(await compare(password, user.password))) {
       throw new UnauthorizedException('비밀번호를 확인해주세요.');
     }
+
     const payload = { sub: user.id };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -208,6 +210,11 @@ export class AuthService {
       expiresIn: 1000 * 60 * 60 * 24 * 7,
     });
     const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
+    // const newClientId = uuidv4();
+    // const clientsInfo = await this.usersService.updateClientsInfo({
+    //   userId: user.id,
+    //   clientId: newClientId,
+    // });
 
     await this.redisService
       .getCluster()

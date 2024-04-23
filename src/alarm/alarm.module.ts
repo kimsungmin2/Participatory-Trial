@@ -9,6 +9,8 @@ import { Trials } from '../trials/entities/trial.entity';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
+import { FcmService } from './fcm.service';
+import { Clients } from '../users/entities/client.entity';
 
 @Module({
   imports: [
@@ -17,12 +19,13 @@ import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_deba
       HumorBoards,
       OnlineBoards,
       PolticalDebateBoards,
+      Clients,
     ]),
     ScheduleModule.forRoot(),
     MongooseModule.forFeature([{ name: 'Alarm', schema: AlarmSchema }]),
     RedisModule,
   ],
-  providers: [AlarmService],
-  exports: [AlarmService],
+  providers: [FcmService],
+  exports: [FcmService],
 })
 export class AlarmModule {}
