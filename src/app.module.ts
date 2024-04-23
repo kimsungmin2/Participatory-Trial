@@ -41,6 +41,8 @@ import { LikeModule } from './like/like.module';
 import { S3Module } from './s3/s3.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { CacheConfigService } from './cache/cache.config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
@@ -123,10 +125,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: HttpLoggingInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,
