@@ -116,7 +116,6 @@ export class HumorVotesService {
 
   // 투표하기
   async addHumorVoteUserorNanUser(
-    userCode: string,
     userId: number,
     humorVoteId: number,
     voteFor: boolean,

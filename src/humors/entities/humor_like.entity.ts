@@ -27,6 +27,10 @@ export class HumorLike {
   @JoinColumn({ name: 'humorBoardId', referencedColumnName: 'id' })
   humorBoard: HumorBoards;
 
+  @ManyToOne(() => Users, (user) => user.humorLike)
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
+  user: Users;
+
   @Column({ type: 'timestamp' })
   @CreateDateColumn()
   createdAt: Date;

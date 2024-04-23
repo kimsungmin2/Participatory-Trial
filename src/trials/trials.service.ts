@@ -15,13 +15,13 @@ import { PanryeInfo } from './entities/panryedata.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Votes } from './entities/vote.entity';
+import { VoteTitleDto } from './vote/dto/voteDto';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
-import { VoteTitleDto } from './vote/dto/voteDto';
 
 @Injectable()
 export class TrialsService {
@@ -39,10 +39,17 @@ export class TrialsService {
     @InjectQueue('trial-queue') private trialQueue: Queue,
   ) {}
   // 재판 생성
+  /**
+   *
+   * @param userId 유저 번호
+   * @param createTrialDto 제목, 컨텐츠 받아오는 Dto
+   * @param voteTrialDto title1 vs title 하는 Dto
+   * @returns
+   */
   async createTrial(
     userId: number,
     createTrialDto: CreateTrialDto,
-    voteTrialDto: VoteTitleDto,
+    voteTitleDto: VoteTitleDto,
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -50,7 +57,8 @@ export class TrialsService {
     try {
       // 1. Dto에서 title, content 뽑아내기
       const { title, content, trialTime } = createTrialDto;
-      const { title1, title2 } = voteTrialDto;
+      const { title1, title2 } = voteTitleDto;
+
       // 2. 객체에 넣기
       const data = {
         title,
@@ -152,38 +160,40 @@ export class TrialsService {
   }
 
   // 내 재판 업데이트
-  // async updateTrials(
-  //   userId: number,
-  //   trialsId: number,
-  //   updateTrialDto: UpdateTrialDto,
-  // ) {
-  //   const queryRunner = this.dataSource.createQueryRunner();
+  async updateTrials(
+    userId: number,
+    trialsId: number,
+    updateTrialDto: UpdateTrialDto,
+  ) {
+    const queryRunner = this.dataSource.createQueryRunner();
 
-  //   await queryRunner.connect();
-  //   await queryRunner.startTransaction();
-  //   try {
-  //     // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
-  //     const existTrial = await this.findOneByTrialsId(trialsId);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
+      const { OneTrials, vote } = await this.findOneByTrialsId(trialsId);
 
-  //     // 2. 내 재판이 맞는지 유효성 검사
-  //     if (existTrial.userId !== userId) {
-  //       throw new NotAcceptableException(
-  //         '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
-  //       );
-  //     }
+      // 2. 내 재판이 맞는지 유효성 검사
+      if (OneTrials.userId !== userId) {
+        throw new NotAcceptableException(
+          '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
+        );
+      }
 
-  //     // 3. 객체의 속성 업데이트
-  //     Object.assign(existTrial, updateTrialDto);
+      // 3. 객체의 속성 업데이트
+      Object.assign(OneTrials, updateTrialDto);
 
-  //     // 4. 수정한거 저장
-  //     await queryRunner.manager.save(Trials, existTrial);
+      // 4. 수정한거 저장
+      await queryRunner.manager.save(Trials, OneTrials);
 
-  //     // 5. 트랜잭션 종료
-  //     await queryRunner.commitTransaction();
+      //     // 5. 트랜잭션 종료
+      //     await queryRunner.commitTransaction();
 
-  //     return existTrial;
-  //   } catch (error) {
-  //     await queryRunner.rollbackTransaction();
+      return OneTrials;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    }
+  }
 
   //     console.log('재판 수정 에러:', error);
 
@@ -202,7 +212,10 @@ export class TrialsService {
     await queryRunner.startTransaction();
     try {
       // 1. 삭제하려는 재판이 존재하는지 검사
-      const deleteResult = await queryRunner.manager.delete(Trials, { id: id });
+      const deleteResult = await queryRunner.manager.softDelete(Trials, {
+        id: id,
+      });
+      console.log(1);
 
       // 2. 404 던지기
       if (deleteResult.affected === 0) {
@@ -226,14 +239,14 @@ export class TrialsService {
 
   // 내 재판인지 찾기 매서드
   async isMyTrials(userId: number, trialsId: number) {
-    return await this.trialsRepository.findOne({
+    return !!(await this.trialsRepository.findOne({
       where: {
         id: trialsId,
         user: {
           id: userId,
         },
       },
-    });
+    }));
   }
 
   // 모든 판례 조회 매서드
@@ -270,7 +283,8 @@ export class TrialsService {
 
   // 타임아웃되면 업데이트 매서드(불큐에서갖다씀 trialQueue.ts )
   async updateTimeDone(trialId: number) {
-    await this.trialsRepository.update(trialId, { is_time_over: true });
+    console.log(trialId);
+    return await this.trialsRepository.update(trialId, { is_time_over: true });
   }
 
   // 투표 vs 만들기 매서드

@@ -1,0 +1,18 @@
+filebeat.inputs:
+  # 타입을 로그로 설정
+  - type: log
+    enabled: true
+    paths:
+      - /usr/share/filebeat/logs/winston-log-error*.log
+    fields:
+      log_type: error
+    fields_under_root: true
+  - type: log
+    enabled: true
+    paths:
+      - /usr/share/filebeat/logs/winston-log-info*.log
+    fields:
+      log_type: info
+    fields_under_root: true
+output.logstash:
+  hosts: ['logstash:5044']

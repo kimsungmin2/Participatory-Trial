@@ -107,7 +107,6 @@ export class PolticalVotesService {
   }
   // 투표하기
   async addPolticalVoteUserorNanUser(
-    userCode: string,
     userId: number | null,
     polticalVoteId: number,
     voteFor: boolean,

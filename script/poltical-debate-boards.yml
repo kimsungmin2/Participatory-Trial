@@ -1,0 +1,77 @@
+config:
+  target: http://localhost:3000
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 30
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  # processor: './processCookies.js'
+  http:
+    defaults:
+      headers:
+        cookie: 'authorization=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImlhdCI6MTcxMzM1NzYzOCwiZXhwIjoxNzU2NTU3NjM4fQ.-yU2RRZ7oUH-cNVBclBzmw2APsZTFwiaEOLRxv6qARU'
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+  plugins:
+    ensure: {}
+    apdex: {}
+    # metrics-by-endpoint: {}
+    fake-data: {}
+scenarios:
+  - name: 'poltical-debates board and comment api test'
+    flow:
+      - post:
+          url: 'http://localhost:3000/poltical-debates'
+          json:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+            trialTime: '{{ $randFullName() }}'
+            title1: '{{ $randFullName() }}'
+            title2: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.newVote.polticalId'
+            as: 'boardId'
+      - get:
+          url: 'http://localhost:3000/poltical-debates'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/my'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/HallofFame/votes'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/HallofFame/views'
+      - patch:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}'
+          json:
+            title: '{{ $randFullName() }}'
+            content: '{{ $randFullName() }}'
+      - post:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments'
+          json:
+            content: '{{ $randFullName() }}'
+          capture:
+            json: '$.data.id'
+            as: 'commentId'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments'
+      - get:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
+      - patch:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
+          json:
+            content: '{{ $randFullName() }}'
+      - delete:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}/comments/{{ commentId }}'
+      - delete:
+          url: 'http://localhost:3000/poltical-debates/{{ boardId }}'

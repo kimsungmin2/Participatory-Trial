@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -11,6 +12,7 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
+import { TrialLike } from './trials.like.entity';
 
 @Entity({
   name: 'trials',
@@ -28,7 +30,7 @@ export class Trials {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false, default: 1 })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
   @Column({ type: 'int', nullable: false, default: 0 })
@@ -46,6 +48,9 @@ export class Trials {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
+
   @ManyToOne(() => Users, (user) => user.trial, {
     onDelete: 'CASCADE',
   })
@@ -54,4 +59,7 @@ export class Trials {
 
   @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
   vote: Votes;
+
+  @OneToOne(() => TrialLike, (trialLike) => trialLike.trial, { cascade: true })
+  trialLike: TrialLike;
 }

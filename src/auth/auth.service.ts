@@ -91,11 +91,21 @@ export class AuthService {
   }
 
   async AuthenticationNumberCache(email: string) {
+    console.log(3);
     const code = Math.floor(Math.random() * 900000) + 100000;
-    const emailCode = await this.redisService.getCluster().get(email);
+    let emailCode;
+    try {
+      console.log('레디스');
+      emailCode = await this.redisService.getCluster().get(email);
+      console.log('햄');
+    } catch (err) {
+      console.error(err);
+    }
+    console.log(emailCode);
     if (emailCode) {
       await this.redisService.getCluster().del(email);
     }
+    console.log(2);
     await this.redisService.getCluster().set(email, code, 'EX', 60 * 60 * 3);
 
     await this.emailService.queueVerificationEmail(email, code);
@@ -147,6 +157,7 @@ export class AuthService {
       });
 
       await queryRunner.commitTransaction();
+      console.log(1);
       await this.AuthenticationNumberCache(email);
 
       return userInfo;

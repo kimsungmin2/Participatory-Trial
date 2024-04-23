@@ -16,6 +16,7 @@
     />
   </head>
   <body>
+    <%- include('partials/notification') %>
     <div class="container">
       <div class="realtime-voting-container">
         <div class="container-info">
@@ -196,7 +197,12 @@
             page: currentPage,
           });
         });
-
+        socket.on('connect', () => {
+          socket.emit('subscribeToNotifications', { userId: socket.id });
+          socket.on('updateUserCode', (userCode) => {
+            document.cookie = `user-code=${userCode}; path=/; max-age=${60 * 60 * 24 * 365}`;
+          });
+        });
         chatInput.addEventListener('keypress', function (event) {
           if (event.key === 'Enter') {
             event.preventDefault();

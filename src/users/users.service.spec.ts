@@ -11,6 +11,8 @@ describe('UsersService', () => {
   let service: UsersService;
   let redisService: RedisService;
 
+  const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
+
   const mockUserRepository = {
     findByEmail: jest.fn(),
     save: jest.fn(),

@@ -8,12 +8,10 @@
   rel="stylesheet"
   href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
 />
-
 <!-- Bootstrap JS, Popper.js, and jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
 <link rel="stylesheet" href="/css/main-style.css" />
 </head>
 <body>
@@ -33,7 +31,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
-
         </ul>
         <ul class="navbar-nav mx-auto">
           <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
@@ -54,14 +51,19 @@
               명예의 전당
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-              <a class="dropdown-item" href="/trials/HallofFame/votes">재판 명예의 전당</a>
-              <a class="dropdown-item" href="/humors/HallofFame/votes">유머 명예의 전당</a>
-              <a class="dropdown-item" href="/poltical-debates/HallofFame/votes">정치 명에의 전당</a>
-              <a class="dropdown-item" href="/online-boards/HallofFame/likes">게시판 명예의 전당</a>
+              <a class="dropdown-item" href="/trials/HallofFame/votes">재판 명예의 전당 (투표수)</a>
+              <a class="dropdown-item" href="/trials/HallofFame/likes">재판 명예의 전당 (좋아요)</a>
+              <a class="dropdown-item" href="/trials/HallofFame/views">재판 명예의 전당 (조회수)</a>
+              <a class="dropdown-item" href="/humors/HallofFame/votes">유머게시판 명예의 전당 (투표수)</a>
+              <a class="dropdown-item" href="/humors/HallofFame/likes">유머게시판 명예의 전당 (좋아요)</a>
+              <a class="dropdown-item" href="/humors/HallofFame/views">유머게시판 명예의 전당 (조회수)</a>
+              <a class="dropdown-item" href="/poltical-debates/HallofFame/votes">정치 명에의 전당(투표수)</a>
+              <a class="dropdown-item" href="/poltical-debates/HallofFame/views">정치 명에의 전당(조회수)</a>
+              <a class="dropdown-item" href="/online-boards/HallofFame/likes">게시판 명예의 전당(좋아요)</a>
+              <a class="dropdown-item" href="/online-boards/HallofFame/views">게시판 명예의 전당(투표수)</a>
             </div>
           </li>
         </ul>
-      
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
             <% if (isLoggedIn) { %>
@@ -96,7 +98,6 @@
     popupContainer.id = 'popupContainer';
     popupContainer.className = 'popup';
         let offset = 0;
-
         function loadNotifications() {
           const notificationsString = localStorage.getItem('notifications');
           return notificationsString ? JSON.parse(notificationsString) : [];
@@ -111,16 +112,7 @@
 
         // const socket = io();
 
-        socket.on('notification', function (message) {
-          notifications.push(message);
-
-          if (notifications.length > 10) {
-            notifications.shift();
-          }
-          localStorage.setItem('notifications', JSON.stringify(notifications));
-          createNotification(message);
-        });
-
+    
         popupContainer.addEventListener('click', function (event) {
           if (
             event.target.tagName === 'A' &&
@@ -132,7 +124,6 @@
             event.target.remove();
           }
         });
-
         showNotificationsBtn.addEventListener('click', function () {
         const rect = this.getBoundingClientRect(); // 버튼의 위치 정보를 가져옴
         const top = rect.bottom + window.scrollY; // 버튼의 하단 위치에 맞춤
@@ -157,7 +148,6 @@
                 const roomIdMatch = messageParts[1].match(/\d+/);
                 const roomId = roomIdMatch ? roomIdMatch[0] : '';
                 const notificationUrl = `http://localhost:3000/${channelType}/${roomId}`;
-
                 removeNotificationFromLocalStorage(notification);
                 this.parentNode.removeChild(this);
                 window.location.href = notificationUrl;
@@ -165,12 +155,10 @@
             popupContainer.appendChild(notificationElement);
             popupContainer.appendChild(document.createElement('br'));
         });
-
         setTimeout(() => {
             popupContainer.style.display = 'none';
         }, 5000);
     });
-
         function removeNotificationFromLocalStorage(notificationToRemove) {
           const notifications = loadNotifications();
           const filteredNotifications = notifications.filter(
@@ -178,12 +166,10 @@
           );
           saveNotifications(filteredNotifications);
         }
-
         function createNotification(message) {
           const notification = document.createElement('div');
           notification.classList.add('notification', 'show');
           notification.textContent = message;
-
           notification.addEventListener('click', function () {
             const messageParts = message.split('의');
             const channelType = messageParts[0];
@@ -200,7 +186,6 @@
             notificationContainer.removeChild(notification);
             offset -= 60;
           }, 5000);
-
           while (notificationContainer.children.length > 5) {
             const oldNotification = notificationContainer.children[0];
             notificationContainer.removeChild(oldNotification);
@@ -209,6 +194,11 @@
         }
       });
 </script>
-   
+<script>
+  $(document).ready(function(){
+  $('.dropdown-toggle').dropdown();
+});
+
+</script>
 </body>
 </html>
