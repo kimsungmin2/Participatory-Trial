@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PolticalVotesService } from './poltical_debates_vote.service';
 
-
 describe('PolticalDebatesVoteService', () => {
   let service: PolticalVotesService;
 

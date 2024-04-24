@@ -5,9 +5,11 @@ import { Users } from './entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
 import { UserInfos } from './entities/user-info.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { RedisService } from '../cache/redis.service';
 
 describe('UsersService', () => {
   let service: UsersService;
+  let redisService: RedisService;
 
   const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
 
@@ -60,6 +62,16 @@ describe('UsersService', () => {
     passwordConfirm: 'hashedPassword',
   };
 
+  const mockRedisCluster = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
+  const mockRedisService = {
+    getCluster: jest.fn(() => mockRedisCluster),
+  };
+
   beforeEach(async () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
@@ -70,7 +82,7 @@ describe('UsersService', () => {
           provide: getRepositoryToken(UserInfos),
           useValue: mockUserInfoRepository,
         },
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: RedisService, useValue: mockRedisService },
         // { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();
@@ -94,37 +106,46 @@ describe('UsersService', () => {
     });
   });
 
-  describe('유저 아이디 조회', () => {
-    it('캐시에 사용자 정보가 있을 경우, 해당 정보를 반환해야 한다', async () => {
-      const userId = 1;
+  describe('findById', () => {
+    it('should return user data from cache if available', async () => {
+      const cachedUserData = JSON.stringify({
+        id: 1,
+        email: 'test@email.com',
+        nickName: 'testName',
+        birth: '1996-05-24',
+      });
+      mockRedisCluster.get.mockResolvedValue(cachedUserData);
 
-      mockCacheManager.get.mockResolvedValue(cachedUser);
+      const result = await service.findById(1);
 
-      const result = await service.findById(userId);
-
-      expect(mockCacheManager.get).toHaveBeenCalledWith(`id:${userId}`);
+      expect(mockRedisCluster.get).toHaveBeenCalledWith('id:1');
+      expect(result).toEqual(JSON.parse(cachedUserData));
       expect(mockUserInfoRepository.findOne).not.toHaveBeenCalled();
-      expect(result).toEqual(cachedUser);
     });
 
-    it('캐시에 사용자 정보가 없을 경우, 데이터베이스에서 정보를 조회하고 캐시에 저장한 후 반환해야 한다', async () => {
+    it('should fetch from database and cache if not in cache', async () => {
       const userId = 1;
-      mockCacheManager.get.mockResolvedValue(null);
-      mockUserInfoRepository.findOne.mockResolvedValue(userId);
+      const userFromDb = {
+        id: userId,
+        email: 'test@email.com',
+        nickName: 'testName',
+        birth: '1996-05-24',
+      };
+
+      mockRedisCluster.get.mockResolvedValue(null);
+      mockUserInfoRepository.findOne.mockResolvedValue(userFromDb);
 
       const result = await service.findById(userId);
 
-      expect(mockCacheManager.get).toHaveBeenCalledWith(`id:${userId}`);
-      expect(mockUserInfoRepository.findOne).toHaveBeenCalledWith({
-        where: { id: userId },
-        select: ['id'],
-      });
-      expect(mockCacheManager.set).toHaveBeenCalledWith(
+      expect(mockRedisCluster.get).toHaveBeenCalledWith(`id:${userId}`);
+      expect(mockUserInfoRepository.findOne).toHaveBeenCalled();
+      expect(mockRedisCluster.set).toHaveBeenCalledWith(
         `id:${userId}`,
-        cachedUser.id,
-        1000 * 60 * 60 * 24,
+        JSON.stringify(userFromDb),
+        'EX',
+        60 * 60 * 24,
       );
-      expect(result).toEqual(cachedUser.id);
+      expect(result).toEqual(userFromDb);
     });
   });
 
@@ -142,7 +163,7 @@ describe('UsersService', () => {
 
       expect(mockUserInfoRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockUserInfoRepository.findOne).toHaveBeenCalledWith({
-        select: ['id', 'nickName', 'email', 'birth'],
+        select: ['id', 'nickName', 'email', 'birth', 'emailVerified'],
         where: { email: user.email },
       });
       expect(result).toEqual(user);

@@ -19,7 +19,7 @@ import { Users } from '../users/entities/user.entity';
 import { userInfo } from 'os';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 @ApiTags('유머 게시판 댓글 API')
-@Controller('humors/humor-boards/:boardId/comments')
+@Controller('humors/:boardId/comments')
 export class HumorCommentsController {
   constructor(private readonly humorCommentsService: HumorCommentsService) {}
 
@@ -46,7 +46,7 @@ export class HumorCommentsController {
     @Body() createHumorCommentDto: CreateHumorCommentDto,
     @Param('boardId') boardId: number,
     @UserInfo() user: Users,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const createdComment = await this.humorCommentsService.createComment(
       createHumorCommentDto,
       boardId,
@@ -68,9 +68,7 @@ export class HumorCommentsController {
     type: Number,
   })
   @Get()
-  async findAllHumorComment(
-    @Param('boardId') boardId: number,
-  ): Promise<HumorBoardReturnValue> {
+  async findAllHumorComment(@Param('boardId') boardId: number) {
     const foundComments: HumorComments[] =
       await this.humorCommentsService.findAllComment(boardId);
     return {
@@ -92,7 +90,7 @@ export class HumorCommentsController {
   async findOneHumorComment(
     @Param('boardId') boardId: number,
     @Param('commentId') commentId: number,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const foundComment = await this.humorCommentsService.findOneComment(
       boardId,
       commentId,
@@ -129,7 +127,7 @@ export class HumorCommentsController {
     @Param('commentId') commentId: number,
     @Body() updateHumorCommentDto: UpdateHumorCommentDto,
     @UserInfo() user: Users,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     const updatedComment = await this.humorCommentsService.updateComment(
       boardId,
       commentId,
@@ -157,7 +155,7 @@ export class HumorCommentsController {
     @Param('commentId') commentId: number,
     @Param('boardId') boardId: number,
     @UserInfo() user: Users,
-  ): Promise<HumorBoardReturnValue> {
+  ) {
     await this.humorCommentsService.deleteHumorComment(
       commentId,
       boardId,

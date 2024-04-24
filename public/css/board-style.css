@@ -43,38 +43,92 @@ a {
   text-decoration: none;
 }
 
-.navbar {
-  background-color: #f4edcc;
+/* --------------header -------------------- */
+header {
+  position: -webkit-sticky; /* 사파리 브라우저 지원을 위함 */
+  position: sticky;
+  top: 0;
+  background-color: #f4edcc;;
 }
 
-.navbar-nav .nav-item:not(:last-child) {
-  margin-right: 100px;
-  font-family: 'MBC1961GulimM';
+.search-container {
+  display: flex; /* flexbox를 활성화 */
+  justify-content: center; /* 가로 방향으로 중앙 정렬 */
 }
 
-.nav-item {
-  font-family: 'MBC1961GulimM';
-  font-size: 20px;
+#searchForm {
+  display: flex; /* flexbox를 활성화 */
+  align-items: center; /* 세로 방향으로 아이템들을 중앙 정렬 */
 }
 
-.navbar-brand {
-  font-size: 24px;
+#searchInput {
+  width: 500px;
+  height: 40px;
+  margin-top: 15px;
 }
 
+#searchForm > div, #searchForm > input, #searchForm > button {
+  margin-right: 10px; /* 요소들 사이의 간격 */
+}
+
+#searchOption {
+  width: 150px; /* 너비 조절 */
+  height: 40px; /* 높이 조절 */
+  padding: 5px; /* 안쪽 여백 추가 */
+  margin-top: 15px;
+}
+
+#searchBtn {
+  width: 100px;
+  height: 40px;
+  margin-top: 10px;
+  background-color: #007bff; /* 배경색 설정 */
+  color: white; /* 텍스트 색상 설정 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 패딩 설정 */
+  font-size: 1rem; /* 버튼 텍스트 크기 설정 */
+  border-radius: 5px; /* 버튼 모서리를 둥글게 설정 */
+  cursor: pointer; /* 커서 타입 설정 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+/* -------------------main ---------------------- */
+
+.board-name{
+  align-items: center;
+  justify-content: center;
+  width: 100%
+}
+
+.board-name-btn {
+  display: flex;
+  width: 100%;
+}
+
+.no_posts {
+  font-size: 30px;
+  margin: 0 auto;
+}
 .board_title,
 .post_title,
-.post_content {
+.post_content,
+.ud-container {
   font-size: 50px;
   font-family: 'SUITE-Regular';
   margin-top: 30px;
   margin-left: 40px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .post_content {
   font-size: 20px;
+  margin-bottom: 400px;
+  padding: 1px;
 }
-.post_title {
+.post_title,
+.ud-container {
   font-size: 30px;
   display: flex; /* Flexbox 레이아웃 사용 */
   justify-content: space-between; /* 자식 요소들을 양 끝으로 정렬 */
@@ -85,6 +139,12 @@ a {
   gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
   font-size: 1.3rem;
 }
+.ud-container > div {
+  display: flex; /* Flexbox로 설정 */
+  justify-content: flex-end; /* 자식 요소들을 우측으로 정렬 */
+  gap: 10px; /* 조회수와 좋아요 사이의 간격 설정 */
+  font-size: 1.3rem; /* 폰트 크기 설정 */
+}
 
 .post_image {
   text-align: center;
@@ -93,41 +153,6 @@ a {
 .post_image img {
   width: 500px;
   height: auto;
-}
-
-/* 검색창 스타일 */
-.search-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
-  /* 컨테이너의 너비를 필요에 따라 조정하세요 */
-  margin-bottom: 50px;
-}
-
-input[type='text'],
-button[type='submit'] {
-  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
-}
-
-input[type='text'] {
-  padding: 10px;
-  font-size: 17px;
-  border: 1px solid grey;
-  width: calc(100% - 120px); /* 버튼 너비와 마진을 고려하여 조정 */
-  background: #f1f1f1;
-  margin-right: 10px; /* 버튼과의 간격 */
-}
-
-button[type='submit'] {
-  width: 100px; /* 버튼의 너비를 고정값으로 설정 */
-  padding: 10px;
-  background: #2196f3;
-  color: white;
-  font-size: 17px;
-  border: 1px solid grey;
-  cursor: pointer;
 }
 
 .board-container {
@@ -198,8 +223,16 @@ button[type='submit'] {
   background-color: #007bff; /* 밝은 파란색 */
   color: white; /* 텍스트 색상은 흰색 */
   border: none; /* 테두리 없음 */
-  padding: 10px 20px; /* 상하 10px, 좌우 20px의 패딩 */
-  font-size: 16px; /* 폰트 크기 */
+  width: 100px;
+  height: 50px;
+  margin: auto;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: flex; /* 플렉스 박스 모델을 사용합니다 */
+  justify-content: center; /* 가로 방향으로 가운데 정렬합니다 */
+  align-items: center; /* 세로 방향으로 가운데 정렬합니다 */
+  height: 50px; /* `<a>` 태그의 높이를 지정합니다 */
+  font-size: 20px; /* 폰트 크기 */
   border-radius: 5px; /* 버튼 모서리를 약간 둥글게 */
   cursor: pointer; /* 마우스 오버 시 커서 모양 변경 */
   transition:
@@ -214,4 +247,83 @@ button[type='submit'] {
 
 .submit-button:active {
   transform: scale(0.95); /* 클릭 시 버튼을 약간 축소 */
+}
+
+.content {
+  border-radius: 10px;
+  border-style: solid;
+  border-color: #a1b1dc;
+  border-width: 5px;
+  background-color: white;
+  width: 100%;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.content_container {
+  width: 100%;
+}
+
+.like_button {
+  text-align: center;
+}
+
+.search_not_found {
+  font-size: 30px;
+  display: flex; /* 이를 통해 flex 컨테이너로 만듭니다 */
+  justify-content: center; /* 수평 중앙 정렬 */
+  align-items: center; /* 수직 중앙 정렬 */
+  height: 100%; /* 컨테이너의 높이를 설정해야 수직 중앙 정렬이 적용됩니다. */
+}
+
+.searched-post {
+  margin-top: 30px;
+  font-size: 30px;
+  text-align: center; /* 텍스트 중앙 정렬 */
+}
+
+.comment-form {
+  margin-top: 50px; /* 댓글 작성 폼과 이전 컨텐츠 사이의 간격 설정 */
+}
+
+.comment-form h2 {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 2rem; /* 제목 크기 설정 */
+  margin-bottom: 20px; /* 제목과 폼 사이의 간격 설정 */
+}
+
+.comment-form .form-group {
+  margin-bottom: 20px; /* 폼 그룹 사이의 간격 설정 */
+}
+
+.comment-form label {
+  font-family: 'SUITE-Regular'; /* 폰트 설정 */
+  font-size: 1.5rem; /* 라벨 크기 설정 */
+}
+
+.comment-form textarea {
+  height: 150px; /* 텍스트영역의 높이 설정 */
+}
+
+.comment-form button[type='submit'] {
+  background-color: #007bff; /* 배경색 설정 */
+  color: white; /* 텍스트 색상 설정 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 패딩 설정 */
+  font-size: 1.5rem; /* 버튼 텍스트 크기 설정 */
+  border-radius: 5px; /* 버튼 모서리를 둥글게 설정 */
+  cursor: pointer; /* 커서 타입 설정 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+.comment-form button[type='submit']:hover {
+  background-color: #0056b3; /* 호버 시 배경색 변경 */
+  transform: scale(1.05); /* 호버 시 약간 확대 */
+}
+
+.comment-form button[type='submit']:active {
+  transform: scale(0.95); /* 클릭 시 약간 축소 */
 }

@@ -58,7 +58,7 @@ export class OnlineBoards {
     (OnlineBoardComment) => OnlineBoardComment.onlineBoard,
     { cascade: true },
   )
-  OnlineBoardComment: OnlineBoardComments[];
+  onlineBoardComment: OnlineBoardComments[];
 
   @OneToMany(
     () => OnlineBoardLike,

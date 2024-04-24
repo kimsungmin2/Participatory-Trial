@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SearchController } from './search.controller';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { config } from 'dotenv';
 //useFactory : 모듈 설정을 동적으로 생성하는 팩토리 함수
 /**
  * node : es 노드 주소 ex) http://localhost:9200
@@ -13,13 +15,19 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
-      useFactory: () => ({
-        node: 'http://localhost:9200',
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        node: configService.get<string>('ELASTIC_NODE'),
+        auth: {
+          username: 'elastic',
+          password: 'tpcGoMVjOa7NpCqv2UUdlOgT',
+        },
         maxRetries: 10,
         requestTimeout: 6000,
         pingTimeout: 6000,
         // sniffOnStart: true,
       }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [SearchController],

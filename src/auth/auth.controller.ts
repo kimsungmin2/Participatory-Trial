@@ -107,8 +107,8 @@ export class AuthController {
 
     res.cookie('authorization', `Bearer ${accessToken}`, {
       maxAge: 1000 * 60 * 60 * 12,
-      httpOnly: true,
-      secure: true,
+      httpOnly: false,
+      secure: false,
     });
     res.redirect('/');
   }
@@ -131,7 +131,7 @@ export class AuthController {
     res.cookie('authorization', `Bearer ${accessToken}`, {
       maxAge: 1000 * 60 * 60 * 12,
       httpOnly: true,
-      secure: true,
+      secure: false,
     });
     res.redirect('/');
   }
@@ -160,19 +160,19 @@ export class AuthController {
   // 회원가입 페이지로 이동
   @Get('sign-up')
   @Render('sign-up.ejs')
-  async getSignUp() {
-    return {};
+  async getSignUp(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 
-  @Get('verification')
+  @Get('sign-up/verification')
   @Render('email-validation-check.ejs')
-  async getVerifyEmail() {
-    return {};
+  async getVerifyEmail(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 
   @Get('sign-in')
   @Render('sign-in.ejs')
-  async getSignIn() {
-    return {};
+  async getSignIn(@Req() req: Request) {
+    return { isLoggedIn: req['isLoggedIn'] };
   }
 }

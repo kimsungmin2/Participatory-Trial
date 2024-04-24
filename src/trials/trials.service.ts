@@ -21,6 +21,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 
 @Injectable()
 export class TrialsService {
@@ -39,20 +40,24 @@ export class TrialsService {
   ) {}
   // 재판 생성
   /**
-   * 
+   *
    * @param userId 유저 번호
    * @param createTrialDto 제목, 컨텐츠 받아오는 Dto
    * @param voteTrialDto title1 vs title 하는 Dto
-   * @returns 
+   * @returns
    */
-  async createTrial(userId: number, createTrialDto: CreateTrialDto, voteTitleDto: VoteTitleDto) {
+  async createTrial(
+    userId: number,
+    createTrialDto: CreateTrialDto,
+    voteTitleDto: VoteTitleDto,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
       // 1. Dto에서 title, content 뽑아내기
       const { title, content, trialTime } = createTrialDto;
-      const { title1, title2 } = voteTitleDto
+      const { title1, title2 } = voteTitleDto;
 
       // 2. 객체에 넣기
       const data = {
@@ -65,17 +70,15 @@ export class TrialsService {
       const newTrial = queryRunner.manager.create(Trials, data);
       // 4. 재판 저장
       const savedTrial = await queryRunner.manager.save(Trials, newTrial);
-      const trialId = savedTrial.id
-      
+      const trialId = savedTrial.id;
       const vote = {
         title1,
         title2,
-        trialId
-      }
-      const newVote = queryRunner.manager.create(Votes, vote)
-      
+        trialId,
+      };
+      const newVote = queryRunner.manager.create(Votes, vote);
       const savedVote = await queryRunner.manager.save(Votes, newVote);
-      const trialDate = new Date(trialTime)
+      const trialDate = new Date(trialTime);
       // 5. 불 큐로 지연시간 후 찍어줌
       const delay = trialDate.getTime() - Date.now();
       console.log(delay);
@@ -87,8 +90,7 @@ export class TrialsService {
       );
       // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
-
-      return { savedTrial, savedVote} ;
+      return { savedTrial, savedVote };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       console.log('재판 생성 에러:', error);
@@ -115,24 +117,38 @@ export class TrialsService {
   }
 
   // 모든 재판 조회 매서드(유저/비회원 구분 X)
-  async findAllTrials() {
+  async findAllTrials(paginationQueryDto: PaginationQueryDto) {
     // 1. 모든 재판 조회
-    const allTrials = await this.trialsRepository.find();
-
-    // 2. 없으면 404
-    if (!allTrials) {
-      throw new NotFoundException('조회할 재판이 없습니다.');
+    let allTrials: Trials[];
+    const totalItems = await this.trialsRepository.count();
+    try {
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      allTrials = await this.trialsRepository.find({
+        skip,
+        take: limit,
+        order: {
+          createdAt: 'DESC',
+        },
+      });
+    } catch (err) {
+      throw new InternalServerErrorException(
+        '게시물을 불러오는 도중 오류가 발생했습니다.',
+      );
     }
 
     // 3. 있으면 리턴
-    return allTrials;
+    return {
+      allTrials,
+      totalItems,
+    };
   }
 
   // 특정 재판 조회 매서드(회원/비회원 구분 X)
   async findOneByTrialsId(id: number) {
     // 1. id에 대한 재판 조회
     const OneTrials = await this.trialsRepository.findOneBy({ id });
-    const vote = await this.votesRepository.findOneBy({ id });
+    const vote = await this.votesRepository.findOneBy({ trialId: id });
 
     // 2. 없으면 404
     if (!OneTrials) {
@@ -155,37 +171,39 @@ export class TrialsService {
     await queryRunner.startTransaction();
     try {
       // 1. 재판 있는지 확인 findOneByTrialsId 안에서 유효성 검사 까지 진행
-      const existTrial = await this.findOneByTrialsId(trialsId);
+      const { OneTrials, vote } = await this.findOneByTrialsId(trialsId);
 
       // 2. 내 재판이 맞는지 유효성 검사
-      if (existTrial.OneTrials.userId !== userId) {
+      if (OneTrials.userId !== userId) {
         throw new NotAcceptableException(
           '수정 권한이 없습니다. 로그인한 유저의 재판이 아닙니다.',
         );
       }
 
       // 3. 객체의 속성 업데이트
-      Object.assign(existTrial, updateTrialDto);
+      Object.assign(OneTrials, updateTrialDto);
 
       // 4. 수정한거 저장
-      await queryRunner.manager.save(Trials, existTrial);
+      await queryRunner.manager.save(Trials, OneTrials);
 
-      // 5. 트랜잭션 종료
-      await queryRunner.commitTransaction();
+      //     // 5. 트랜잭션 종료
+      //     await queryRunner.commitTransaction();
 
-      return existTrial;
+      return OneTrials;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-
-      console.log('재판 수정 에러:', error);
-
-      throw new InternalServerErrorException(
-        '재판 수정 중 오류가 발생했습니다.',
-      );
-    } finally {
-      await queryRunner.release();
     }
   }
+
+  //     console.log('재판 수정 에러:', error);
+
+  //     throw new InternalServerErrorException(
+  //       '재판 수정 중 오류가 발생했습니다.',
+  //     );
+  //   } finally {
+  //     await queryRunner.release();
+  //   }
+  // }
 
   // 내 재판 삭제
   async deleteTrials(id: number) {
@@ -194,7 +212,10 @@ export class TrialsService {
     await queryRunner.startTransaction();
     try {
       // 1. 삭제하려는 재판이 존재하는지 검사
-      const deleteResult = await queryRunner.manager.delete(Trials, { id: id });
+      const deleteResult = await queryRunner.manager.softDelete(Trials, {
+        id: id,
+      });
+      console.log(1);
 
       // 2. 404 던지기
       if (deleteResult.affected === 0) {

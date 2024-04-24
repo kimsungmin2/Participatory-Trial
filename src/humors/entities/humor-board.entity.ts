@@ -65,5 +65,5 @@ export class HumorBoards {
   humorLike: HumorLike[];
 
   @OneToOne(() => HumorVotes, (humorVotes) => humorVotes.humorBoards)
-  humorVotes: HumorVotes
+  humorVotes: HumorVotes;
 }

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { OnlineBoards } from './entities/online_board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, Repository } from 'typeorm';
 import { OnlineBoardLikeHallOfFames } from './entities/online_boardLike_of_fame.entity';
 import { OnlineBoardViewHallOfFames } from './entities/online_boardVIew_of_fame.entity';
 import { Cron } from '@nestjs/schedule';
+import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
 
 @Injectable()
 export class OnlineBoardHallOfFameService {
@@ -78,16 +79,14 @@ export class OnlineBoardHallOfFameService {
 
     const candidates = await this.onlineBoardsRepository
       .createQueryBuilder('onlineBoards')
-      .select(['onlineBoards.id', 'onlineBoards.title', 'onlineBoards.content'])
-      .addSelect('onlineBoards.like', 'likes')
+      .select(['onlineBoards.id', 'onlineBoards.title', 'onlineBoards.content', 'onlineBoards.content', 'onlineBoards.like AS likes'])
       .where('onlineBoards.createdAt BETWEEN :start AND :end', {
         start: start.toISOString(),
         end: end.toISOString(),
       })
-      .having('likes >= :minlikes', { minlikes: 100 }) // 투표 수 100 이상인 것만 조회
-      .orderBy('likes', 'DESC')
+      .andWhere("onlineBoards.like >= :minlikes", { minlikes: 100 }) // 'like' 속성을 기준으로 필터링
+      .orderBy('onlineBoards.likes', 'DESC')
       .limit(1000) // 1000개 이상의 데이터가 없어도 남은 데이터 만큼 올라간다. 즉 데이터 집계 상한선이 1000개 라는 뜻
-      .groupBy('onlineBoards.id')
       .getRawMany();
 
     return candidates;
@@ -121,13 +120,15 @@ export class OnlineBoardHallOfFameService {
     await queryRunner.startTransaction();
     try {
       // 한번에 저장
+    await queryRunner.manager.delete(OnlineBoardLikeHallOfFames, {});
+
       const newLikeHallOfFameEntries = hallOfFameData.map((data) => {
         const newLikeHallOfFameEntry = new OnlineBoardLikeHallOfFames();
         newLikeHallOfFameEntry.id = data.id; // vote table의 id임다
         newLikeHallOfFameEntry.userId = data.userId; // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
         newLikeHallOfFameEntry.title = data.title;
         newLikeHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-        newLikeHallOfFameEntry.totallike = data.like;
+        newLikeHallOfFameEntry.total = data.likes;
         newLikeHallOfFameEntry.createdAt = new Date();
         newLikeHallOfFameEntry.updatedAt = new Date();
         return newLikeHallOfFameEntry;
@@ -154,13 +155,15 @@ export class OnlineBoardHallOfFameService {
     await queryRunner.startTransaction();
     try {
       // 한번에 저장
+    await queryRunner.manager.delete(OnlineBoardViewHallOfFames, {});
+
       const newViewHallOfFameEntries = hallOfFameData.map((data) => {
         const newViewHallOfFameEntry = new OnlineBoardViewHallOfFames();
         newViewHallOfFameEntry.id = data.id; // vote table의 id임다
         newViewHallOfFameEntry.userId = data.userId; // vote에는 userId가 없으므로 일대일관계인 trial에 가서 userId 가져옴
         newViewHallOfFameEntry.title = data.title;
         newViewHallOfFameEntry.content = data.content; // vote에는 content가 없으므로 일대일관계인 trial에 가서 content 가져옴
-        newViewHallOfFameEntry.totalview = data.like;
+        newViewHallOfFameEntry.total = data.views;
         newViewHallOfFameEntry.createdAt = new Date();
         newViewHallOfFameEntry.updatedAt = new Date();
         return newViewHallOfFameEntry;
@@ -181,12 +184,81 @@ export class OnlineBoardHallOfFameService {
   }
 
   // 명예전당 좋아요 조회 매서드
-  async getLikeRecentHallOfFame() {
-    return await this.onlineBoardLikeHallOfFames.find();
+  async getLikeRecentHallOfFame(paginationQueryDto: PaginationQueryDto) {
+    let onlineBoardLikeHallOfFames: OnlineBoardLikeHallOfFames[];
+
+    const totalItems = await this.onlineBoardLikeHallOfFames.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      onlineBoardLikeHallOfFames = await this.onlineBoardLikeHallOfFames.find({
+        skip,
+        take: limit,
+        order: {
+          total: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '명에의 전당을 불러오는 도중오류가발생했습니다.'
+      )
+    }
+    return {
+      onlineBoardLikeHallOfFames,
+      totalItems,
+    }
   }
 
   // 명예전당 조회수 조회 매서드
-  async getViewRecentHallOfFame() {
-    return await this.onlineBoardViewHallOfFames.find();
+  async getViewRecentHallOfFame(paginationQueryDto: PaginationQueryDto) {
+    let onlineBoardViewHallOfFames: OnlineBoardViewHallOfFames[];
+    
+    const totalItems = await this.onlineBoardViewHallOfFames.count();
+    try{
+      const { page, limit } = paginationQueryDto;
+      const skip = (page - 1) * limit;
+      onlineBoardViewHallOfFames = await this.onlineBoardViewHallOfFames.find({
+        skip,
+        take: limit,
+        order: {
+          total: 'DESC',
+        }
+      })
+    } catch(err) {
+      console.log(err.message);
+      throw new InternalServerErrorException(
+        '명예의 전당을 불러오는 도중오류가발생했습니다.'
+      )
+  }
+  return {
+    onlineBoardViewHallOfFames,
+    totalItems
+  }
+}
+
+
+  // 특정 명전 투표 조회
+  async findOneByOnlineHallofFameLike(id: number) {
+
+    const OneHallOfOnlineLike = await this.onlineBoardLikeHallOfFames.findOneBy({ id });
+
+    if(!OneHallOfOnlineLike) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfOnlineLike }
+  }
+
+  // 특정 명전 투표 조회
+  async findOneByOnlineHallofFameView(id: number) {
+
+    const OneHallOfOnlineView = await this.onlineBoardViewHallOfFames.findOneBy({ id });
+
+    if(!OneHallOfOnlineView) {
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+    }
+
+    return { OneHallOfOnlineView }
   }
 }

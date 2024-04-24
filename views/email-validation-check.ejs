@@ -11,49 +11,13 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <link rel="stylesheet" href="/css/email-validation-check.css">
     <title>Email Validation Check</title>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">CPT</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav"></ul>
-          <ul class="navbar-nav mx-auto">
-            <!-- 중앙에 배치하기 위해 mx-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">자유게시판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">재판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">유머</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">정치 토론</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">로그인</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <header>
+      <%- include('partials/nav') %>
+    </header>
     <main>
       <form id="verifyEmail">
         <div>
@@ -81,6 +45,39 @@
       </form>
     </main>
     <footer></footer>
-    <script src="/scripts/email-validation-check.js" type="module"></script>
+    <script>
+      //email-validation-check.js
+      const form = document.getElementById('verifyEmail');
+      form.addEventListener('submit', (event) => {
+        // 폼의 기본 동작을 중지합니다.
+        event.preventDefault();
+        const formData = {
+          email: document.getElementById('email').value,
+          code: document.getElementById('code').value,
+        };
+        fetch('http://localhost:3000/sign-up/verification', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          alert('이메일이 인증되었습니다. 로그인 페이지로 이동합니다.');
+          console.log(data);
+          window.location.href = 'http://localhost:3000/sign-in';
+        })
+        .catch((error) => {
+          alert('인증 중 오류가 발생했습니다: ' + error.message);
+          console.error(error);
+        });
+      });
+    </script>
   </body>
 </html>

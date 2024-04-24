@@ -57,12 +57,16 @@ input[type="text"] {
   padding: 10px;
   text-align: center;
   background-color: #007bff;
-  color: #fff;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   text-decoration: none;
   margin-bottom: 10px;
+}
+.button-img {
+  width: 5px !important;
+  height: 5px !important;
 }
 
 .submitBtn:hover,
@@ -71,8 +75,8 @@ input[type="text"] {
 }
 
 footer {
-  background-color: #333;
-  color: #fff;
+  background-color: #fffed4;
+  color: black;
   padding: 20px 0;
   text-align: center;
 }

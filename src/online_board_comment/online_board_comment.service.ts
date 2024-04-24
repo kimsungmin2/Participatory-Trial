@@ -11,12 +11,17 @@ import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { UsersService } from '../users/users.service';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Repository } from 'typeorm';
+import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 
 @Injectable()
 export class OnlineBoardCommentService {
   constructor(
     @InjectRepository(OnlineBoardComments)
     private readonly onlineBoardCommentRepository: Repository<OnlineBoardComments>,
+    @InjectRepository(OnlineBoards)
+    private readonly onlineBoardRepository: Repository<OnlineBoards>,
+
+    private readonly onlineBoardsService: OnlineBoardsService,
   ) {}
 
   // 자유게시판 댓글 생성
@@ -25,10 +30,13 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
+    console.log(userInfo.id);
     const { content } = createOnlineBoardCommentDto;
-
+    const foundBoard =
+      await this.onlineBoardsService.findBoardId(onlineBoardId);
+    console.log(foundBoard);
     const board = await this.onlineBoardCommentRepository.save({
-      onlineBoardId,
+      onlineBoardId: foundBoard.id,
       userId: userInfo.id,
       content,
     });

@@ -23,6 +23,7 @@
   font-weight: normal;
   font-style: normal;
 }
+
 body {
   background-color: lightskyblue;
 }
@@ -82,24 +83,6 @@ header {
   margin-top: 15px;
   background: transparent;
   border: transparent;
-}
-
-.navbar {
-  background-color: #f4edcc;
-}
-
-.navbar-nav .nav-item:not(:last-child) {
-  margin-right: 100px;
-  font-family: 'MBC1961GulimM';
-}
-
-.nav-item {
-  font-family: 'MBC1961GulimM';
-  font-size: 20px;
-}
-
-.navbar-brand {
-  font-size: 24px;
 }
 
 /* --------------main 영역------------------ */

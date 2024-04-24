@@ -17,49 +17,11 @@
     <link rel="stylesheet" href="/css/create-style.css">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="http://localhost:3000/">CPT</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav"></ul>
-          <ul class="navbar-nav mx-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/online-boards"
-                >자유게시판</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/trials">재판</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/humors">유머</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/poltical-debates">정치 토론</a>
-            </li>
-          </ul>
-          <ul class="navbar-nav ms-auto">
-            <!-- 우측에 배치하기 위해 ms-auto 사용 -->
-            <li class="nav-item">
-              <a class="nav-link" href="#">로그인</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
     <header>
+      <%- include('partials/nav')  %>
+    </header>
+
+    <main>
       <div class="board_title">
         <% if (boardType === 'humor') { %>
           <span>유머 게시판</span>
@@ -74,8 +36,8 @@
       <hr width="100%" color="black" size="2" style="margin-left: 30px" />
       
       <div class="container">
-        <h2>게시물 생성</h2>
-        <form id="postForm">
+        <% if (boardType === 'onlineBoard') { %>
+          <form id="postForm">
             <div class="form-group">
                 <label for="title">제목</label>
                 <input type="text" id="title" name="title" required>
@@ -92,12 +54,60 @@
             </div>
             <button type="submit">게시물 등록</button>
         </form>
-    </div>
-    </header>
+          <% } else if(boardType === 'humor' || boardType === 'polticalDebate') {%>
+            <form id="postForm">
+              <div class="form-group">
+                  <label for="title">제목</label>
+                  <input type="text" id="title" name="title" required>
+              </div>
+              <div class="form-group">
+                <label for="image">이미지 첨부</label>
+                <input type="file" id="image" name="files" accept="image/*" multiple>
+            </div>
+              <div class="form-group">
+                  <label for="content">내용</label>
+                  
+                    <textarea  cols="100" rows="10" contenteditable="true" name="content"></textarea>
+                  
+              </div>
+              <div class="form-group">
+                <p>투표 생성</p>
+                <label for="title1">투표1</label>
+                <input type="text" id="title1" name="title1" value="title1">
+                <label for="title2">투표2</label>
+                <input type="text" id="title2" name="title2" value="title2">
+            </div>
+              <button type="submit">게시물 등록</button>
+          </form>
+            <% } else if(boardType === 'trial') { %>
+              <form id="postForm">
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    
+                      <textarea  cols="100" rows="10" contenteditable="true" name="content"></textarea>
+                    
+                </div>
+                <div class="form-group">
+                  <p>투표 생성</p>
+                  <label for="title1">투표1</label>
+                  <input type="text" id="title1" name="title1" value="title1">
+                  <label for="title2">투표2</label>
+                  <input type="text" id="title2" name="title2" value="title2">
+                  <label for="trialTime">투표타이머</label>
+                  <input type="datetime-local" id="trialTime" name="trialTime" value="trialTime">
+              </div>
+                <button type="submit">게시물 등록</button>
+            </form>
+              <% } %>
+      </div>
+    </main>
 <script>
   let boardType;
   boardType = "<%= boardType %>";
-
   if (boardType === 'humor') { 
           boardType = 'humors'
         } else if (boardType === 'onlineBoard') { 
@@ -108,23 +118,46 @@
           boardType = 'trials'
         } 
   document.getElementById('postForm').addEventListener('submit', function(event) {
-    // 기본 폼 제출 이벤트 방지
-    console.log(boardType);
-    event.preventDefault();
+  event.preventDefault(); // 기본 폼 제출 이벤트 방지
 
-    // FormData 객체를 사용하여 폼 데이터를 쉽게 수집
-    const formData = new FormData(this);
-    console.log(formData);
+  const titleElement = document.getElementById('title'); // 제목 필드 선택
+    const contentElement = document.querySelector('textarea[name="content"]'); // 내용 필드 선택
 
-    // fetch API를 사용하여 POST 요청
-    fetch(`http://localhost:3000/${boardType}`, {
-      method: 'POST',
-      body: formData, // 폼 데이터 전송
-    })
-    .then(response => response.json()) // 응답을 JSON 형태로 파싱
-    .then(data => console.log(data)) // 서버 응답 출력
-    .catch(error => console.error('Error:', error)); // 오류 처리
+    if (titleElement.value.trim() === '' || contentElement.value.trim() === '') {
+      alert('제목 또는 내용을 비워둘 수 없습니다.'); // 알림 메시지 표시
+    }
+
+  const formData = new FormData(this); // FormData 객체를 사용하여 폼 데이터를 수집
+
+  if (formData.has('trialTime')) {
+    const trialTimeValue = formData.get('trialTime'); // 'trialTime' 필드 값 가져오기
+    const trialTimeDate = new Date(trialTimeValue); // Date 객체로 변환
+    const formattedTrialTime = trialTimeDate.toISOString(); // ISO 8601 형식으로 변환
+
+    formData.set('trialTime', formattedTrialTime); // 'trialTime' 필드 값을 업데이트
+  }
+  console.log(formData);
+  console.log(formData.title);
+  fetch(`http://localhost:3000/${boardType}`, {
+    method: 'POST',
+    body: formData, // 폼 데이터 전송
+  })
+  .then(response => {
+    if (response.ok) { // HTTP 상태 코드가 200-299인 경우
+      return response.json(); // 응답을 JSON 형태로 파싱하고 다음 then 블록으로 전달
+    } else {
+      throw new Error('Network response was not ok.'); // 응답이 성공적이지 않은 경우 오류를 던짐
+    }
+  })
+  .then(data => {
+    console.log(data); 
+    alert('게시물 생성을 성공하였습니다.')
+    window.location.href = `/${boardType}`
+  })
+  .catch(error => {
+    console.error('Error:', error); // 오류 처리
   });
+});
 </script>
   </body>
 </html>

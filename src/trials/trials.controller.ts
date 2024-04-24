@@ -11,12 +11,14 @@ import {
   Query,
   Req,
   Render,
+  UseInterceptors,
 } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -24,17 +26,24 @@ import {
 } from '@nestjs/swagger';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
-import { UserInfos } from 'src/users/entities/user-info.entity';
 import { VoteTitleDto } from './vote/dto/voteDto';
 import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
-import { LikeInputDto } from 'src/like/dto/create-like.dto';
-import { LikeService } from 'src/like/like.service';
-import { Users } from 'src/users/entities/user.entity';
 import { CreateTrialDto } from './dto/create-trial.dto';
+import { BoardType } from '../s3/board-type';
+import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { Request } from 'express';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { LikeInputDto } from '../like/dto/create-like.dto';
+import { LikeService } from '../like/like.service';
+import { Users } from '../users/entities/user.entity';
+import { PaginateQueryDto } from 'src/search/dto/paginateQuery.dto';
+import { HalloffameType } from 'src/s3/halloffame-type';
+import { PaginationQueryHallOfFameDto } from 'src/humors/dto/get-pagenation.dto';
 
 @ApiTags('재판')
 @Controller('trials')
@@ -42,14 +51,26 @@ export class TrialsController {
   constructor(
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
-    private readonly likeServise: LikeService
+    private readonly likeServise: LikeService,
   ) {}
   // 모든 API는 비동기 처리
-
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
   // 어쓰 가드 필요
+
+  // 글쓰기 페이지 이동
+  @UseGuards(AuthGuard('jwt'))
+  @Get('create')
+  @Render('create-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getCreatePostPage(@Req() req: Request) {
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
   // 재판 생성 API
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiOperation({ summary: '재판 생성 API' })
+  @ApiConsumes('multipart/form-data')
   @ApiBearerAuth('access-token')
   @ApiBody({
     description: '재판 게시물 생성',
@@ -67,15 +88,29 @@ export class TrialsController {
   @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(
-    // @UserInfo() userInfo: UserInfos,
-    @Req() req,
     @Body() createTrialDto: CreateTrialDto, // 재판 제목하고 재판 내용 들어감
-    @Body() voteTitleDto: VoteTitleDto
+    @Body() voteTitleDto: VoteTitleDto,
+    @Req() req,
   ) {
+    console.log(createTrialDto);
+    console.log(voteTitleDto);
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
+    // const voteTitleDto = {
+    //   title1: 'ss',
+    //   title2: 'ss',
+    // };
+    // const createTrialDto = {
+    //   title: '22',
+    //   content: '22',
+    //   trialTime: new Date(),
+    // };
 
     const user = req.user;
-    const data = await this.trialsService.createTrial(user.id, createTrialDto, voteTitleDto);
+    const data = await this.trialsService.createTrial(
+      user.id,
+      createTrialDto,
+      voteTitleDto,
+    );
 
     return {
       statusCode: HttpStatus.CREATED,
@@ -165,19 +200,36 @@ export class TrialsController {
 
   // 모든 재판 조회 API(회원/비회원 구분 없음)
   @ApiOperation({ summary: ' 모든 게시판 조회 재판 게시물 API' })
-  @Get('/AllTrials')
-  async findAllTrials() {
-    const data = await this.trialsService.findAllTrials();
-
+  @Get('')
+  @Render('board.ejs')
+  async findAllTrials(
+    @Query() paginationQueryDto: PaginationQueryDto,
+    @Req() req: Request,
+  ) {
+    const { allTrials, totalItems } =
+      await this.trialsService.findAllTrials(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 10) * 10 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
+    }
     return {
       statusCode: HttpStatus.OK,
-      message: '모든 조회에 성공하였습니다.',
-      data,
+      message: '게시물 조회 성공',
+      data: allTrials,
+      boardType: BoardType.Trial,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn'],
     };
   }
 
   // 특정 재판 조회 API(회원/비회원 구분 X)
-  @Render('vote.ejs')
+  @Render('post.ejs')
   @ApiOperation({ summary: ' 특정 재판 조회 API (회원/비회원 구분 X)' })
   @ApiParam({
     name: 'trialsId',
@@ -186,12 +238,27 @@ export class TrialsController {
     type: Number,
   })
   @Get(':trialsId')
-  async findOneByTrialsId(@Param('trialsId') id: number) {
+  async findOneByTrialsId(@Param('trialsId') id: number, @Req() req: Request) {
     const data = await this.trialsService.findOneByTrialsId(+id);
 
     return {
       statusCode: HttpStatus.OK,
       message: '재판 검색에 성공하였습니다.',
+      data,
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+  //특정 재판 수정 페이지
+  @ApiOperation({ summary: '재판 게시물 수정 페이지' })
+  @Get('update/:id')
+  @UseGuards(AuthGuard('jwt'))
+  @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
+    const data = await this.trialsService.findOneByTrialsId(id);
+    return {
+      boardType: BoardType.Trial,
+      isLoggedIn: req['isLoggedIn'],
       data,
     };
   }
@@ -229,13 +296,14 @@ export class TrialsController {
       +trialsId,
       updateTrialDto,
     );
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: '재판 수정에 성공하였습니다.',
-      data,
-    };
   }
+
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: '재판 수정에 성공하였습니다.',
+  //     data,
+  //   };
+  // }
 
   // 내 재판 삭제 API
   @ApiOperation({ summary: ' 내 재판 게시물 삭제 API' })
@@ -256,42 +324,37 @@ export class TrialsController {
     };
   }
 
-
   // 재판 게시물 좋아요 API
-  @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
-  @ApiBody({
-    description: '좋아요/좋아요 취소',
-    schema: {
-      type: 'object',
-      properties: {
-        boardType: { type: 'string' },
-      },
-    },
-  })
-  @ApiParam({
-    name: 'trialId',
-    required: true,
-    description: '재판 게시물 ID',
-    type: Number,
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Post('/:trialId/like')
-  async like(
-    @Param('trialId') trialId: number,
-    @UserInfo() user: Users,
-    @Body() likeInputDto: LikeInputDto,
-  ): Promise<HumorBoardReturnValue> {
-    const result = await this.likeServise.like(
-      likeInputDto,
-      user,
-      trialId,
-    );
+  // @ApiOperation({ summary: '재판 게시판 좋아요/좋아요 취소' })
+  // @ApiBody({
+  //   description: '좋아요/좋아요 취소',
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       boardType: { type: 'string' },
+  //     },
+  //   },
+  // })
+  // @ApiParam({
+  //   name: 'trialId',
+  //   required: true,
+  //   description: '재판 게시물 ID',
+  //   type: Number,
+  // })
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post('/:trialId/like')
+  // async like(
+  //   @Param('trialId') trialId: number,
+  //   @UserInfo() user: Users,
+  //   @Body() likeInputDto: LikeInputDto,
+  // ) {
+  //   const result = await this.likeServise.like(likeInputDto, user, trialId);
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: result,
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: result,
+  //   };
+  // }
   // --------------------------------------------------------------------------------------------------------------------------------------------------------------------//
   // -------------------------------------------------------------------------- 재판 vs API ----------------------------------------------------------------------//
 
@@ -417,61 +480,218 @@ export class TrialsController {
 
   // 명예의 전당 조회하기 API(투표 수)
   @ApiOperation({ summary: ' 명예의 전당 조회하기 API(투표 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/votes')
-  async getRecentHallOfFame() {
-    const recentHallofFame =
-      await this.trialHallOfFameService.getRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '명예의 전당 정보가 없습니다.',
-      };
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getRecentHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryHallOfFameDto,
+    @Req() req: Request,
+  ) {
+    const { trialHallOfFames, totalItems } =
+      await this.trialHallOfFameService.getRecentHallOfFame(paginationQueryDto);
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
     }
-
     return {
       statusCode: HttpStatus.OK,
       message: '명예의 전당을 조회하였습니다.(투표 수 순)',
-      recentHallofFame,
+      data: trialHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameVotes,
     };
   }
 
   // 명예의 전당 조회하기 API(종아요 수)
   @ApiOperation({ summary: '명예의 전당 조회하기 API(종아요 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/likes')
-  async getRecentLikeHallOfFame() {
-    const recentHallofFame =
-      await this.trialHallOfFameService.getLikeRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '명예의 전당 정보가 없습니다.',
-      };
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getRecentLikeHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryHallOfFameDto,
+    @Req() req: Request,
+  ) {
+    const { trialLikeHallOfFames, totalItems } =
+      await this.trialHallOfFameService.getLikeRecentHallOfFame(
+        paginationQueryDto,
+      );
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
       message: '명예의 전당을 조회하였습니다.(좋아요 순)',
-      recentHallofFame,
+      data: trialLikeHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameLikes,
     };
   }
 
   // 명예의 전당 조회하기 API(조회수 수)
   @ApiOperation({ summary: '명예의 전당 조회하기 API(조회수 수)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: '페이지 번호',
+    type: Number,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: '한 페이지당 게시물 수',
+    type: Number,
+    example: 10,
+  })
   @Get('HallofFame/views')
-  async getRecentViewHallOfFame() {
-    const recentHallofFame =
-      await this.trialHallOfFameService.getViewRecentHallOfFame();
-    if (!recentHallofFame) {
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: '명예의 전당 정보가 없습니다.',
-      };
+  @Render('halloffame.ejs') // index.ejs 파일을 렌더링하여 응답
+  async getRecentViewHallOfFame(
+    @Query() paginationQueryDto: PaginationQueryHallOfFameDto,
+    @Req() req: Request,
+  ) {
+    const { trialViewHallOfFames, totalItems } =
+      await this.trialHallOfFameService.getViewRecentHallOfFame(
+        paginationQueryDto,
+      );
+    const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);
+    const currentPage = paginationQueryDto.page;
+    const startPage = Math.floor((currentPage - 1) / 100) * 100 + 1;
+    let endPage = startPage + 9;
+    if (endPage > pageCount) {
+      endPage = pageCount;
     }
     return {
       statusCode: HttpStatus.OK,
       message: '명예의 전당을 조회하였습니다.(조회수 순)',
-      recentHallofFame,
+      data: trialViewHallOfFames,
+      pageCount,
+      currentPage,
+      startPage,
+      endPage,
+      isLoggedIn: req['isLoggedIn'],
+      halloffameType: HalloffameType.TrialsHallofFameViews,
     };
   }
+
+  // 특정 명예의 전당 조회 투표수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/votes/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameVote(
+    @Param('hallOfFameId') id: number,
+    @Req() req: Request,
+  ) {
+    const data =
+      await this.trialHallOfFameService.findOneBytrialHallofFameVote(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameVotes,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 특정 명예의 전당 조회 좋아요수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/likes/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameLike(
+    @Param('hallOfFameId') id: number,
+    @Req() req: Request,
+  ) {
+    const data =
+      await this.trialHallOfFameService.findOneBytrialHallofFameLike(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameLikes,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 특정 명예의 전당 조회 조회수
+  @ApiOperation({ summary: ' 특정 명예의 전당 조회 API (회원/비회원 구분 X)' })
+  @ApiParam({
+    name: 'hallOfFameId',
+    required: true,
+    description: ' 명예의 전당 투표 조회 ID',
+    type: Number,
+  })
+  @Get('HallofFame/views/:hallOfFameId')
+  @Render('halloffamepost.ejs')
+  async findOneBytrialHallofFameViews(
+    @Param('hallOfFameId') id: number,
+    @Req() req: Request,
+  ) {
+    const data =
+      await this.trialHallOfFameService.findOneBytrialHallofFameViews(+id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '명예의 전당 데이터를 조회 성공하였습니다.',
+      data,
+      halloffameType: HalloffameType.TrialsHallofFameViews,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
   // 판례 조회 API
   @Get('cases')
   async getCaseDetails(@Query('caseId') caseId: string) {

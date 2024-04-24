@@ -96,7 +96,4 @@ export class PolticalDebateCommentsService {
     await this.polticalDebateCommentsRepository.delete(commentId);
     return { message: '댓글이 삭제되었습니다.' };
   }
-
-
-  
 }

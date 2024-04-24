@@ -7,7 +7,6 @@ body {
 
 /* 헤더 영역 스타일 */
 header {
-  background-color: #333;
   color: #fff;
   padding: 20px 0;
   text-align: center;
@@ -68,36 +67,17 @@ input[type="submit"]:hover {
   background-color: #0056b3;
 }
 
-/* 모달 스타일 */
-.modal {
-  display: none; /* 모달 숨김 */
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.4); /* 배경에 불투명한 색상 추가 */
+button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-/* 모달 스타일 */
-.modal-content {
-  width: 50%; /* 너비를 50%로 설정 */
-  max-width: 500px; /* 최대 너비를 500px로 제한 */
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  border-radius: 5px;
-}
-
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 80%;
-  border-radius: 5px;
+button:hover {
+  background-color: #0056b3;
 }
 
 .close {
@@ -114,4 +94,11 @@ input[type="submit"]:hover {
   color: black;
   text-decoration: none;
   cursor: pointer;
+}
+
+footer {
+  background-color: #fffed4;
+  color: black;
+  padding: 20px 0;
+  text-align: center;
 }

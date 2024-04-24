@@ -15,6 +15,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import Redis from 'ioredis';
 import { S3Service } from '../s3/s3.service';
 import { BoardType } from '../s3/board-type';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
 export class OnlineBoardsService {
@@ -22,8 +23,7 @@ export class OnlineBoardsService {
     @InjectRepository(OnlineBoards)
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
     private readonly s3Service: S3Service,
-    @InjectRedis()
-    private readonly redis: Redis,
+    private readonly redisService: RedisService,
   ) {}
 
   // 자유게시판 게시글 작성
@@ -32,6 +32,7 @@ export class OnlineBoardsService {
     userInfo: UserInfos,
     files: Express.Multer.File[],
   ): Promise<OnlineBoards> {
+    console.log(createOnlineBoardDto);
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(
@@ -96,9 +97,6 @@ export class OnlineBoardsService {
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    if (onlineBoards.length === 0) {
-      throw new NotFoundException('더이상 게시물이 없습니다!');
-    }
     return {
       onlineBoards,
       totalItems,
@@ -109,7 +107,7 @@ export class OnlineBoardsService {
   async findBoard(id: number) {
     const board = await this.onlineBoardsRepository.findOne({
       where: { id },
-      relations: { OnlineBoardComment: true },
+      relations: { onlineBoardComment: true },
     });
     return board;
   }
@@ -119,14 +117,17 @@ export class OnlineBoardsService {
     const findHumorBoard: OnlineBoards =
       await this.onlineBoardsRepository.findOne({
         where: { id },
-        relations: ['OnlineBoardComment'],
+        relations: ['onlineBoardComment'],
       });
+    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
     let cachedView: number;
     try {
-      cachedView = await this.redis.incr(`online:${id}:view`);
+      cachedView = await this.redisService
+        .getCluster()
+        .incr(`online:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',
@@ -144,6 +145,7 @@ export class OnlineBoardsService {
     const foundBoard = await this.findBoardId(id);
 
     const { title, content } = updateOnlineBoardDto;
+
     const board = await this.onlineBoardsRepository.save({
       id: foundBoard.id,
       title,

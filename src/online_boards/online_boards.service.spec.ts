@@ -85,7 +85,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
@@ -109,7 +109,7 @@ describe('OnlineBoardsService', () => {
         created_at: new Date('2024-03-24T02:05:02.602Z'),
         updated_at: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
-        OnlineBoardComment: null,
+        onlineBoardComment: null,
         onlineBoardLike: null,
       },
     ] as OnlineBoards[];
@@ -136,7 +136,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
@@ -180,7 +180,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
@@ -197,7 +197,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
@@ -228,7 +228,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
@@ -256,7 +256,7 @@ describe('OnlineBoardsService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
-      OnlineBoardComment: null,
+      onlineBoardComment: null,
       onlineBoardLike: null,
     };
 
