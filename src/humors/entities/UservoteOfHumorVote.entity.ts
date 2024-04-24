@@ -22,7 +22,7 @@ export class EachHumorVote {
   userId?: number;
 
   @Column({ type: 'varchar', nullable: true })
-  userCode?: string;
+  ip?: string;
 
   @Column({ type: 'boolean' })
   voteFor: boolean;

@@ -9,6 +9,8 @@ import { PolticalDebateComments } from './entities/poltical_debate_comments.enti
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
 import { UserInfos } from '../users/entities/user-info.entity';
+import { RedisService } from '../cache/redis.service';
+import { NicknameGeneratorService } from '../chats/nickname.service';
 
 @Injectable()
 export class PolticalDebateCommentsService {
@@ -17,6 +19,8 @@ export class PolticalDebateCommentsService {
     private readonly polticalDebateCommentsRepository: Repository<PolticalDebateComments>,
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
+    private readonly redisService: RedisService,
+    private readonly nickNameService: NicknameGeneratorService,
   ) {}
 
   async createComment(
@@ -96,7 +100,4 @@ export class PolticalDebateCommentsService {
     await this.polticalDebateCommentsRepository.delete(commentId);
     return { message: '댓글이 삭제되었습니다.' };
   }
-
-
-  
 }

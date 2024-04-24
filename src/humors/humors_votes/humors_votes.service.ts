@@ -73,29 +73,25 @@ export class HumorVotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       humorVoteId: number;
       voteFor: boolean;
     },
     queryRunner: QueryRunner,
   ) {
-    // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
-    const isExistingVote = userId
-      ? await queryRunner.manager.findOneBy(EachHumorVote, {
-          userId,
-          humorVoteId,
-        })
-      : await queryRunner.manager.findOneBy(EachHumorVote, {
-          userCode,
-          humorVoteId,
-        });
+    const searchCriteria = userId
+      ? { userId, humorVoteId }
+      : { ip, humorVoteId };
+    const isExistingVote = await queryRunner.manager.findOneBy(
+      EachHumorVote,
+      searchCriteria,
+    );
 
-    // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
       if (isExistingVote.voteFor === voteFor) {
         const vote = await this.canselEachVote(isExistingVote.id);
@@ -106,9 +102,10 @@ export class HumorVotesService {
         return isExistingVote;
       }
     }
+
     const voteData = this.eachHumorVoteRepository.create({
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     });
@@ -117,6 +114,7 @@ export class HumorVotesService {
 
   // 투표하기
   async addHumorVoteUserorNanUser(
+    ip: string,
     userId: number,
     humorVoteId: number,
     voteFor: boolean,
@@ -129,7 +127,7 @@ export class HumorVotesService {
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, humorVoteId, voteFor },
+        { userId, ip, humorVoteId, voteFor },
         queryRunner,
       );
       await queryRunner.commitTransaction();
@@ -182,7 +180,6 @@ export class HumorVotesService {
         'voteForFalse',
       )
       .where('eachHumorVote.humorVoteId = :humorVoteId', { humorVoteId })
-      .andWhere('eachHumorVote.userCode IS NULL')
       .getRawOne();
 
     const voteForTrue = parseInt(result.voteForTrue, 10);
@@ -250,7 +247,7 @@ export class HumorVotesService {
         'voteCount2',
       )
       .where('eachHumorVote.humorVoteId = :humorVoteId', { humorVoteId })
-      .andWhere('eachHumorVote.userCode IS NULL')
+      .andWhere('eachHumorVote.ip IS NULL')
       .getRawOne();
 
     const voteCount1 = parseInt(result.voteCount1, 10);

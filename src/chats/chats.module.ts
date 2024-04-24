@@ -11,6 +11,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CatSchema } from '../schemas/chat.schemas';
 import { AlarmService } from '../alarm/alarm.service';
 import { AlarmModule } from '../alarm/alarm.module';
+import { NicknameGeneratorService } from './nickname.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AlarmModule } from '../alarm/alarm.module';
   providers: [
     ChatsService,
     RedisIoAdapter,
+    NicknameGeneratorService,
     {
       provide: 'REDIS_DATA_CLIENT',
       useFactory: (redisAdapter: RedisIoAdapter) =>
@@ -34,6 +36,6 @@ import { AlarmModule } from '../alarm/alarm.module';
       inject: [RedisIoAdapter],
     },
   ],
-  exports: [ChatsService, RedisIoAdapter],
+  exports: [ChatsService, RedisIoAdapter, NicknameGeneratorService],
 })
 export class ChatsModule {}

@@ -23,15 +23,15 @@ export class RedisService implements OnModuleDestroy {
       ],
       {
         natMap: {
-          '172.23.0.3:6380': {
+          '172.23.0.7:6380': {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_1),
           },
-          '172.23.0.5:6381': {
+          '172.23.0.7:6381': {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_2),
           },
-          '172.23.0.2:6382': {
+          '172.23.0.5:6382': {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_3),
           },
@@ -39,11 +39,11 @@ export class RedisService implements OnModuleDestroy {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_4),
           },
-          '172.23.0.4:6384': {
+          '172.23.0.3:6384': {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_5),
           },
-          '172.23.0.7:6385': {
+          '172.23.0.2:6385': {
             host: process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT_6),
           },

@@ -57,10 +57,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: number; channelType: string },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    console.log(1);
     const { roomId, channelType } = data;
     const userId = socket.userId;
-    console.log(roomId);
+
     try {
       const updatedLikes = await this.likesService.like(
         channelType,
@@ -88,7 +87,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: number; channelType: string },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    console.log(24234);
     const { roomId, channelType } = data;
     await socket.join(`${channelType}:${roomId}`);
   }
@@ -110,11 +108,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = socket.userId;
     const { channelType, roomId, message } = data;
     try {
+      const ip = socket.request.connection.remoteAddress;
       const user = await this.chatsService.createChannelChat(
         channelType,
         userId,
         message,
         roomId,
+        ip,
       );
       this.server.to(`${channelType}:${roomId}`).emit('message', {
         userId,
@@ -158,6 +158,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       } else if (channelType === 'humors') {
         await this.humorVotesService.addHumorVoteUserorNanUser(
+          ip,
           userId,
           roomId,
           voteFor,
@@ -173,6 +174,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       } else if (channelType === 'poltical-debates') {
         await this.polticalVotesService.addPolticalVoteUserorNanUser(
+          ip,
           userId,
           roomId,
           voteFor,

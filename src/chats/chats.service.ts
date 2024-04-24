@@ -15,6 +15,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatDocument } from '../schemas/chat.schemas';
 import { FcmService } from '../alarm/fcm.service';
+import { NicknameGeneratorService } from './nickname.service';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -31,6 +32,7 @@ export class ChatsService implements OnModuleInit {
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
     private readonly alarmService: FcmService,
+    private readonly nickNameService: NicknameGeneratorService,
   ) {}
 
   async publishNotification(message: string) {
@@ -133,9 +135,20 @@ export class ChatsService implements OnModuleInit {
     userId: number | null,
     message: string,
     roomId: number,
+    ip: string,
   ) {
     try {
-      let userName = '익명';
+      let userName = await this.redisDataClient.get(`userName:${ip}`);
+
+      if (!userName) {
+        userName = this.nickNameService.generateNickname();
+        await this.redisDataClient.set(
+          `userName:${ip}`,
+          userName,
+          'EX',
+          60 * 60 * 24,
+        );
+      }
 
       if (userId) {
         userName = await this.redisDataClient.get(`userName:${userId}`);

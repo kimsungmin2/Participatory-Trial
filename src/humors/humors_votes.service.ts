@@ -72,12 +72,12 @@ export class HumorVotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       humorVoteId: number;
       voteFor: boolean;
     },
@@ -90,7 +90,7 @@ export class HumorVotesService {
           humorVoteId,
         })
       : await queryRunner.manager.findOneBy(EachHumorVote, {
-          userCode,
+          ip,
           humorVoteId,
         });
 
@@ -107,7 +107,7 @@ export class HumorVotesService {
     }
     const voteData = this.eachHumorVoteRepository.create({
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     });

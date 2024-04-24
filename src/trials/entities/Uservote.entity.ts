@@ -17,7 +17,7 @@ export class EachVote {
   @Column({ type: 'int', nullable: true })
   userId?: number;
   @Column({ type: 'varchar', nullable: true })
-  userCode?: string;
+  ip?: string;
   @Column({ type: 'boolean' })
   voteFor: boolean;
   @CreateDateColumn({ type: 'timestamp' })
