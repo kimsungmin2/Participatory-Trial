@@ -43,7 +43,7 @@ a {
 }
 
 body {
-  background-color: lightskyblue;
+  background-color: rgb(187, 229, 255);
 }
 
 /* --------------header 영역 -------------- */
@@ -52,7 +52,7 @@ header {
   position: sticky;
   width: 100%;
   top: 0;
-  background-color: #f4edcc;;
+  background-color: #f4edcc;
 }
 
 #searchForm {
@@ -91,6 +91,9 @@ header {
 }
 
 /* --------------main 영역------------------ */
+main {
+  background-color: lightskyblue;
+}
 .swiper-container {
   width: 100%;
   height: 100%;
