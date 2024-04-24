@@ -3,13 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Participatory Trial</title>
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-
     <!-- Bootstrap JS, Popper.js, and jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
@@ -66,38 +65,48 @@
       </div>
     </nav>
     <header>
-      <div>
-        <p class="hot_vote_now">지금 가장 핫한 토론은?</p>
+      <form action="/search" method="get" id="searchForm">
+        <div class="search">
+          <input type="text" placeholder="검색어 입력" name="search" id="searchInput">
+          <button type="submit" class="glass_button"><i class="fa-solid fa-magnifying-glass fa-2x"></i></button>
+        </div>
+      </form>
+      <%- include('partials/nav')  %>
+    </header>
+
+    <main>
+      <div class="hot_vote_now_container">
+        <span>
+          <h1 class="hot_vote_now">지금 가장 핫한 토론은?</>
+        </span>
       </div>
+      <img class="img" src="/image/pngwing.com.png" alt="">
       <div class="hot_vote">
         <div class="hot_vote_container">
-          
           <div class="hot_vote_title">
-            <div>
-              <span>맥그리거</span>
-            </div>
-            <div>
-              <span>VS</span>
-            </div>
-            <div>
-              <span>할머니 500명</span>
-            </div>
+            <span class="title">맥그리거와 할머니 500명이 싸우면?</span>
           </div>
           <div class="hot_vote_sub">
-            <div class="fighter">
+            <div class="title_one">
               <span>맥그리거</span>
-              <span>5000표</span>
             </div>
             <div class="vs">
               <span>VS</span>
             </div>
-            <div class="grandmothers">
+            <div class="titile_two">
               <span>할머니 500명</span>
-              <span>1000표</span>
+            </div>
+          </div>
+          <div class="hot_vote_count">
+            <div class="title_one_count">
+              <span>100</span>
+            </div>
+            <div class="titile_two_count">
+              <span>50</span>
             </div>
           </div>
           <div class="hot_vote_timer">
-            <span>1시간 30분 33초</span>
+            <span>투표 종료: 1시간 30분 33초</span>
           </div>
         </div>
       </div>
@@ -121,7 +130,6 @@
           </div>
         </div>
         <% } %>
-
         <!-- 다른 grid-item 블록 추가 -->
       </div>
     </header>
