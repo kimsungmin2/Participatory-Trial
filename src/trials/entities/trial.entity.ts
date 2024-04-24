@@ -1,6 +1,7 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -11,8 +12,11 @@ import {
 } from 'typeorm';
 import { Users } from '../../users/entities/user.entity';
 import { Votes } from './vote.entity';
+import { TrialLike } from './trials.like.entity';
 
-@Entity()
+@Entity({
+  name: 'trials',
+})
 export class Trials {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
@@ -26,14 +30,17 @@ export class Trials {
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
+
+  @Column({ type: 'boolean', nullable: false, default: true })
+  is_time_over: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
@@ -41,10 +48,18 @@ export class Trials {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @ManyToOne(() => Users, (user) => user.trial)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deletedAt: Date;
+
+  @ManyToOne(() => Users, (user) => user.trial, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
-  @OneToMany(() => Votes, (vote) => vote.trial, { cascade: true })
-  vote: Votes[];
+  @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
+  vote: Votes;
+
+  @OneToOne(() => TrialLike, (trialLike) => trialLike.trial, { cascade: true })
+  trialLike: TrialLike;
 }

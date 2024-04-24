@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <link rel="stylesheet" href="/css/board-style.css" />
+</head>
+<body>
+  <div class="board_title">
+    <% if (boardType === 'humor' || boardType === 'humor_board') { %>
+      <span>유머 게시판</span>
+    <% } else if (boardType === 'onlineBoard' || boardType === 'online_boardaw') { %>
+      <span>자유 게시판</span>
+    <% } else if (boardType === 'polticalDebate' || boardType === 'poltical_debate_board') { %>
+      <span>정치토론 게시판</span>
+    <% } else if (boardType === 'trial') { %>
+      <span>재판 게시판</span>
+    <% } else {%>
+      <span>전체 검색</span>
+      <% } %>
+  </div>
+</body>
+</html>

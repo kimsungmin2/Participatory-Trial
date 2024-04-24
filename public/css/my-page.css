@@ -1,0 +1,54 @@
+/* my-page.css */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 10px 0;
+  text-align: center;
+}
+
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+.navbar-brand {
+  font-size: 24px;
+}
+
+main {
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.info {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px;
+  margin: 20px auto; /* 요소를 가운데 정렬 */
+  max-width: 300px; /* 최대 너비 설정 */
+}
+
+.label {
+  font-weight: bold;
+}
+
+footer {
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 10px 0;
+}

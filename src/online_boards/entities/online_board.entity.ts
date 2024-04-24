@@ -1,16 +1,18 @@
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Users } from '../../users/entities/user.entity';
-import { OnlineBoardComments } from './online_board_comment.entity';
+
+import { OnlineBoardLike } from './online_board_like.entity';
 
 @Entity()
 export class OnlineBoards {
@@ -20,29 +22,35 @@ export class OnlineBoards {
   @Column({ type: 'int' })
   userId: number;
 
-  @Column({ type: 'varchar', unique: true, nullable: false })
+  @Column({ type: 'varchar', unique: false, nullable: false })
   title: string;
 
   @Column({ type: 'varchar', nullable: false })
   content: string;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 1 })
   view: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
   @Column({ type: 'varchar', nullable: true })
-  top_comments: string;
+  imageUrl: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  topComments: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
+
+  @DeleteDateColumn({ type: 'timestamp', nullable: true })
+  deleted_at: Date;
 
   @ManyToOne(() => Users, (user) => user.onlineBoard)
-  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
   user: Users;
 
   @OneToMany(
@@ -50,5 +58,14 @@ export class OnlineBoards {
     (OnlineBoardComment) => OnlineBoardComment.onlineBoard,
     { cascade: true },
   )
-  OnlineBoardComment: OnlineBoardComments[];
+  onlineBoardComment: OnlineBoardComments[];
+
+  @OneToMany(
+    () => OnlineBoardLike,
+    (onlineBoardLike) => onlineBoardLike.onlineBoard,
+    {
+      cascade: true,
+    },
+  )
+  onlineBoardLike: OnlineBoardLike[];
 }

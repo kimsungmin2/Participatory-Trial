@@ -1,0 +1,252 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: 'GmarketSansMedium';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'SUITE-Regular';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/SUITE-Regular.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'MBC1961GulimM';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+/* body {
+  background-color: lightskyblue;
+} */
+
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.navbar {
+  background-color: #f4edcc;
+}
+
+.hot_vote {
+  border-radius: 10px;
+  background-color: lightsalmon;
+  width: 90%;
+  height: 400px;
+  margin: 0 auto;
+  box-shadow: 0px 0px 5px #444;
+  margin-top: 5%;
+  padding: 20px;
+}
+
+.hot_vote_container {
+  width: 100%;
+}
+
+.hot_vote_now {
+  width: 95%;
+  text-align: center;
+  font-size: 3.5em;
+  margin: 0px;
+  font-family: 'GmarketSansMedium';
+
+  background-color: lightseagreen;
+  margin: 0 auto;
+  margin-top: 5%;
+  border-radius: 10px;
+}
+
+.hot_vote_title,
+.hot_vote_timer,
+.other {
+  width: 80%; /* 부모 요소의 너비 설정, 필요에 따라 조정 가능 */
+  margin: 0 auto; /* 가운데 정렬 */
+  text-align: center;
+  font-size: 2.8em;
+}
+.hot_vote_title,
+.hot_vote_timer {
+  display: flex; /* Flex 컨테이너 설정 */
+  justify-content: center; /* 내부 요소들을 가운데 정렬 */
+  align-items: center; /* 내부 요소들을 세로 방향으로 가운데 정렬 */
+  font-family: 'SUITE-Regular';
+}
+.hot_vote_title > div {
+  margin: 0 10px; /* 좌우 마진으로 요소들 사이의 간격 조정 */
+  margin-top: 3%;
+}
+
+.hot_vote_title span:not(:last-child) {
+  margin-right: 100px; /* 마지막 요소를 제외한 모든 span 요소에 오른쪽 마진 추가 */
+}
+
+.hot_vote_sub {
+  width: 100%;
+  height: 100%;
+  margin-top: 20px;
+  font-family: 'SUITE-Regular';
+}
+
+.hot_vote_sub {
+  padding: 0 15%;
+  display: flex; /* 가로로 나란히 배치 */
+  justify-content: space-between; /* 가운데 정렬 */
+  align-items: center; /* 세로 방향에서도 가운데 정렬 */
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+.hot_vote_sub > div {
+  display: flex; /* 각 컨테이너도 Flex 컨테이너로 설정 */
+  flex-direction: column; /* 세로 방향 배치 */
+  align-items: center; /* 세로 방향에서 가운데 정렬 */
+  margin: 0 10px; /* 요소 사이의 간격 */
+}
+
+.vs {
+  display: flex; /* VS만 담긴 컨테이너도 Flex로 설정하여 */
+  justify-content: center; /* 가운데 정렬 유지 */
+  align-items: center;
+}
+
+.other {
+  width: 100%;
+  margin-top: 3%;
+  font-family: 'GmarketSansMedium';
+  margin: 5% 0 5% 0;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(30%, 1fr)
+  ); /* 블록의 최소 너비를 250px로 설정하고 사용 가능한 공간에 따라 늘어나도록 함 */
+  grid-gap: 50px; /* 그리드 아이템 간의 간격을 20px로 설정 */
+  padding: 20px;
+}
+
+.grid-item {
+  background: #ffd5cd; /* 블록의 배경색 */
+  border: 1px solid #f5a9a9; /* 블록의 테두리색 */
+  padding: 20px;
+  text-align: center;
+  box-shadow: 5px 5px 3px #666;
+  display: flex; /* 추가된 부분 */
+  flex-direction: column; /* 세로로 내용을 쌓기 위해 */
+  justify-content: space-between; /* 내용 사이에 공간을 균등하게 분배 */
+  margin-bottom: 5%;
+  border-radius: 5px;
+}
+
+.vote-title {
+  font-size: 1.5em; /* 제목의 크기를 조절 */
+  margin-bottom: 20px; /* 제목 아래의 여백 */
+  font-family: 'SUITE-Regular';
+  font-weight: 700;
+}
+
+.vote-options {
+  margin-bottom: 15px; /* 옵션들 아래의 여백 */
+}
+
+.vote-option {
+  /* 투표 옵션 스타일 */
+  font-family: 'SUITE-Regular';
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.vote-count {
+  /* 투표 수 스타일 */
+  font-family: 'SUITE-Regular';
+  font-weight: 500;
+  margin-bottom: 1em;
+}
+
+.navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+
+.navbar-brand {
+  font-size: 24px;
+}
+
+.right-align-item {
+  margin-left: auto;
+}
+
+.search {
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
+  margin-bottom: 110px;
+}
+
+input {
+  width: 100%;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 30px;
+  height: 50 px;
+}
+
+.glass_button {
+  position: absolute;
+  width: 17px;
+  top: 12px;
+  right: 40px;
+  margin: 0;
+  background: transparent;
+  border: transparent;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.notification.show {
+  transform: translateY(0); /* 알림창 보여줌 */
+}
+
+.hidden {
+  display: none;
+}

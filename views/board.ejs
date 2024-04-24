@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="/css/board-style.css" />
+  </head>
+  <body>
+    <%- include('partials/nav')  %>
+    <% 
+    let boardName;
+    switch (boardType) {
+          case 'humor':
+          boardName = 'humors';
+            break;
+          case 'onlineBoard':
+          boardName = 'online-boards';
+            break;
+          case 'polticalDebate':
+          boardName = 'poltical-debates';
+            break;
+          case 'trial':
+          boardName = 'trials';
+            break;
+        }
+    %>
+
+    <header>
+      <%- include('partials/board-title') %>
+
+      <hr width="70%" color="black" size="2" style="margin-left: 30px" />
+      
+      <div class="cards-container">
+        <% if (data.length !== 0) {%>
+        <% for (let i = 0; i < data.length; i++) {  %>
+        <div class="card">
+            <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <div class="card-stats">
+            <div>작성자: <%= data[i].userId %></div>
+            <div>조회 : <%= data[i].view %></div>
+            <% if (boardType !== 'polticalDebate') { %>
+            <div>좋아요 : <%= data[i].like %></div>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+      <% } else { %>
+        <p class="no_posts">게시물이 없습니다!</p>
+        <% } %>
+      </div>
+      <div class="pagination">
+        <%
+        // 페이지 링크를 위한 기본 URL 설정
+        let baseUrl = '';
+        switch (boardType) {
+          case 'humor':
+            baseUrl = '/humors?page=';
+            break;
+          case 'onlineBoard':
+            baseUrl = '/online-boards?page=';
+            break;
+          case 'polticalDebate':
+            baseUrl = '/poltical-debates?page=';
+            break;
+          case 'trial':
+            baseUrl = '/trials?page=';
+            break;
+        }
+        const prevGroupPage = startPage > 1 ? startPage - 1 : null;
+        const nextGroupPage = endPage < pageCount ? endPage + 1 : null;
+        %>
+        <% if (prevGroupPage) { %>s
+          <a href="<%= baseUrl + (prevGroupPage - 9) %>">« 이전</a>
+        <% } %>
+        
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <% if (i === currentPage) { %>
+            <span class="current-page-number">[<%= i %>]</span>
+          <% } else { %>
+            <a href="<%= baseUrl + i %>"><%= i %></a>
+          <% } %>
+        <% } %>
+        
+        <% if (nextGroupPage) { %>
+          <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
+        <% } %>
+        
+      </div>
+
+        <a class="submit-button" id="createPostLink" href="/<%= boardName %>/create">글쓰기</a>
+
+      <div class="search-container">
+        <form action="/search" method="get" id="searchForm">
+          <div>
+            <select name="searchOption" id="searchOption">
+              <option value="title">제목</option>
+              <option value="content">내용</option>
+              <option value="titleContent">제목+내용</option>
+            </select>
+          </div>
+          <input type="text" placeholder="검색..." name="search" id="searchInput"/>
+          <button type="submit">검색</button>
+        </form>
+      </div>
+      
+    </header>
+    <script defer>
+      document.getElementById('createPostLink').addEventListener('click', function(e) {
+        e.preventDefault();
+
+        fetch('/<%= boardName %>/create')
+        .then(response => {
+          if(response.ok) {
+            window.location.href = '/<%= boardName %>/create'
+          } else if (response.status === 401) {
+            return response.json()
+          }
+        })
+        .then(data => {
+          if (data && data.message) {
+            alert('로그인해야 합니다!')
+          }
+        })
+      })
+
+      let boardIndex = '';
+        switch ("<%= boardType %>") {
+          case 'humor':
+          boardIndex = 'humor_board';
+            break;
+          case 'onlineBoard':
+            boardIndex = 'online_board';
+            break;
+          case 'polticalDebate':
+            boardIndex = 'poltical_debate_board';
+            break;
+          case 'trial':
+            boardIndex = 'trial';
+            break;
+        }
+
+      document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const searchInput = document.getElementById('searchInput').value;
+      const selectedOption = document.getElementById('searchOption').value;
+      const queryParams = new URLSearchParams();
+
+      queryParams.append('search', searchInput); // 검색어 항상 추가
+      queryParams.append('type', selectedOption); // 선택된 검색 옵션 추가
+      queryParams.append('boardName', boardIndex)
+
+      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+      window.location.href = `/search?${queryParams.toString()}`;
+});
+
+    </script>
+  </body>
+</html>

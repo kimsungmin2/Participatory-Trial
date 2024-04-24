@@ -1,0 +1,139 @@
+<!-- <!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/layout.css" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="showNotifications">이전 알림 보기</button>
+    <div
+      id="notificationContainer"
+      style="position: fixed; bottom: 20px; right: 20px"
+    ></div>
+
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const showNotificationsBtn =
+          document.getElementById('showNotifications');
+        let popupContainer = document.createElement('div');
+        popupContainer.id = 'popupContainer';
+        document.body.appendChild(popupContainer);
+        popupContainer.className = 'popup';
+        let offset = 0;
+
+        function loadNotifications() {
+          const notificationsString = localStorage.getItem('notifications');
+          return notificationsString ? JSON.parse(notificationsString) : [];
+        }
+
+        let notifications =
+          JSON.parse(localStorage.getItem('notifications')) || [];
+
+        function saveNotifications(notifications) {
+          localStorage.setItem('notifications', JSON.stringify(notifications));
+        }
+
+        const socket = io();
+
+        socket.on('notification', function (message) {
+          notifications.push(message);
+
+          if (notifications.length > 10) {
+            notifications.shift();
+          }
+          localStorage.setItem('notifications', JSON.stringify(notifications));
+          createNotification(message);
+        });
+
+        popupContainer.addEventListener('click', function (event) {
+          if (
+            event.target.tagName === 'A' &&
+            event.target.classList.contains('notification-link')
+          ) {
+            event.preventDefault();
+            const notificationUrl = event.target.getAttribute('href');
+            window.location.href = notificationUrl;
+            event.target.remove();
+          }
+        });
+
+        showNotificationsBtn.addEventListener('click', function () {
+          const notifications = loadNotifications();
+          popupContainer.innerHTML = '';
+
+          notifications.forEach((notification) => {
+            // 알림 요소 생성
+            const notificationElement = document.createElement('a');
+            notificationElement.href = '#';
+            notificationElement.textContent = notification;
+
+            // 알림 클릭 이벤트 핸들러
+            notificationElement.onclick = function (event) {
+              event.preventDefault();
+              const messageParts = notification.split('의');
+              const channelType = messageParts[0].trim();
+              const roomIdMatch = messageParts[1].match(/\d+/);
+              const roomId = roomIdMatch ? roomIdMatch[0] : '';
+              const notificationUrl = `http://localhost:3000/${channelType}/${roomId}`;
+
+              removeNotificationFromLocalStorage(notification);
+
+              this.parentNode.removeChild(this);
+
+              window.location.href = notificationUrl;
+            };
+
+            popupContainer.appendChild(notificationElement);
+            popupContainer.appendChild(document.createElement('br'));
+          });
+
+          popupContainer.style.display = 'block';
+
+          setTimeout(() => {
+            popupContainer.style.display = 'none';
+          }, 5000);
+        });
+
+        function removeNotificationFromLocalStorage(notificationToRemove) {
+          const notifications = loadNotifications();
+          const filteredNotifications = notifications.filter(
+            (notification) => notification !== notificationToRemove,
+          );
+          saveNotifications(filteredNotifications);
+        }
+
+        function createNotification(message) {
+          const notification = document.createElement('div');
+          notification.classList.add('notification', 'show');
+          notification.textContent = message;
+
+          notification.addEventListener('click', function () {
+            const messageParts = message.split('의');
+            const channelType = messageParts[0];
+            const roomIdMatch = messageParts[1].match(/\d+/);
+            const roomId = roomIdMatch ? roomIdMatch[0] : '';
+            window.location.href = `http://localhost:3000/${channelType}/${roomId}`;
+          });
+          notification.style.bottom = `${20 + offset}px`;
+          notificationContainer.appendChild(notification);
+
+          offset += 60;
+
+          setTimeout(() => {
+            notificationContainer.removeChild(notification);
+            offset -= 60;
+          }, 5000);
+
+          while (notificationContainer.children.length > 5) {
+            const oldNotification = notificationContainer.children[0];
+            notificationContainer.removeChild(oldNotification);
+            offset -= 60;
+          }
+        }
+      });
+    </script>
+  </body>
+</html> -->

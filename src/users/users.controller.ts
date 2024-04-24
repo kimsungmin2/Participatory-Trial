@@ -1,34 +1,77 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Patch,
+  Delete,
+  Req,
+  ForbiddenException,
+  UseGuards,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UpdateDto } from './dto/update.dto';
+import { DeleteDto } from './dto/delete.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { JwtOpAuthGuard } from '../utils/guard/jwtop.guard';
+import { IGuestRequest } from '../utils/interface/guest.interface';
+import { ClientsDto } from './dto/client.dto';
+import { v4 as uuidv4 } from 'uuid';
 
+@ApiTags('USER_UD')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @ApiOperation({ summary: '닉네임 변경', description: '업데이트' })
+  @UseGuards(JwtOpAuthGuard)
+  @Patch('')
+  async userUpdate(@Body() updateDto: UpdateDto, @Req() req: IGuestRequest) {
+    const id = req.id;
+    const userUpdate = await this.usersService.userUpdate(
+      id,
+      updateDto.nickName,
+    );
+    return {
+      statusCode: HttpStatus.OK,
+      message: '닉네임 변경에 성공하였습니다.',
+      userUpdate,
+    };
   }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
+  @ApiOperation({ summary: '유저 삭제', description: '삭제' })
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('')
+  async userDelete(@Body() deleteDto: DeleteDto, @Req() req) {
+    const { id } = req.user;
+    if (deleteDto.password !== deleteDto.confirmPassword) {
+      throw new ForbiddenException(
+        '입력한 비밀번호와 확인 비밀번호가 같지 않습니다.',
+      );
+    }
+    const data = await this.usersService.userDelete(id);
+    return {
+      statusCode: HttpStatus.NO_CONTENT,
+      message: '회원 탈퇴가 완료됐습니다.',
+      data,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
+  @UseGuards(JwtOpAuthGuard)
+  @Post('register-token')
+  async registerToken(@Body() body: ClientsDto, @Req() req: IGuestRequest) {
+    const id = req.id;
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    let clientId = body.clientId;
+    if (!clientId) {
+      clientId = uuidv4();
+    }
+    const clientsDto = {
+      ...body,
+      userId: id,
+      clientId: clientId,
+    };
+    const result = await this.usersService.updateClientsInfo(clientsDto);
+    return result;
   }
 }

@@ -9,17 +9,29 @@ import {
 } from 'typeorm';
 import { UserInfos } from './user-info.entity';
 import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
-import { OnlineBoardComments } from '../../online_boards/entities/online_board_comment.entity';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Trials } from '../../trials/entities/trial.entity';
-import { HumorBoards } from '../../humors/entities/humor.entity';
-import { HumorComments } from '../../humors/entities/humor_comment.entity';
+import { HumorBoards } from '../../humors/entities/humor-board.entity';
+import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
+import { Role } from '../types/userRole.type';
+import { EachVote } from '../../trials/entities/Uservote.entity';
+import { HumorLike } from '../../humors/entities/humor_like.entity';
+import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
+import { EachHumorVote } from '../../humors/entities/UservoteOfHumorVote.entity';
+import { EachPolticalVote } from '../../poltical_debates/entities/userVoteOfPoltical_debate.entity';
+import { TrialsChat } from '../../events/entities/trialsChat.entity';
 
-@Entity()
+@Entity({
+  name: 'users',
+})
 export class Users {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
+
+  @Column({ type: 'enum', enum: Role, default: Role.User })
+  role: Role;
 
   @CreateDateColumn({ type: 'date' })
   createdAt: Date;
@@ -39,14 +51,13 @@ export class Users {
   )
   onlineBoardComment: OnlineBoardComments[];
 
-  @OneToMany(() => Trials, (trial) => trial.user)
+  @OneToMany(() => Trials, (trial) => trial.user, {
+    eager: true,
+  })
   trial: Trials[];
 
   @OneToMany(() => HumorBoards, (humorBoard) => humorBoard.user)
   humorBoard: HumorBoards[];
-
-  @OneToMany(() => HumorComments, (humorComment) => humorComment.user)
-  humorComment: HumorComments[];
 
   @OneToMany(
     () => PolticalDebateBoards,
@@ -61,4 +72,30 @@ export class Users {
     { cascade: true },
   )
   polticalDebateComments: PolticalDebateComments[];
+
+  @OneToMany(() => EachVote, (eachVote) => eachVote.user, { cascade: true })
+  eachVote: EachVote[];
+
+  @OneToMany(
+    () => EachPolticalVote,
+    (eachPolticalVote) => eachPolticalVote.user,
+    { cascade: true },
+  )
+  eachPolticalVote: EachPolticalVote[];
+
+  @OneToMany(() => EachHumorVote, (eachHumorVote) => eachHumorVote.user, {
+    cascade: true,
+  })
+  eachHumorVote: EachHumorVote[];
+  @OneToMany(() => HumorLike, (humorLike) => humorLike.user, {
+    cascade: true,
+  })
+  humorLike: HumorLike[];
+  @OneToMany(() => OnlineBoardLike, (onlineBoardLike) => onlineBoardLike.user, {
+    cascade: true,
+  })
+  onlineBoardLike: OnlineBoardLike[];
+
+  @OneToMany(() => TrialsChat, (trialsChat) => trialsChat.user)
+  trialsChat: TrialsChat[];
 }
