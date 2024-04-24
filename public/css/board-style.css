@@ -22,15 +22,13 @@
   font-weight: normal;
   font-style: normal;
 }
-/* body {
-  background-color: lightskyblue;
-} */
 
 * {
   margin: 0px;
   padding: 0px;
 }
-header {
+
+main {
   padding: 0 20%;
 }
 
@@ -42,6 +40,10 @@ ol {
 a {
   text-decoration: none;
 }
+
+/* body {
+  background-color: lightskyblue;
+} */
 
 /* --------------header -------------------- */
 header {
@@ -168,7 +170,7 @@ header {
 }
 
 .card {
-  background-color: #a1b1dc;
+  background-color: #ffebdd;
   border-radius: 8px; /* 둥근 모서리 */
   padding: 20px; /* 내부 여백 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
@@ -267,6 +269,17 @@ header {
 
 .like_button {
   text-align: center;
+  margin-top: 20px;
+}
+
+.like_button > button {
+  height: 40px;
+  padding: 0 20px;
+  margin-bottom: 50px;
+  border: none;
+  border-radius: 8px;
+  background-color: blue;
+  color: white;
 }
 
 .search_not_found {

@@ -24,9 +24,9 @@
   font-style: normal;
 }
 
-body {
+/* body {
   background-color: lightskyblue;
-}
+} */
 
 * {
   margin: 0px;
@@ -41,6 +41,11 @@ ol {
 a {
   text-decoration: none;
 }
+
+body {
+  background-color: lightskyblue;
+}
+
 /* --------------header 영역 -------------- */
 header {
   position: -webkit-sticky; /* 사파리 브라우저 지원을 위함 */
@@ -94,10 +99,6 @@ header {
 
 .swiper-slide {
   align-content: center;
-}
-
-.banner {
-  width: 500px;
 }
 
 .img {

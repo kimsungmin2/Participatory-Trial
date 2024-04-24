@@ -1,5 +1,4 @@
 @charset "UTF-8";
-
 @font-face {
   font-family: 'GmarketSansMedium';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff')
@@ -14,7 +13,6 @@
   font-weight: 400;
   font-style: normal;
 }
-
 @font-face {
   font-family: 'MBC1961GulimM';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-01@1.0/MBC1961GulimM.woff2')
@@ -25,17 +23,14 @@
 /* body {
   background-color: lightskyblue;
 } */
-
 * {
   margin: 0px;
   padding: 0px;
 }
-
 ul,
 ol {
   list-style: none;
 }
-
 a {
   text-decoration: none;
 }
@@ -51,11 +46,27 @@ a {
   transition: transform 0.5s ease;
   transform: translateY(100%);
 }
-
 .notification.show {
   transform: translateY(0); /* 알림창 보여줌 */
 }
-
 .hidden {
   display: none;
+}
+
+#showNotifications {
+  position: fixed; /* 고정 위치 */
+  top: 70px; /* 상단에서 20px */
+  right: 20px; /* 왼쪽에서 20px */
+  z-index: 100; /* 다른 요소 위에 표시 */
+}
+
+#popupContainer {
+  position: fixed; /* 고정 위치 */
+  top: 100px; /* 버튼 아래에 위치 */
+  right: 20px; /* 왼쪽에서 20px */
+  z-index: 99; /* 버튼 바로 아래에 위치 */
+  background-color: white; /* 배경색 */
+  border: 1px solid #000; /* 테두리 */
+  padding: 10px; /* 내부 여백 */
+  display: none; /* 기본적으로 숨김 */
 }
