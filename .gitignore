@@ -6,6 +6,8 @@
 /logstash
 /elasticsearch
 /py
+/aws
+/postgres-data
 
 # Logs
 logs
