@@ -692,6 +692,22 @@ export class TrialsController {
     };
   }
 
+
+  // 가장 인기있는 투표 탑 10 조회
+  @Get('Top10/Votes')
+  async findTop10TrialsByVotes(
+    @Req() req: Request,
+  ){
+    const data = await this.trialsService.findTop10TrialsByVotes()
+    
+    return {
+      statusCode: HttpStatus.OK,
+      message: '실시간핫한투표수데이터입니다.',
+      data,
+      isLoggedIn: req['isLoggedIn'],
+    }
+  }
+
   // 판례 조회 API
   @Get('cases')
   async getCaseDetails(@Query('caseId') caseId: string) {

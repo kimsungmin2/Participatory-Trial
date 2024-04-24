@@ -370,7 +370,13 @@ export class PolticalDebatesService {
     }
   }
 
-  async sum() {
-    return 1 + 2;
+  // Top 10 humors
+  async findTop10PolticalByVotes() {
+    return this.polticalDebateRepository
+    .createQueryBuilder('PolticalDabatesVote')
+    .loadRelationCountAndMap('PolticalDabatesVote.eachVoteCount', 'PolticalDabatesVote.eachPolticalVote')
+    .orderBy('PolticalDabatesVote.eachVoteCount', 'DESC')
+    .take(10)
+    .getMany();
   }
 }

@@ -36,6 +36,7 @@ export class FcmService {
   // Firebase 초기화
   private initializeFirebase(): void {
     try {
+      console.log(1)
       const privateKey = this.configService
         .get<string>('FIREBASE_PRIVATE_KEY')
         .replace(/\\n/g, '\n');
@@ -84,11 +85,12 @@ export class FcmService {
     messageType: string,
   ) {
     const writer = await this.findByBoardId(channelType, boardId);
-
+    
     const token = await this.clientsRepository.findOne({
       where: { userId: writer.userId },
       select: ['pushToken'],
     });
+    console.log(token)
 
     let message;
     switch (messageType) {
@@ -110,9 +112,10 @@ export class FcmService {
         body: `${writer.title} 게시글에 ${message} 추가되었습니다.`,
       },
     };
-
+    console.log(payload, 12313123)
     try {
       const response = await admin.messaging().send(payload);
+      console.log(response)
 
       this.logger.log(
         `알림 전송 성공, Notification sent successfully: ${response}`,
@@ -169,15 +172,19 @@ export class FcmService {
   }
 
   async findByBoardId(channelType: string, boardId: number) {
+    console.log(channelType, boardId)
     const cacheKey = `writerId:${channelType}:${boardId}`;
 
     const cachedWriterId = await this.redisService.getCluster().get(cacheKey);
-
+    console.log(cachedWriterId)
     if (cachedWriterId) {
       return JSON.parse(cachedWriterId);
+    } else{
+      console.log("연결안됨")
     }
 
     let channelRepository: Repository<any>;
+    console.log(channelType)
     switch (channelType) {
       case 'trials':
         channelRepository = this.trialsRepository;
@@ -193,10 +200,15 @@ export class FcmService {
         break;
     }
 
+
+    console.log(2)
+
     const writerId = await channelRepository.findOne({
       where: { id: boardId },
       select: ['userId', 'title'],
     });
+
+    console.log(3)
 
     await this.redisService
       .getCluster()
