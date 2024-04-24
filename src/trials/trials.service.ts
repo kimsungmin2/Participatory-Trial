@@ -406,6 +406,16 @@ export class TrialsService {
     return trial;
   }
 
+  // Top 10 find
+  async findTop10TrialsByVotes() {
+    return this.votesRepository
+    .createQueryBuilder('votes')
+    .loadRelationCountAndMap('votes.eachVoteCount', 'votes.eachVote')
+    .orderBy('votes.eachVoteCount', 'DESC')
+    .take(10)
+    .getMany();
+  }
+
   // 판례 조회
   async getCaseDetails(caseId: string) {}
 }

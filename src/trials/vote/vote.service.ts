@@ -207,6 +207,7 @@ export class VotesService {
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
   }
+  
   async updateVoteCounts(voteId: number) {
     const result = await this.dataSource
       .getRepository(EachVote)

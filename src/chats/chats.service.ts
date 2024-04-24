@@ -185,7 +185,7 @@ export class ChatsService implements OnModuleInit {
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
       await this.redisDataClient.publish(chatKey, chatValue);
 
-      // await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
+      await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
 
       return userName;
     } catch (error) {

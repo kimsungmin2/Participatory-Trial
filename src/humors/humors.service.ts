@@ -222,4 +222,14 @@ export class HumorsService {
     }
     return deletedHumorBoard;
   }
+
+  // Top 10 humors
+  async findTop10HumorsByVotes() {
+    return this.HumorVotesRepository
+    .createQueryBuilder('humorVotes')
+    .loadRelationCountAndMap('humorVotes.eachVoteCount', 'votes.eachHumorVote')
+    .orderBy('humorVotes.eachVoteCount', 'DESC')
+    .take(10)
+    .getMany();
+  }
 }

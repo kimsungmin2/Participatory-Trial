@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   postgres:
-    image: postgres:16
+    image: postgres:15
     restart: always
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
@@ -10,7 +10,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      POSTGRES_DB: postgres123
 
   redis-0:
     image: redis:latest

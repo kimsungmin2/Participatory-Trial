@@ -41,6 +41,7 @@ export class UsersService {
 
   async findById(id: number) {
     const userCache = await this.redisService.getCluster().get(`id:${id}`);
+    console.log(userCache)
 
     if (userCache) {
       const userJson = JSON.parse(userCache);
