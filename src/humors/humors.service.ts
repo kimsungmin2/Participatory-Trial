@@ -19,6 +19,7 @@ import { cache } from 'joi';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class HumorsService {
@@ -29,6 +30,7 @@ export class HumorsService {
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   //게시물 생성
@@ -115,7 +117,6 @@ export class HumorsService {
   }
 
   //모든 게시물 조회(페이지네이션)
-
   async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     let humorBoards: HumorBoards[];
 
@@ -131,16 +132,28 @@ export class HumorsService {
         },
         relations: ['humorComment'],
       });
+
+      const humorBoardsWithUserNames = await Promise.all(
+        humorBoards.map(async (humorBoard) => {
+          const userName = await this.usersService.findById(humorBoard.userId);
+
+          return {
+            ...humorBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        humorBoards: humorBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      humorBoards,
-      totalItems,
-    };
   }
 
   //단건 게시물 조회
@@ -225,11 +238,13 @@ export class HumorsService {
 
   // Top 10 humors
   async findTop10HumorsByVotes() {
-    return this.HumorVotesRepository
-    .createQueryBuilder('humorVotes')
-    .loadRelationCountAndMap('humorVotes.eachVoteCount', 'votes.eachHumorVote')
-    .orderBy('humorVotes.eachVoteCount', 'DESC')
-    .take(10)
-    .getMany();
+    return this.HumorVotesRepository.createQueryBuilder('humorVotes')
+      .loadRelationCountAndMap(
+        'humorVotes.eachVoteCount',
+        'votes.eachHumorVote',
+      )
+      .orderBy('humorVotes.eachVoteCount', 'DESC')
+      .take(10)
+      .getMany();
   }
 }

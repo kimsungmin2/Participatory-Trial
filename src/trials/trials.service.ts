@@ -22,6 +22,7 @@ import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class TrialsService {
@@ -37,6 +38,7 @@ export class TrialsService {
     private dataSource: DataSource,
     private httpService: HttpService,
     @InjectQueue('trial-queue') private trialQueue: Queue,
+    private readonly usersService: UsersService,
   ) {}
   // 재판 생성
   /**
@@ -131,17 +133,26 @@ export class TrialsService {
           createdAt: 'DESC',
         },
       });
+      const trialBoardsWithUserNames = await Promise.all(
+        allTrials.map(async (trialBoard) => {
+          const userName = await this.usersService.findById(trialBoard.userId);
+          return {
+            ...trialBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      // 3. 있으면 리턴
+      return {
+        allTrials: trialBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-
-    // 3. 있으면 리턴
-    return {
-      allTrials,
-      totalItems,
-    };
   }
 
   // 특정 재판 조회 매서드(회원/비회원 구분 X)
@@ -409,11 +420,11 @@ export class TrialsService {
   // Top 10 find
   async findTop10TrialsByVotes() {
     return this.votesRepository
-    .createQueryBuilder('votes')
-    .loadRelationCountAndMap('votes.eachVoteCount', 'votes.eachVote')
-    .orderBy('votes.eachVoteCount', 'DESC')
-    .take(10)
-    .getMany();
+      .createQueryBuilder('votes')
+      .loadRelationCountAndMap('votes.eachVoteCount', 'votes.eachVote')
+      .orderBy('votes.eachVoteCount', 'DESC')
+      .take(10)
+      .getMany();
   }
 
   // 판례 조회

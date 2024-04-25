@@ -13,6 +13,7 @@ import { EachPolticalVote } from './entities/userVoteOfPoltical_debate.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { PolticalDebatesVoteModule } from './poltical_debates_vote/poltical_debates_vote.module';
 import { S3Module } from '../s3/s3.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { S3Module } from '../s3/s3.module';
     ]),
     PolticalDebatesVoteModule,
     S3Module,
+    UsersModule,
   ],
   controllers: [PolticalDebatesController, PolticalDebateCommentsController],
   providers: [

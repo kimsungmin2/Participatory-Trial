@@ -21,6 +21,7 @@ import { NotFound } from '@aws-sdk/client-s3';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PolticalDebatesService {
@@ -33,6 +34,7 @@ export class PolticalDebatesService {
     private readonly dataSource: DataSource,
     private s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -158,15 +160,27 @@ export class PolticalDebatesService {
           createdAt: 'DESC',
         },
       });
+      const polticalDbatesBoardsWithUserNames = await Promise.all(
+        polticalDebateBoards.map(async (polticalBoard) => {
+          const userName = await this.usersService.findById(
+            polticalBoard.userId,
+          );
+          return {
+            ...polticalBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        polticalDebateBoards: polticalDbatesBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      polticalDebateBoards,
-      totalItems,
-    };
   }
 
   async findMyBoards(userId: number) {
@@ -373,10 +387,13 @@ export class PolticalDebatesService {
   // Top 10 humors
   async findTop10PolticalByVotes() {
     return this.polticalDebateRepository
-    .createQueryBuilder('PolticalDabatesVote')
-    .loadRelationCountAndMap('PolticalDabatesVote.eachVoteCount', 'PolticalDabatesVote.eachPolticalVote')
-    .orderBy('PolticalDabatesVote.eachVoteCount', 'DESC')
-    .take(10)
-    .getMany();
+      .createQueryBuilder('PolticalDabatesVote')
+      .loadRelationCountAndMap(
+        'PolticalDabatesVote.eachVoteCount',
+        'PolticalDabatesVote.eachPolticalVote',
+      )
+      .orderBy('PolticalDabatesVote.eachVoteCount', 'DESC')
+      .take(10)
+      .getMany();
   }
 }

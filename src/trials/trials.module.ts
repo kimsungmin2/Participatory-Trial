@@ -17,6 +17,7 @@ import { TrialsProcessor } from './trialQueue/trialQueue';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { HumorsModule } from '../humors/humors.module';
 import { LikeModule } from '../like/like.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { LikeModule } from '../like/like.module';
     }),
     VoteModule,
     LikeModule,
+    UsersModule,
   ],
   controllers: [TrialsController],
   providers: [TrialsService, TrialHallOfFameService, TrialsProcessor],

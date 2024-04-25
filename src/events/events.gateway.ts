@@ -17,6 +17,7 @@ import { OptionalWsJwtGuard } from '../utils/guard/ws.guard';
 import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
 import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
 import { LikeService } from '../like/like.service';
+import { PushService } from '../alarm/alarm.service';
 @WebSocketGateway({
   namespace: '',
   cors: {
@@ -33,6 +34,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly humorVotesService: HumorVotesService,
     private readonly polticalVotesService: PolticalVotesService,
     private readonly likesService: LikeService,
+    private readonly pushService: PushService,
   ) {}
   async onModuleInit() {
     await this.redisSubClient.subscribe('notifications', 'userNotifications');
@@ -152,9 +154,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
+        if (votes.totalVotes === 100) {
+          await this.pushService.sendAllNotifications(
+            channelType,
+            roomId,
+            'votes',
+          );
         }
       } else if (channelType === 'humors') {
         await this.humorVotesService.addHumorVoteUserorNanUser(
@@ -168,9 +173,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
+        if (votes.totalVotes === 100) {
+          await this.pushService.sendAllNotifications(
+            channelType,
+            roomId,
+            'votes',
+          );
         }
       } else if (channelType === 'poltical-debates') {
         await this.polticalVotesService.addPolticalVoteUserorNanUser(
@@ -184,9 +192,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
+        if (votes.totalVotes === 100) {
+          await this.pushService.sendAllNotifications(
+            channelType,
+            roomId,
+            'votes',
+          );
         }
       }
     } catch (error) {
