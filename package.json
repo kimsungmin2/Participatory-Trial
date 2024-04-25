@@ -99,6 +99,7 @@
     "uninstall": "^0.0.0",
     "unique-names-generator": "^4.7.1",
     "uuid": "^9.0.1",
+    "web-push": "^3.6.7",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0",
     "winston-elasticsearch": "^0.18.0"

@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  Unique,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'clients' })
 export class Clients {
@@ -19,4 +13,13 @@ export class Clients {
 
   @Column({ type: 'varchar', nullable: true })
   pushToken: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  endpoint: string;
+
+  @Column({ type: 'json', nullable: true })
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }

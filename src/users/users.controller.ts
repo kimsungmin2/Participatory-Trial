@@ -59,19 +59,16 @@ export class UsersController {
 
   @UseGuards(JwtOpAuthGuard)
   @Post('register-token')
-  async registerToken(@Body() body: ClientsDto, @Req() req: IGuestRequest) {
+  async registerToken(
+    @Body() subscriptionData: any,
+    @Req() req: IGuestRequest,
+  ) {
     const id = req.id;
 
-    let clientId = body.clientId;
-    if (!clientId) {
-      clientId = uuidv4();
-    }
-    const clientsDto = {
-      ...body,
-      userId: id,
-      clientId: clientId,
-    };
-    const result = await this.usersService.updateClientsInfo(clientsDto);
+    const result = await this.usersService.updateClientsInfo(
+      id,
+      subscriptionData,
+    );
     return result;
   }
 }

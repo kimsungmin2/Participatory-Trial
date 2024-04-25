@@ -19,6 +19,8 @@ import { cache } from 'joi';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { RedisService } from '../cache/redis.service';
+import { UserInfos } from '../users/entities/user-info.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class HumorsService {
@@ -29,6 +31,7 @@ export class HumorsService {
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   //게시물 생성
@@ -131,16 +134,28 @@ export class HumorsService {
         },
         relations: ['humorComment'],
       });
+
+      const humorBoardsWithUserNames = await Promise.all(
+        humorBoards.map(async (humorBoard) => {
+          const userName = await this.usersService.findById(humorBoard.userId);
+
+          return {
+            ...humorBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        humorBoards: humorBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      humorBoards,
-      totalItems,
-    };
   }
 
   //단건 게시물 조회
@@ -154,7 +169,9 @@ export class HumorsService {
   }
 
   //조회수를 증가시키고 데이터를 반환
-  async findOneHumorBoardWithIncreaseView(id: number): Promise<HumorBoards> {
+  async findOneHumorBoardWithIncreaseView(
+    id: number,
+  ): Promise<HumorBoards & { userName?: string }> {
     const findHumorBoard: HumorBoards = await this.HumorBoardRepository.findOne(
       {
         where: { id },
@@ -165,6 +182,10 @@ export class HumorsService {
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
+
+    const userId = findHumorBoard.userId;
+    const userName = await this.redisService.getCluster().get(`id:${userId}`);
+
     let cachedView: number;
     try {
       cachedView = await this.redisService
@@ -179,6 +200,7 @@ export class HumorsService {
     return {
       ...findHumorBoard,
       view: findHumorBoard.view + cachedView,
+      userName,
     };
   }
 

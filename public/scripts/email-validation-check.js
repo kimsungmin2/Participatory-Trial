@@ -1,5 +1,3 @@
-//email-validation-check.js
-
 const form = document.getElementById('verifyEmail');
 
 form.addEventListener('submit', (event) => {
@@ -18,7 +16,10 @@ form.addEventListener('submit', (event) => {
     body: JSON.stringify(formData),
   })
     .then((response) => {
-      response.json();
+      if (!response.ok) {
+        throw new Error('네트워크 응답이 올바르지 않습니다.');
+      }
+      return response.json();
     })
     .then((data) => {
       alert('이메일이 인증되었습니다. 로그인 페이지로 이동합니다.');
@@ -26,7 +27,7 @@ form.addEventListener('submit', (event) => {
       window.location.href = 'http://localhost:3000/sign-in';
     })
     .catch((error) => {
-      alert(error);
-      console.error(error.message);
+      alert('인증 중 오류가 발생했습니다: ' + error.message);
+      console.error(error);
     });
 });

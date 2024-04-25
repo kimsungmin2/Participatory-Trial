@@ -95,12 +95,9 @@ export class AuthService {
     const code = Math.floor(Math.random() * 900000) + 100000;
     let emailCode;
     try {
-      console.log('레디스');
       emailCode = await this.redisService.getCluster().get(email);
       console.log('햄');
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
     console.log(emailCode);
     if (emailCode) {
       await this.redisService.getCluster().del(email);
@@ -222,7 +219,7 @@ export class AuthService {
     });
     const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
     // const newClientId = uuidv4();
-    // const clientsInfo = await this.usersService.updateClientsInfo({
+    // await this.usersService.updateClientsInfo({
     //   userId: user.id,
     //   clientId: newClientId,
     // });

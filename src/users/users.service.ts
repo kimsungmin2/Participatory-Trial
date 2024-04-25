@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserInfos } from './entities/user-info.entity';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
@@ -9,6 +9,7 @@ import * as Redis from 'ioredis';
 import { RedisService } from '../cache/redis.service';
 import { ClientsDto } from './dto/client.dto';
 import { Clients } from './entities/client.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -48,7 +49,7 @@ export class UsersService {
     }
     const user = await this.usersInfoRepository.findOne({
       where: { id },
-      select: ['id'],
+      select: ['id', 'nickName'],
     });
 
     await this.redisService
@@ -63,10 +64,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
-    const code = Math.floor(Math.random() * 900000) + 100000;
-    await this.redisService
-      .getCluster()
-      .set(`id:${code}`, code, 'EX', 60 * 60 * 3);
 
     return this.usersInfoRepository.update(id, { nickName });
   }
@@ -79,35 +76,46 @@ export class UsersService {
 
     return this.usersRepository.softDelete(id);
   }
+  async updateClientsInfo(
+    userId: number | null,
+    subscriptionInfo: any,
+  ): Promise<Clients> {
+    if (userId == null) {
+      await this.clientsRepository.delete({
+        endpoint: subscriptionInfo.endpoint,
+      });
+      const clientId = uuidv4();
+      const client = this.clientsRepository.create({
+        clientId,
+        endpoint: subscriptionInfo.endpoint,
+        keys: subscriptionInfo.keys,
+      });
+      await this.clientsRepository.save(client);
+      return client;
+    }
 
-  async updateClientsInfo(clientsDto: ClientsDto) {
-    const { userId, clientId, pushToken } = clientsDto;
+    let client = await this.clientsRepository.findOne({ where: { userId } });
+    if (!client || client.endpoint !== subscriptionInfo.endpoint) {
+      await this.clientsRepository.delete({
+        endpoint: subscriptionInfo.endpoint,
+      });
 
-    let clientsInfo = await this.clientsRepository.findOne({
-      where: { pushToken: pushToken, clientId: clientId, userId: userId },
-    });
-
-    let area;
-    let updateNeeded = false;
-
-    if (clientsInfo) {
-      const isUpdated = clientsInfo.pushToken !== pushToken;
-      if (isUpdated) {
-        console.log('변경 전', clientsInfo, clientsDto);
-        Object.assign(clientsInfo, clientsDto);
-        console.log('변경 후---------', clientsInfo, clientsDto);
-        updateNeeded = true;
+      if (!client) {
+        client = this.clientsRepository.create({
+          userId,
+          endpoint: subscriptionInfo.endpoint,
+          keys: subscriptionInfo.keys,
+        });
+      } else {
+        client.endpoint = subscriptionInfo.endpoint;
+        client.keys = subscriptionInfo.keys;
       }
     } else {
-      clientsInfo = this.clientsRepository.create(clientsDto);
-      updateNeeded = true;
+      client.keys = subscriptionInfo.keys;
     }
 
-    if (updateNeeded) {
-      await this.clientsRepository.save(clientsInfo);
-    }
-
-    return { clientsInfo, area };
+    await this.clientsRepository.save(client);
+    return client;
   }
 
   // async userReport(id: number, reportId: number, content: string) {

@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AlarmSchema } from '../schemas/alarm.schemas';
 import { RedisModule } from '../cache/redis.module';
-import { AlarmService } from './alarm.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Trials } from '../trials/entities/trial.entity';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
@@ -11,6 +10,7 @@ import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { FcmService } from './fcm.service';
 import { Clients } from '../users/entities/client.entity';
+import { PushService } from './alarm.service';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { Clients } from '../users/entities/client.entity';
     MongooseModule.forFeature([{ name: 'Alarm', schema: AlarmSchema }]),
     RedisModule,
   ],
-  providers: [FcmService],
-  exports: [FcmService],
+  providers: [FcmService, PushService],
+  exports: [FcmService, PushService],
 })
 export class AlarmModule {}

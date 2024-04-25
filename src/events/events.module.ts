@@ -14,6 +14,7 @@ import { HumorsVotesModule } from '../humors/humors_votes/humors_votes.module';
 import { PolticalDebatesModule } from '../poltical_debates/poltical_debates.module';
 import { PolticalDebatesVoteModule } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.module';
 import { LikeModule } from '../like/like.module';
+import { AlarmModule } from '../alarm/alarm.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { LikeModule } from '../like/like.module';
     HumorsVotesModule,
     PolticalDebatesVoteModule,
     LikeModule,
+    AlarmModule,
   ],
   providers: [
     EventsGateway,

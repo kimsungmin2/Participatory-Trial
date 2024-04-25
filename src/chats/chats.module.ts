@@ -9,9 +9,9 @@ import { HumorsChat } from '../events/entities/humorsChat.entity';
 import { PolticalsChat } from '../events/entities/polticalsChat.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CatSchema } from '../schemas/chat.schemas';
-import { AlarmService } from '../alarm/alarm.service';
 import { AlarmModule } from '../alarm/alarm.module';
 import { NicknameGeneratorService } from './nickname.service';
+import { PushService } from '../alarm/alarm.service';
 
 @Module({
   imports: [

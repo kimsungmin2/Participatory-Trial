@@ -16,6 +16,7 @@ import { Model } from 'mongoose';
 import { ChatDocument } from '../schemas/chat.schemas';
 import { FcmService } from '../alarm/fcm.service';
 import { NicknameGeneratorService } from './nickname.service';
+import { PushService } from '../alarm/alarm.service';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -31,7 +32,7 @@ export class ChatsService implements OnModuleInit {
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
-    private readonly alarmService: FcmService,
+    private readonly pushService: PushService,
     private readonly nickNameService: NicknameGeneratorService,
   ) {}
 
@@ -185,7 +186,7 @@ export class ChatsService implements OnModuleInit {
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
       await this.redisDataClient.publish(chatKey, chatValue);
 
-      // await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
+      await this.pushService.sendNotification(channelType, roomId, 'chat');
 
       return userName;
     } catch (error) {

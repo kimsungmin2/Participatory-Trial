@@ -46,7 +46,7 @@
         <div class="card">
             <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
           <div class="card-stats">
-            <div>작성자: <%= data[i].userId %></div>
+            <div>작성자: <%= data[i].userName %></div>
             <div>조회 : <%= data[i].view %></div>
             <% if (boardType !== 'polticalDebate') { %>
             <div>좋아요 : <%= data[i].like %></div>

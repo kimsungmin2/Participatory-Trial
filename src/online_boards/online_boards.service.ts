@@ -16,6 +16,7 @@ import Redis from 'ioredis';
 import { S3Service } from '../s3/s3.service';
 import { BoardType } from '../s3/board-type';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class OnlineBoardsService {
@@ -24,6 +25,7 @@ export class OnlineBoardsService {
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
     private readonly s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   // 자유게시판 게시글 작성
@@ -80,7 +82,7 @@ export class OnlineBoardsService {
   //게시판 모두 조회(페이지네이션)
   async getPaginateBoards(paginationQueryDto: PaginationQueryDto) {
     let onlineBoards: OnlineBoards[];
-    const totalItems: number = await this.onlineBoardsRepository.count();
+    const totalItems = await this.onlineBoardsRepository.count();
     try {
       const { page, limit } = paginationQueryDto;
       const skip = (page - 1) * limit;
@@ -91,16 +93,27 @@ export class OnlineBoardsService {
           created_at: 'DESC',
         },
       });
+
+      const onlineBoardsWithUserNames = await Promise.all(
+        onlineBoards.map(async (onlineBoard) => {
+          const userName = await this.usersService.findById(onlineBoard.userId);
+          return {
+            ...onlineBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        onlineBoards: onlineBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      onlineBoards,
-      totalItems,
-    };
   }
 
   // 자유게시판 단건 조회
