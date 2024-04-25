@@ -1,0 +1,3 @@
+FROM elasticsearch:7.9.3
+# 예시 플러그인 설치
+RUN bin/elasticsearch-plugin install analysis-nori
