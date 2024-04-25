@@ -79,7 +79,6 @@ describe('SearchService', () => {
         searchQueryDto,
         mockPaginateQuery,
       );
-      console.log(result);
       expect(spy).toHaveBeenCalled();
       expect(result.result[0]).toEqual({
         title: 'Example',

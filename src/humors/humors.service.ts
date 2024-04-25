@@ -161,7 +161,6 @@ export class HumorsService {
         relations: ['humorComment', 'humorVotes'],
       },
     );
-    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
@@ -175,7 +174,6 @@ export class HumorsService {
         '요청을 처리하는 도중 오류가 발생했습니다.',
       );
     }
-    console.log(findHumorBoard);
 
     return {
       ...findHumorBoard,

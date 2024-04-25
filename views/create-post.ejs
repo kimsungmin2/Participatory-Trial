@@ -135,9 +135,7 @@
 
     formData.set('trialTime', formattedTrialTime); // 'trialTime' 필드 값을 업데이트
   }
-  console.log(formData);
-  console.log(formData.title);
-  fetch(`http://localhost:3000/${boardType}`, {
+  fetch(`/${boardType}`, {
     method: 'POST',
     body: formData, // 폼 데이터 전송
   })

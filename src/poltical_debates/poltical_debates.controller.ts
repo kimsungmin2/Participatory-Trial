@@ -237,7 +237,6 @@ export class PolticalDebatesController {
       +id,
       updatePolticalDebateDto,
     );
-    console.log(updatedBoard);
     return {
       statusCode: HttpStatus.OK,
       message: '정치 토론방이 수정되었습니다.',

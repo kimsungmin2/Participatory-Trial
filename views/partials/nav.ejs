@@ -84,7 +84,7 @@
         .then(response => {
           if (response.ok) {
             alert('로그아웃 성공')
-            window.location.href = 'http://localhost:3000'; // 응답 성공 시 리다이렉트
+            window.location.href = '/'; // 응답 성공 시 리다이렉트
           } else {
             alert('Logout failed.');
           }
@@ -147,7 +147,7 @@
                 const channelType = messageParts[0].trim();
                 const roomIdMatch = messageParts[1].match(/\d+/);
                 const roomId = roomIdMatch ? roomIdMatch[0] : '';
-                const notificationUrl = `http://localhost:3000/${channelType}/${roomId}`;
+                const notificationUrl = `/${channelType}/${roomId}`;
                 removeNotificationFromLocalStorage(notification);
                 this.parentNode.removeChild(this);
                 window.location.href = notificationUrl;
@@ -175,7 +175,7 @@
             const channelType = messageParts[0];
             const roomIdMatch = messageParts[1].match(/\d+/);
             const roomId = roomIdMatch ? roomIdMatch[0] : '';
-            window.location.href = `http://localhost:3000/${channelType}/${roomId}`;
+            window.location.href = `/${channelType}/${roomId}`;
           });
           notification.style.bottom = `${20 + offset}px`;
           notificationContainer.appendChild(notification);

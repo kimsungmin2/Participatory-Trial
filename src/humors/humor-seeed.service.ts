@@ -21,7 +21,6 @@ export class HumorSeedService {
         view: faker.number.int({ min: 0, max: 10000 }),
       };
       humorBoards.push(humorBoard);
-      console.log(humorBoard);
     }
     return humorBoards;
   }

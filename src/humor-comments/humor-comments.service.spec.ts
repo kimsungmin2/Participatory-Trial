@@ -95,7 +95,6 @@ describe('HumorCommentsService', () => {
           boardId: 1,
           user: mockedUser,
         };
-        console.log(1);
         jest.spyOn(humorBoardRepository, 'findOneBy').mockResolvedValue({
           id: 1,
         } as HumorBoards);

@@ -394,7 +394,6 @@ export class TrialHallOfFameService {
   async findOneBytrialHallofFameViews(id: number) {
     const OneHallOfTrialLikes =
       await this.trialHallOfViewFamesRepository.findOneBy({ id });
-    console.log(OneHallOfTrialLikes);
 
     if (!OneHallOfTrialLikes) {
       throw new NotFoundException(`검색한 명예의 전당이 없습니다.${id}`);

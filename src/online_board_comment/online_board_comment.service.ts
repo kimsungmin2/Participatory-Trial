@@ -30,11 +30,9 @@ export class OnlineBoardCommentService {
     createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     userInfo: UserInfos,
   ) {
-    console.log(userInfo.id);
     const { content } = createOnlineBoardCommentDto;
     const foundBoard =
       await this.onlineBoardsService.findBoardId(onlineBoardId);
-    console.log(foundBoard);
     const board = await this.onlineBoardCommentRepository.save({
       onlineBoardId: foundBoard.id,
       userId: userInfo.id,

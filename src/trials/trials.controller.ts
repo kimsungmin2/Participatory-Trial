@@ -92,8 +92,6 @@ export class TrialsController {
     @Body() voteTitleDto: VoteTitleDto,
     @Req() req,
   ) {
-    console.log(createTrialDto);
-    console.log(voteTitleDto);
     // 1. 유저 아이디 2. 재판 제목 3. 재판 내용
     // const voteTitleDto = {
     //   title1: 'ss',
@@ -142,8 +140,6 @@ export class TrialsController {
   ) {
     let cursorNumber = parseInt(cursor);
     let limitNumber = parseInt(limit);
-    console.log(cursorNumber);
-    console.log(limitNumber);
 
     if (isNaN(cursorNumber) || isNaN(limitNumber)) {
       cursorNumber = 0;

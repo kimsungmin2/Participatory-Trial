@@ -27,7 +27,6 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @Post('sign-up')
   async register(@Body() signUpdto: SignUpDto) {
-    console.log(signUpdto);
     const user = await this.authService.signUp(
       signUpdto.email,
       signUpdto.password,

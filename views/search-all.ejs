@@ -33,7 +33,7 @@
             }
         %>
       <div class="card">
-          <div class="card-header" ><a href="http://localhost:3000/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
+          <div class="card-header" ><a href="/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
         <div class="card-stats">
           <div>조회 : <%= data[i].view %></div>
           <% if (boardType !== 'polticalDebate') { %>

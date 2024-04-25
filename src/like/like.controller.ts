@@ -51,7 +51,6 @@ export class LikeController {
       user.id,
       boardId,
     );
-    console.log(result);
     return {
       statusCode: HttpStatus.OK,
       message: result,

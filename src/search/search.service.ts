@@ -63,7 +63,6 @@ export class SearchService {
       },
     });
     const totalHits = data.body.hits.total.value;
-    console.log(data.body.hits);
 
     // 검색 결과에서 문서들의 배열을 추출
     const hits = data.body.hits.hits;

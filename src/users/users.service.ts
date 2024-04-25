@@ -93,9 +93,7 @@ export class UsersService {
     if (clientsInfo) {
       const isUpdated = clientsInfo.pushToken !== pushToken;
       if (isUpdated) {
-        console.log('변경 전', clientsInfo, clientsDto);
         Object.assign(clientsInfo, clientsDto);
-        console.log('변경 후---------', clientsInfo, clientsDto);
         updateNeeded = true;
       }
     } else {

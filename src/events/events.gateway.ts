@@ -57,17 +57,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: number; channelType: string },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    console.log(1);
     const { roomId, channelType } = data;
     const userId = socket.userId;
-    console.log(roomId);
     try {
       const updatedLikes = await this.likesService.like(
         channelType,
         userId,
         roomId,
       );
-      console.log(updatedLikes);
       this.server.emit('likesUpdated', { id: roomId, likes: updatedLikes });
     } catch (error) {
       console.error('좋아요 처리 중 오류 발생:', error);
@@ -88,13 +85,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { roomId: number; channelType: string },
     @ConnectedSocket() socket: CustomSocket,
   ) {
-    console.log(24234);
     const { roomId, channelType } = data;
     await socket.join(`${channelType}:${roomId}`);
   }
   @SubscribeMessage('userConnect')
   handleConnection(@ConnectedSocket() socket: CustomSocket) {
-    console.log(socket.userId);
   }
   @UseGuards(OptionalWsJwtGuard)
   @SubscribeMessage('createChat')

@@ -10,7 +10,7 @@ form.addEventListener('submit', (event) => {
     code: document.getElementById('code').value,
   };
 
-  fetch('http://localhost:3000/sign-up/verification', {
+  fetch('/sign-up/verification', {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -22,8 +22,7 @@ form.addEventListener('submit', (event) => {
     })
     .then((data) => {
       alert('이메일이 인증되었습니다. 로그인 페이지로 이동합니다.');
-      console.log(data);
-      window.location.href = 'http://localhost:3000/sign-in';
+      window.location.href = '/sign-in';
     })
     .catch((error) => {
       alert(error);

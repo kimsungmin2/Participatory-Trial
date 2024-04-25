@@ -4,7 +4,6 @@ import { WinstonModule, utilities } from 'nest-winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 const isProduction = process.env['NODE_ENV'] === 'production';
-console.log(isProduction);
 const logDir = __dirname + '/../../logs';
 const appendTimestamp = winston.format((info, opts) => {
   if (opts.tz) {

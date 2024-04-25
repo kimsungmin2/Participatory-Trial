@@ -32,7 +32,6 @@ export class OnlineBoardsService {
     userInfo: UserInfos,
     files: Express.Multer.File[],
   ): Promise<OnlineBoards> {
-    console.log(createOnlineBoardDto);
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(
@@ -119,7 +118,6 @@ export class OnlineBoardsService {
         where: { id },
         relations: ['onlineBoardComment'],
       });
-    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }

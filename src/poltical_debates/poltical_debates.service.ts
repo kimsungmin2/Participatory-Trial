@@ -244,7 +244,6 @@ export class PolticalDebatesService {
   }
 
   async delete(userInfo: UserInfos, id: number) {
-    console.log(userInfo);
     const userId = userInfo.id;
 
     const politicalDebateBoard = await this.polticalDebateRepository.findOne({

@@ -81,7 +81,6 @@ export class TrialsService {
       const trialDate = new Date(trialTime);
       // 5. 불 큐로 지연시간 후 찍어줌
       const delay = trialDate.getTime() - Date.now();
-      console.log(delay);
       // 6. 제한 시간끝나면 불큐로 비동기 처리
       await this.trialQueue.add(
         'updateTimeDone',
@@ -215,7 +214,6 @@ export class TrialsService {
       const deleteResult = await queryRunner.manager.softDelete(Trials, {
         id: id,
       });
-      console.log(1);
 
       // 2. 404 던지기
       if (deleteResult.affected === 0) {
@@ -283,7 +281,6 @@ export class TrialsService {
 
   // 타임아웃되면 업데이트 매서드(불큐에서갖다씀 trialQueue.ts )
   async updateTimeDone(trialId: number) {
-    console.log(trialId);
     return await this.trialsRepository.update(trialId, { is_time_over: true });
   }
 

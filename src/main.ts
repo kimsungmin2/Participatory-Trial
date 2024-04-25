@@ -21,7 +21,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const cors = require('cors');
 
-  app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+  app.use(cors({ credentials: true, origin: 'http://3.35.170.197:3000/:3000' }));
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({

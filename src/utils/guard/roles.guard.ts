@@ -24,7 +24,6 @@ export class RolesGuard extends AuthGuard('jwt') implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
-    console.log(user.role);
 
     return requiredRoles.some((role) => user.role === role);
   }
