@@ -14,7 +14,7 @@ self.addEventListener('install', function (event) {
 self.addEventListener('notificationclick', function (event) {
   const { channelType, boardId } = event.data.json();
 
-  const targetUrl = `http://localhost:3000/${channelType}/${boardId}`;
+  const targetUrl = `/${channelType}/${boardId}`;
 
   event.notification.close(); // 알림 닫기
 
