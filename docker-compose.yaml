@@ -11,113 +11,159 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
-
   redis-0:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6380
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6380;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.2:6380;
+      "
     ports:
       - '6380:6380'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.2
     volumes:
       - redis-0-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis-1:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6381
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6381;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.3:6381;
+      "
     ports:
       - '6381:6381'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.3
     volumes:
       - redis-1-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis-2:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6382
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6382;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.4:6382;
+      "
     ports:
       - '6382:6382'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.4
     volumes:
       - redis-2-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis-3:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6383
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6383;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.5:6383;
+      "
     ports:
       - '6383:6383'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.5
     volumes:
       - redis-3-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis-4:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6384
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6384;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.6:6384;
+      "
     ports:
       - '6384:6384'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.6
     volumes:
       - redis-4-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis-5:
     image: redis:latest
-    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6385
+    command: >
+      sh -c "
+        redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6385;
+        sleep 10;
+        redis-cli --cluster check 172.20.0.7:6385;
+      "
     ports:
       - '6385:6385'
     networks:
-      - redis-cluster-net
+      redis-cluster-net:
+        ipv4_address: 172.20.0.7
     volumes:
       - redis-5-data:/data
-
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
   redis:
     image: redis:latest
     restart: always
     ports:
       - '6379:6379'
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.9.3
-    env_file:
-      - .env
-    restart: always
-    volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash/pipeline:/usr/share/logstash/pipeline
-      - ./drivers:/usr/share/logstash/drivers
-      - ./logs:/usr/share/logstash/logs
-    ports:
-      - '5044:5044'
-    environment:
-      LS_JAVA_OPTS: '-Xmx256m -Xms256m'
-
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:7.9.3
-    user: root # 필요한 경우 root 권한으로 실행
-    volumes:
-      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro # 파일비트 구성 파일
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro # 도커 컨테이너 로그에 접근하기 위함
-      - /var/run/docker.sock:/var/run/docker.sock:ro # 도커 정보에 접근하기 위함
-      - ./logs:/usr/share/filebeat/logs:ro
+  redis-cluster-init:
+    image: redis:latest
     depends_on:
-      - logstash
-    command:
-      [
-        'filebeat',
-        '-e',
-        '-strict.perms=false',
-        '-E',
-        "output.logstash.hosts=['logstash:5044']",
-        '-E',
-        'setup.kibana.host=kibana:5601',
-      ]
-    restart: always
-
+      - redis-0
+      - redis-1
+      - redis-2
+      - redis-3
+      - redis-4
+      - redis-5
+    command: >
+      sh -c "
+        sleep 20;
+        redis-cli --cluster create 172.20.0.2:6380 172.20.0.3:6381 172.20.0.4:6382 172.20.0.5:6383 172.20.0.6:6384 172.20.0.7:6385 --cluster-replicas 1 --cluster-yes;
+      "
+    networks:
+      - redis-cluster-net
 networks:
   redis-cluster-net:
     driver: bridge
-
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
 volumes:
   postgres-data:
   redis-0-data:

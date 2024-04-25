@@ -123,6 +123,7 @@ export class OnlineBoardsController {
     @Query() paginationQueryDto: PaginationQueryDto,
     @Req() req: Request,
   ) {
+    console.log(123);
     const { onlineBoards, totalItems } =
       await this.onlineBoardsService.getPaginateBoards(paginationQueryDto);
     const pageCount = Math.ceil(totalItems / paginationQueryDto.limit);

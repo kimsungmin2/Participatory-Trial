@@ -16,6 +16,8 @@ import Redis from 'ioredis';
 import { S3Service } from '../s3/s3.service';
 import { BoardType } from '../s3/board-type';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
+import { Promise } from 'mongoose';
 
 @Injectable()
 export class OnlineBoardsService {
@@ -24,6 +26,7 @@ export class OnlineBoardsService {
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
     private readonly s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   // 자유게시판 게시글 작성
@@ -32,7 +35,6 @@ export class OnlineBoardsService {
     userInfo: UserInfos,
     files: Express.Multer.File[],
   ): Promise<OnlineBoards> {
-    console.log(createOnlineBoardDto);
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(
@@ -80,7 +82,7 @@ export class OnlineBoardsService {
   //게시판 모두 조회(페이지네이션)
   async getPaginateBoards(paginationQueryDto: PaginationQueryDto) {
     let onlineBoards: OnlineBoards[];
-    const totalItems: number = await this.onlineBoardsRepository.count();
+    const totalItems = await this.onlineBoardsRepository.count();
     try {
       const { page, limit } = paginationQueryDto;
       const skip = (page - 1) * limit;
@@ -91,16 +93,29 @@ export class OnlineBoardsService {
           created_at: 'DESC',
         },
       });
+      console.log(1234);
+      // const onlineBoardsWithUserNames = await Promise.all(
+      //   onlineBoards.map(async (onlineBoard) => {
+      //     console.log(12345);
+      //     const userName = await this.usersService.findById(onlineBoard.userId);
+      //     return {
+      //       ...onlineBoard,
+      //       userName: userName.nickName,
+      //     };
+      //   }),
+      // );
+      //console.log(onlineBoardsWithUserNames);
+
+      return {
+        onlineBoards,
+        totalItems,
+      };
     } catch (err) {
       console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      onlineBoards,
-      totalItems,
-    };
   }
 
   // 자유게시판 단건 조회
@@ -119,7 +134,6 @@ export class OnlineBoardsService {
         where: { id },
         relations: ['onlineBoardComment'],
       });
-    console.log(findHumorBoard);
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }

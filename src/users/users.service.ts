@@ -41,16 +41,14 @@ export class UsersService {
 
   async findById(id: number) {
     const userCache = await this.redisService.getCluster().get(`id:${id}`);
-
     if (userCache) {
       const userJson = JSON.parse(userCache);
       return userJson;
     }
     const user = await this.usersInfoRepository.findOne({
       where: { id },
-      select: ['id'],
+      select: ['id', 'nickName'],
     });
-
     await this.redisService
       .getCluster()
       .set(`id:${id}`, JSON.stringify(user), 'EX', 60 * 60 * 24);

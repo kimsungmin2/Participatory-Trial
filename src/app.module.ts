@@ -73,9 +73,9 @@ export const typeOrmModuleOptions = {
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         DB_SYNC: Joi.boolean().required(),
-        DB_SLAVE_HOST: Joi.string().required(),
-        DB_SLAVE_USERNAME: Joi.string().required(),
-        DB_SLAVE_PASSWORD: Joi.string().required(),
+        // DB_SLAVE_HOST: Joi.string().required(),
+        // DB_SLAVE_USERNAME: Joi.string().required(),
+        // DB_SLAVE_PASSWORD: Joi.string().required(),
       }),
     }),
     ServeStaticModule.forRoot({
