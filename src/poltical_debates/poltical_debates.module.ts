@@ -35,5 +35,6 @@ import { UsersModule } from '../users/users.module';
     PolticalDebateCommentsService,
     PolticalDabateHallOfFameService,
   ],
+  exports: [PolticalDebatesService],
 })
 export class PolticalDebatesModule {}

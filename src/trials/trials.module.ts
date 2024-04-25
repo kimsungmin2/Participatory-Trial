@@ -18,6 +18,7 @@ import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { HumorsModule } from '../humors/humors.module';
 import { LikeModule } from '../like/like.module';
 import { UsersModule } from '../users/users.module';
+import { PolticalDebatesModule } from '../poltical_debates/poltical_debates.module';
 
 @Module({
   imports: [
@@ -31,6 +32,8 @@ import { UsersModule } from '../users/users.module';
       TrialViewHallOfFames,
       HumorBoards,
     ]),
+    HumorsModule,
+    PolticalDebatesModule,
     HttpModule,
     BullModule.registerQueue({
       name: 'trial-queue',
@@ -41,5 +44,6 @@ import { UsersModule } from '../users/users.module';
   ],
   controllers: [TrialsController],
   providers: [TrialsService, TrialHallOfFameService, TrialsProcessor],
+  exports: [TrialsService],
 })
 export class TrialsModule {}

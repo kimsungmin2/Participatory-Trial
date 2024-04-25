@@ -39,10 +39,10 @@ export class Votes {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => EachVote, (eachVote) => eachVote.vote, { cascade: true })
+  @OneToMany(() => EachVote, (eachVote) => eachVote.votes, { cascade: true })
   eachVote: EachVote[];
-  
-  @OneToOne(() => Trials, (trial) => trial.vote)
+
+  @OneToOne(() => Trials, (trial) => trial.votes)
   @JoinColumn({ name: 'trialId', referencedColumnName: 'id' })
   trial: Trials;
 }

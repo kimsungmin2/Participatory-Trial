@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Participatory Trial</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/8bc9e38e4e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/css/main-style.css" />
+  </head>
+  <body>
+    <header>
+      <form action="/search" method="get" id="searchForm">
+        <div class="search">
+          <input type="text" placeholder="검색어 입력" name="search" id="searchInput">
+          <button type="submit" class="glass_button"><i class="fa-solid fa-magnifying-glass fa-2x"></i></button>
+        </div>
+      </form>
+      <%- include('partials/nav')  %>
+    </header>
+
+    <main>
+      <div class="hot_vote_now_container">
+        <span>
+          <h1 class="hot_vote_now">지금 가장 핫한 토론은?</>
+        </span>
+      </div>
+      <img class="img" src="/image/pngwing.com.png" alt="">
+      <div class="hot_vote">
+        <div class="debate-toggle" style="text-align: right;">
+          <div class="btn-group btn-group-toggle" data-toggle="buttons">
+            <label class="btn btn-secondary active">
+              <input type="radio" name="options" id="option1" autocomplete="off" checked> 재판
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="option2" autocomplete="off"> 유머
+            </label>
+            <label class="btn btn-secondary">
+              <input type="radio" name="options" id="option3" autocomplete="off"> 정치
+            </label>
+          </div>
+        </div>
+        
+        <div class="hot_vote_container">
+          <div class="hot_vote_title">
+            <span class="title">맥그리거와 할머니 500명이 싸우면?</span>
+          </div>
+          <div class="hot_vote_sub">
+            <div class="title_one">
+              <span>맥그리거</span>
+            </div>
+            <div class="vs">
+              <span>VS</span>
+            </div>
+            <div class="titile_two">
+              <span>할머니 500명</span>
+            </div>
+          </div>
+          <div class="hot_vote_count">
+            <div class="title_one_count">
+              <span>100</span>
+            </div>
+            <div class="titile_two_count">
+              <span>50</span>
+            </div>
+          </div>
+          <div class="hot_vote_timer">
+            <span>투표 종료: 1시간 30분 33초</span>
+          </div>
+        </div>
+      </div>
+      <div class="other">
+    </div>
+      <div class="grid-container">
+        <% for(let i = 0; i < 9; i++) { %>
+        <div class="grid-item">
+          <div class="vote-title">맥그리거 VS 할머니 500명</div>
+          <div class="vote-options">
+            <div class="vote-option">
+              <div>맥그리거</div>
+              <div class="vote-count">5000표</div>
+            </div>
+            <div class="vote-title">VS</div>
+            <div class="vote-option">
+              <div>할머니 500명</div>
+              <div class="vote-count">1000표</div>
+            </div>
+          </div>
+        </div>
+        <% } %>
+        <!-- 다른 grid-item 블록 추가 -->
+      </div>
+    </header>
+    <script>
+     
+
+      firebase.initializeApp(firebaseConfig);
+      const messaging = firebase.messaging();
+    </script>
+    <script>
+      document.getElementById('searchForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const searchInput = document.getElementById('searchInput').value;
+      const queryParams = new URLSearchParams();
+
+      queryParams.append('search', searchInput); // 검색어 항상 추가
+      queryParams.append('type', "titleContent"); // 선택된 검색 옵션 추가
+
+      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+      window.location.href = `/search/all?${queryParams.toString()}`;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  var permissionButton = document.getElementById('permissionBtn');
+  if (permissionButton) {
+    permissionButton.addEventListener('click', requestPermission);
+  } else {
+    console.error('No button with ID "permissionBtn" found');
+  }
+});
+
+function requestPermission() {
+  Notification.requestPermission().then(function(permission) {
+    if (permission === 'granted') {
+      console.log('Notification permission granted.');
+      subscribeUser();
+    } else {
+      console.log('Notification permission denied.');
+      alert('You need to enable notifications to use this service.');
+    }
+  });
+}
+
+function subscribeUser() {
+  if ('serviceWorker' in navigator && 'PushManager' in window) {
+    navigator.serviceWorker.register('/scripts/sw.js').then(function(registration) {
+      console.log('ServiceWorker registration successful with scope:', registration.scope);
+      const subscribeOptions = {
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array('BP7NuFz6M57eBbRExlszvMlomhxmowJmXazmBJAFjaj4Zf4isc4XBHSW3TCI7qZDRsL9i7arwDkswXqcnZRGN0w')
+      };
+      return registration.pushManager.subscribe(subscribeOptions);
+    })
+    .then(function(pushSubscription) {
+      console.log('Received PushSubscription:', JSON.stringify(pushSubscription));
+      sendSubscriptionToServer(pushSubscription);
+    })
+    .catch(function(err) {
+      console.error('ServiceWorker registration or subscription failed:', err);
+    });
+  }
+}
+
+function sendSubscriptionToServer(subscription) {
+  fetch('/users/register-token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(subscription)
+  })
+  .then(function(response) {
+    if (!response.ok) throw new Error('Bad status code from server.');
+    return response.json();
+  })
+  .then(function(responseData) {
+    if (!(responseData.data && responseData.data.success)) throw new Error('Bad response from server.');
+    console.log('Subscription data sent successfully:', responseData);
+  })
+  .catch(function(error) {
+    console.error('Could not send subscription to server:', error);
+  });
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+  if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/scripts/sw.js')
+      .then(function(registration) {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        subscribeUser();  // 구독 시작
+      })
+      .catch(function(err) {
+        console.error('ServiceWorker registration failed: ', err);
+      });
+  });
+}
+      requestPermission();
+    </script>
+  </body>
+</html>

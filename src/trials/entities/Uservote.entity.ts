@@ -24,7 +24,7 @@ export class EachVote {
   createdAt: Date;
   @ManyToOne(() => Votes, (votes) => votes.eachVote)
   @JoinColumn({ name: 'voteId', referencedColumnName: 'id' })
-  vote: Votes;
+  votes: Votes;
   @ManyToOne(() => Users, (user) => user.eachVote, {
     onDelete: 'CASCADE',
   })

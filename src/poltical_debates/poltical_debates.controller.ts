@@ -416,19 +416,15 @@ export class PolticalDebatesController {
     };
   }
 
-
   // 가장 인기있는 투표 탑 10 조회
   @Get('Top10/Votes')
-  async findTop10PolticalsByVotes(
-    @Req() req: Request,
-  ){
-    const data = await this.polticalDebatesService.findTop10PolticalByVotes()
-    
+  async findTop10PolticalsByVotes(@Req() req: Request) {
+    const data = await this.polticalDebatesService.findTop10PolticalByVotes();
+
     return {
       statusCode: HttpStatus.OK,
       message: '실시간핫한투표수데이터입니다.',
       data,
-      isLoggedIn: req['isLoggedIn'],
-    }
+    };
   }
 }

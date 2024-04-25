@@ -43,7 +43,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: '회원가입 이메일 인증' })
-  @Patch('sign-up/verification')
+  @Patch('verification')
   async verifiCationEmail(@Body() verifiCation: VerifiCation) {
     const user = await this.authService.verifiCationEmail(verifiCation);
     return {
@@ -164,7 +164,7 @@ export class AuthController {
     return { isLoggedIn: req['isLoggedIn'] };
   }
 
-  @Get('sign-up/verification')
+  @Get('verification')
   @Render('email-validation-check.ejs')
   async getVerifyEmail(@Req() req: Request) {
     return { isLoggedIn: req['isLoggedIn'] };

@@ -68,7 +68,7 @@ header {
   text-align: center;
   display: flex;
   justify-content: center; /* 가로 방향 가운데 정렬 */
-  }
+}
 
 #searchInput {
   width: 100%;
@@ -263,7 +263,6 @@ main {
   margin-bottom: 1em;
 }
 
-
 .right-align-item {
   margin-left: auto;
 }
@@ -278,6 +277,10 @@ main {
   border-radius: 5px;
 }
 
+.time_left {
+  font-size: 25px; /* 글자 크기를 12px로 설정 */
+}
+
 .notification.show {
   transform: translateY(0); /* 알림창 보여줌 */
 }
@@ -285,5 +288,3 @@ main {
 .hidden {
   display: none;
 }
-
-

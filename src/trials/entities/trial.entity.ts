@@ -36,6 +36,9 @@ export class Trials {
   @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
+  @Column({ type: 'timestamp' })
+  trialTime: Date;
+
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
 
@@ -57,8 +60,8 @@ export class Trials {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
-  @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
-  vote: Votes;
+  @OneToOne(() => Votes, (votes) => votes.trial, { cascade: true })
+  votes: Votes;
 
   @OneToOne(() => TrialLike, (trialLike) => trialLike.trial, { cascade: true })
   trialLike: TrialLike;

@@ -67,6 +67,7 @@ export class TrialsService {
         content,
         userId,
         is_time_over: false,
+        trialTime,
       };
       // 3. 재판 생성
       const newTrial = queryRunner.manager.create(Trials, data);
@@ -227,7 +228,7 @@ export class TrialsService {
         id: id,
       });
       console.log(1);
-
+      await this.deleteVote(id);
       // 2. 404 던지기
       if (deleteResult.affected === 0) {
         throw new NotFoundException(`존재하지 않거나 이미 삭제된 재판입니다.`);
@@ -421,10 +422,30 @@ export class TrialsService {
   async findTop10TrialsByVotes() {
     return this.votesRepository
       .createQueryBuilder('votes')
-      .loadRelationCountAndMap('votes.eachVoteCount', 'votes.eachVote')
-      .orderBy('votes.eachVoteCount', 'DESC')
+      .leftJoin('votes.trial', 'trial')
+      .leftJoin('votes.eachVote', 'eachVote')
+      .groupBy('votes.id')
+      .addGroupBy('trial.title')
+      .addGroupBy('trial.trialTime')
+      .select('votes.id', 'id')
+      .addSelect('trial.title', 'title')
+      .addSelect('trial.trialTime', 'trialTime')
+      .addSelect('votes.title1', 'title1')
+      .addSelect('votes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
       .take(10)
-      .getMany();
+      .getRawMany();
   }
 
   // 판례 조회

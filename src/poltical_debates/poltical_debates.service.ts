@@ -31,6 +31,8 @@ export class PolticalDebatesService {
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
+    @InjectRepository(PolticalDebateVotes)
+    private readonly polticalVoteRepository: Repository<PolticalDebateVotes>,
     private readonly dataSource: DataSource,
     private s3Service: S3Service,
     private readonly redisService: RedisService,
@@ -386,14 +388,26 @@ export class PolticalDebatesService {
 
   // Top 10 humors
   async findTop10PolticalByVotes() {
-    return this.polticalDebateRepository
-      .createQueryBuilder('PolticalDabatesVote')
-      .loadRelationCountAndMap(
-        'PolticalDabatesVote.eachVoteCount',
-        'PolticalDabatesVote.eachPolticalVote',
+    return this.polticalVoteRepository
+      .createQueryBuilder('polticalDebateVotes')
+      .leftJoin('polticalDebateVotes.eachPolticalVote', 'eachPolticalVote')
+      .groupBy('polticalDebateVotes.id')
+      .select('polticalDebateVotes.id', 'id')
+      .addSelect('polticalDebateVotes.title1', 'title1')
+      .addSelect('polticalDebateVotes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
       )
-      .orderBy('PolticalDabatesVote.eachVoteCount', 'DESC')
+      .addSelect(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
       .take(10)
-      .getMany();
+      .getRawMany();
   }
 }

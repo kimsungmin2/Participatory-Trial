@@ -30,6 +30,7 @@ import { UsersModule } from '../users/users.module';
       EachHumorVote,
       HumorsLikeHallOfFames,
       HumorsViewHallOfFames,
+      EachHumorVote,
     ]),
     S3Module,
     LikeModule,
@@ -39,5 +40,6 @@ import { UsersModule } from '../users/users.module';
   ],
   controllers: [HumorsController],
   providers: [HumorsService, HumorHallOfFameService, HumorSeedService],
+  exports: [HumorsService],
 })
 export class HumorsModule {}

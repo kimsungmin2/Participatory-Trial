@@ -8,7 +8,7 @@ import { CreateHumorBoardDto } from './dto/create-humor.dto';
 import { UpdateHumorDto } from './dto/update-humor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HumorBoards } from './entities/humor-board.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Service } from '../s3/s3.service';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
@@ -20,6 +20,7 @@ import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { RedisService } from '../cache/redis.service';
 import { UsersService } from '../users/users.service';
+import { EachHumorVote } from './entities/UservoteOfHumorVote.entity';
 
 @Injectable()
 export class HumorsService {
@@ -29,8 +30,11 @@ export class HumorsService {
     @InjectRepository(HumorVotes)
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
+    @InjectRepository(EachHumorVote)
+    private eachHumorVoteRepository: Repository<EachHumorVote>,
     private readonly redisService: RedisService,
     private readonly usersService: UsersService,
+    private readonly dataSource: DataSource,
   ) {}
 
   //게시물 생성
@@ -84,6 +88,10 @@ export class HumorsService {
     user: Users,
     files: Express.Multer.File[],
   ): Promise<HumorBoards> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(
@@ -97,13 +105,15 @@ export class HumorsService {
     const imageUrl =
       uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
     try {
-      const createdBoard = await this.HumorBoardRepository.save({
-        userId: user.id,
-        ...createHumorBoardDto,
-        imageUrl,
-      });
+      const createdBoard = await queryRunner.manager
+        .getRepository(HumorBoards)
+        .save({
+          userId: user.id,
+          ...createHumorBoardDto,
+          imageUrl,
+        });
 
-      await this.HumorVotesRepository.save({
+      await queryRunner.manager.getRepository(HumorVotes).save({
         humorId: createdBoard.id,
         ...voteTitleDto,
       });
@@ -236,15 +246,26 @@ export class HumorsService {
     return deletedHumorBoard;
   }
 
-  // Top 10 humors
-  async findTop10HumorsByVotes() {
+  async findTop10VotedHumorPosts() {
     return this.HumorVotesRepository.createQueryBuilder('humorVotes')
-      .loadRelationCountAndMap(
-        'humorVotes.eachVoteCount',
-        'votes.eachHumorVote',
+      .leftJoin('humorVotes.eachHumorVote', 'eachHumorVote')
+      .groupBy('humorVotes.id')
+      .select('humorVotes.id', 'id')
+      .addSelect('humorVotes.title1', 'title1')
+      .addSelect('humorVotes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
       )
-      .orderBy('humorVotes.eachVoteCount', 'DESC')
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
       .take(10)
-      .getMany();
+      .getRawMany();
   }
 }

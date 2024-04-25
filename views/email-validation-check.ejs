@@ -11,13 +11,11 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
-    <link rel="stylesheet" href="/css/email-validation-check.css">
+    <link rel="stylesheet" href="/css/email-validation-check.css" />
     <title>Email Validation Check</title>
   </head>
   <body>
-    <header>
-      <%- include('partials/nav') %>
-    </header>
+    <header><%- include('partials/nav') %></header>
     <main>
       <form id="verifyEmail">
         <div>
@@ -55,28 +53,28 @@
           email: document.getElementById('email').value,
           code: document.getElementById('code').value,
         };
-        fetch('http://localhost:3000/sign-up/verification', {
+        fetch('/verification', {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(formData),
         })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error('인증 이메일/코드가 올바르지 않습니다.');
-          }
-          return response.json();
-        })
-        .then((data) => {
-          alert('이메일이 인증되었습니다. 로그인 페이지로 이동합니다.');
-          console.log(data);
-          window.location.href = 'http://localhost:3000/sign-in';
-        })
-        .catch((error) => {
-          alert('인증 중 오류가 발생했습니다: ' + error.message);
-          console.error(error);
-        });
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('인증 이메일/코드가 올바르지 않습니다.');
+            }
+            return response.json();
+          })
+          .then((data) => {
+            alert('이메일이 인증되었습니다. 로그인 페이지로 이동합니다.');
+            console.log(data);
+            window.location.href = 'http://localhost:3000/sign-in';
+          })
+          .catch((error) => {
+            alert('인증 중 오류가 발생했습니다: ' + error.message);
+            console.error(error);
+          });
       });
     </script>
   </body>
