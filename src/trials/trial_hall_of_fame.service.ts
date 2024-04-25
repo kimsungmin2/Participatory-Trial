@@ -50,7 +50,7 @@ export class TrialHallOfFameService {
 
     const lastWeekTrials = await this.trialsRepository.find({
       where: {
-        createdAt: Between(start, end),
+        created_at: Between(start, end),
       },
     });
 

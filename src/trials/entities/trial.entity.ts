@@ -46,10 +46,10 @@ export class Trials {
   is_time_over: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt: Date;

@@ -88,6 +88,7 @@ export class HumorsService {
     user: Users,
     files: Express.Multer.File[],
   ): Promise<HumorBoards> {
+    console.log(`hi`);
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -117,12 +118,16 @@ export class HumorsService {
         humorId: createdBoard.id,
         ...voteTitleDto,
       });
+      await queryRunner.commitTransaction();
 
       return createdBoard;
     } catch {
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
         '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
       );
+    } finally {
+      await queryRunner.release();
     }
   }
 

@@ -41,23 +41,38 @@ import { LikeModule } from './like/like.module';
 import { S3Module } from './s3/s3.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { CacheConfigService } from './cache/cache.config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { HttpLoggingInterceptor } from './utils/interceptor/logging/http.logging.interceptor';
 
 export const typeOrmModuleOptions = {
   useFactory: async (
     configService: ConfigService,
   ): Promise<TypeOrmModuleOptions> => ({
     type: 'postgres',
-    host: configService.get<string>('DB_HOST'),
-    username: configService.get('DB_USERNAME'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
+    replication: {
+      master: {
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+      },
+      slaves: [
+        {
+          host: configService.get<string>('DB_SLAVE_HOST'),
+          port: configService.get<number>('DB_PORT'),
+          username: configService.get('DB_SLAVE_USERNAME'),
+          password: configService.get('DB_SLAVE_PASSWORD'),
+          database: configService.get('DB_NAME'),
+        },
+      ],
+    },
     entities: [__dirname + '/**/*.entity{.ts,.js}'],
     synchronize: configService.get('DB_SYNC'),
-    logging: true, // DB에서 query가 발생할때마다 rawquery가 출력된다.
+    logging: true,
   }),
   inject: [ConfigService],
 };
-
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -123,10 +138,10 @@ export const typeOrmModuleOptions = {
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: HttpLoggingInterceptor,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: HttpLoggingInterceptor,
+    },
     // {
     //   provide: APP_INTERCEPTOR,
     //   useClass: ErrorInterceptor,

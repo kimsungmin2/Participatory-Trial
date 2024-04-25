@@ -131,7 +131,7 @@ export class TrialsService {
         skip,
         take: limit,
         order: {
-          createdAt: 'DESC',
+          created_at: 'DESC',
         },
       });
       const trialBoardsWithUserNames = await Promise.all(
