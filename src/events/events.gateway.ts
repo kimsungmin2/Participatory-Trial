@@ -154,7 +154,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 100) {
+        if ((votes.totalVotes = 100)) {
           await this.pushService.sendAllNotifications(
             channelType,
             roomId,
@@ -173,7 +173,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
+        if ((votes.totalVotes = 100)) {
           await this.pushService.sendAllNotifications(
             channelType,
             roomId,
@@ -192,7 +192,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
+        if ((votes.totalVotes = 1)) {
           await this.pushService.sendAllNotifications(
             channelType,
             roomId,

@@ -14,7 +14,6 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatDocument } from '../schemas/chat.schemas';
-import { FcmService } from '../alarm/fcm.service';
 import { NicknameGeneratorService } from './nickname.service';
 import { PushService } from '../alarm/alarm.service';
 

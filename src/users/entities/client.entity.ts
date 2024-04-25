@@ -12,9 +12,6 @@ export class Clients {
   userId: number;
 
   @Column({ type: 'varchar', nullable: true })
-  pushToken: string;
-
-  @Column({ type: 'varchar', nullable: true })
   endpoint: string;
 
   @Column({ type: 'json', nullable: true })
