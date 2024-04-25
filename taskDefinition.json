@@ -1,0 +1,288 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "nestjs-app",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/nestjs4",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "name": "nestjs-app-3000-tcp",
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "environmentFiles": [
+        {
+          "value": "arn:aws:s3:::eaglebackfromthenest/.env",
+          "type": "s3"
+        }
+      ],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "secrets": [
+        {
+          "name": "DB_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_HOST::"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_NAME::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_PASSWORD::"
+        },
+        {
+          "name": "DB_PORT",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_PORT::"
+        },
+        {
+          "name": "DB_SYNC",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_SYNC::"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_USERNAME::"
+        },
+        {
+          "name": "JWT_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:JWT_SECRET_KEY::"
+        },
+        {
+          "name": "AWS_S3_ACCESS_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:AWS_S3_ACCESS_KEY::"
+        },
+        {
+          "name": "AWS_S3_SECRET_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:AWS_S3_SECRET_KEY::"
+        },
+        {
+          "name": "AWS_S3_BUCKET_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:AWS_S3_BUCKET_NAME::"
+        },
+        {
+          "name": "AWS_REGION",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:AWS_REGION::"
+        },
+        {
+          "name": "DEFAULT_PROFILE_IMG",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DEFAULT_PROFILE_IMG::"
+        },
+        {
+          "name": "KAKAO_CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:KAKAO_CLIENT_ID::"
+        },
+        {
+          "name": "KAKAO_REDIRECT_URI",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:KAKAO_REDIRECT_URI::"
+        },
+        {
+          "name": "KAKAO_LOGOUT_URI",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:KAKAO_LOGOUT_URI::"
+        },
+        {
+          "name": "NAVER_CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:NAVER_CLIENT_ID::"
+        },
+        {
+          "name": "NAVER_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:NAVER_SECRET::"
+        },
+        {
+          "name": "NAVER_REDIRECT_URI",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:NAVER_REDIRECT_URI::"
+        },
+        {
+          "name": "email_service",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:email_service::"
+        },
+        {
+          "name": "user",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:user::"
+        },
+        {
+          "name": "pass",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:pass::"
+        },
+        {
+          "name": "COOKIE_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:COOKIE_SECRET::"
+        },
+        {
+          "name": "REFRESH_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REFRESH_SECRET::"
+        },
+        {
+          "name": "GOOGLE_CLIENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:GOOGLE_CLIENT_ID::"
+        },
+        {
+          "name": "GOOGLE_CLIENT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:GOOGLE_CLIENT_SECRET::"
+        },
+        {
+          "name": "GOOGLE_REDIRECT_URI",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:GOOGLE_REDIRECT_URI::"
+        },
+        {
+          "name": "REDIS_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_HOST::"
+        },
+        {
+          "name": "REDIS_HOST_1",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_HOST_1::"
+        },
+        {
+          "name": "REDIS_HOST_2",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_HOST_2::"
+        },
+        {
+          "name": "REDIS_HOST_3",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_HOST_3::"
+        },
+        {
+          "name": "REDIS_PORT",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT::"
+        },
+        {
+          "name": "REDIS_PORT_1",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_1::"
+        },
+        {
+          "name": "REDIS_PORT_2",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_2::"
+        },
+        {
+          "name": "REDIS_PORT_3",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_3::"
+        },
+        {
+          "name": "REDIS_PORT_4",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_4::"
+        },
+        {
+          "name": "REDIS_PORT_5",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_5::"
+        },
+        {
+          "name": "REDIS_PORT_6",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:REDIS_PORT_6::"
+        },
+        {
+          "name": "NODE_ENV",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:NODE_ENV::"
+        },
+        {
+          "name": "ES_NODE",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:ES_NODE::"
+        },
+        {
+          "name": "ELASTIC_CLOUD_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:ELASTIC_CLOUD_ID::"
+        },
+        {
+          "name": "ELASTIC_CLOUD_AUTH",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:ELASTIC_CLOUD_AUTH::"
+        },
+        {
+          "name": "ELASTIC_NODE",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:ELASTIC_NODE::"
+        },
+        {
+          "name": "DB_SLAVE_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_SLAVE_HOST::"
+        },
+        {
+          "name": "DB_SLAVE_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_SLAVE_USERNAME::"
+        },
+        {
+          "name": "DB_SLAVE_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_SLAVE_PASSWORD::"
+        },
+        {
+          "name": "DB_SLAVE_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:DB_SLAVE_NAME::"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:OPENAI_API_KEY::"
+        },
+        {
+          "name": "MONGODB_URI",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:MONGODB_URI::"
+        },
+        {
+          "name": "FIREBASE_API_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_API_KEY::"
+        },
+        {
+          "name": "FIREBASE_AUTH_DOMAIN",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_AUTH_DOMAIN::"
+        },
+        {
+          "name": "FIREBASE_PROJECT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_PROJECT_ID::"
+        },
+        {
+          "name": "FIREBASE_STORAGEBUCKET",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_STORAGEBUCKET::"
+        },
+        {
+          "name": "FIREBASE_MESSAGING_SENDER_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_MESSAGING_SENDER_ID::"
+        },
+        {
+          "name": "FIREBASE_APP_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_APP_ID::"
+        },
+        {
+          "name": "FIREBASE_MEASUREMENT_ID",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_MEASUREMENT_ID::"
+        },
+        {
+          "name": "VAPID_PUBLIC_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:VAPID_PUBLIC_KEY::"
+        },
+        {
+          "name": "FIREBASE_CLIENT_EMAIL",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_CLIENT_EMAIL::"
+        },
+        {
+          "name": "FIREBASE_PRIVATE_KEY",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-2:767398029720:secret:ecs_nestjs_key-lXuC7U:FIREBASE_PRIVATE_KEY::"
+        }
+      ],
+      "ulimits": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/nest-app-task",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "nest"
+        },
+        "secretOptions": []
+      },
+      "systemControls": []
+    }
+  ],
+  "family": "nestjs-app-task-definition",
+  "taskRoleArn": "arn:aws:iam::767398029720:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::767398029720:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "volumes": [],
+  "placementConstraints": [],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "3072",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "tags": []
+}

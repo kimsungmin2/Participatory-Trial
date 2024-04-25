@@ -1,0 +1,271 @@
+{
+  "family": "redis-cluster",
+  "taskRoleArn": "arn:aws:iam::767398029720:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::767398029720:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "cpu": "2048",
+  "memory": "4096",
+  "containerDefinitions": [
+    {
+      "name": "redis",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [],
+      "portMappings": [
+        {
+          "containerPort": 6379
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-0",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6380; sleep 10; redis-cli --cluster check 172.20.0.2:6380;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6380
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-1",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6381; sleep 10; redis-cli --cluster check 172.20.0.3:6381;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6381
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-2",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6382; sleep 10; redis-cli --cluster check 172.20.0.4:6382;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6382
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-3",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6383; sleep 10; redis-cli --cluster check 172.20.0.5:6383;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6383
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-4",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6384; sleep 10; redis-cli --cluster check 172.20.0.6:6384;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6384
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-5",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "redis-server --appendonly yes --cluster-enabled yes --cluster-config-file /data/nodes.conf --cluster-node-timeout 5000 --port 6385; sleep 10; redis-cli --cluster check 172.20.0.7:6385;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6385
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      }
+    },
+    {
+      "name": "redis-cluster-init",
+      "image": "767398029720.dkr.ecr.ap-northeast-2.amazonaws.com/redis:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "command": [
+        "sh",
+        "-c",
+        "sleep 20; redis-cli --cluster create 172.20.0.2:6380 172.20.0.3:6381 172.20.0.4:6382 172.20.0.5:6383 172.20.0.6:6384 172.20.0.7:6385 --cluster-replicas 1 --cluster-yes;"
+      ],
+      "portMappings": [
+        {
+          "containerPort": 6379
+        }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "efs-volume",
+          "containerPath": "/data",
+          "readOnly": false
+        }
+      ],
+      "healthCheck": {
+        "command": ["CMD", "redis-cli", "ping"],
+        "interval": 30,
+        "timeout": 10,
+        "retries": 3
+      },
+      "dependsOn": [
+        { "containerName": "redis-0", "condition": "HEALTHY" },
+        { "containerName": "redis-1", "condition": "HEALTHY" },
+        { "containerName": "redis-2", "condition": "HEALTHY" },
+        { "containerName": "redis-3", "condition": "HEALTHY" },
+        { "containerName": "redis-4", "condition": "HEALTHY" },
+        { "containerName": "redis-5", "condition": "HEALTHY" }
+      ],
+      "startTimeout": 300,
+      "stopTimeout": 30
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "volumes": [
+    {
+      "name": "efs-volume",
+      "efsVolumeConfiguration": {
+        "fileSystemId": "fs-054e653d2cd085dc0",
+        "rootDirectory": "/",
+        "transitEncryption": "ENABLED",
+        "authorizationConfig": {
+          "accessPointId": "fsap-0e9514467dbf811cd",
+          "iam": "ENABLED"
+        }
+      }
+    }
+  ]
+}

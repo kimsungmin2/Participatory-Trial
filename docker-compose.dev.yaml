@@ -1,16 +1,5 @@
 version: '3.7'
 services:
-  postgres:
-    image: postgres:16
-    restart: always
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
   logstash:
     image: docker.elastic.co/logstash/logstash:7.9.3
     env_file:
@@ -197,7 +186,6 @@ networks:
       config:
         - subnet: 172.20.0.0/24
 volumes:
-  postgres-data:
   redis-0-data:
   redis-1-data:
   redis-2-data:

@@ -4,8 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    environment:
-      TEST_LOGSTASH_URL: 'logstash:9600' # Logstash 서비스 URL 업데이트
     command: npm run test:ci
     depends_on:
       - logstash
