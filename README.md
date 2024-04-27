@@ -4,7 +4,7 @@
 
 <br>
 
-#### 🏠 배포 주소 : ahwlsqja.store
+#### 🏠 배포 주소 : [ahwlsqja.store](https://ahwlsqja.store)
 #### 🔥 작업 로그 : [Notion](https://teamsparta.notion.site/9c0f63d669cd4eeaabf9c42afeabfdb9)
 #### 📹 소개 영상 : 미정
 
@@ -13,19 +13,25 @@
 <br>
 
 목차 
+#### 1. [📝인트로](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--intro)
+#### 2. [👨‍👩‍👧‍👦팀 소개](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Team-Members)
+#### 3. [📒ERD](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--ERD)
+#### 4. [🤷🏻‍♂️기술적 의사결정](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--기술적-의사결정)
+#### 5. [⚒사용한 기술 Stack](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Tech-Stack)
+#### 6. [🕸아키텍쳐](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Architecture)
+#### 7. [💣트러블 슈팅](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Troubleshooting)
 
 
-
-1. # 📝 Intro
+# 1. 📝 Intro
 
 * **프로젝트명** : 국민 참여 재판
 * **기간** : 2024년 3월 25일 ~ 2024년 5월 1일
-* **주제** : 극악무도한 범죄자들의 판결을 실시간 투표로 정하고 , 대법원 api를 통해 판례를 가져와서 죄질에 대한 형량을 국민끼리 투표해보고 , 유머 혹은 정치적 이야기를 재미있게 토론하는 웹사이트입니다. (맥그리거 vs 할머니 500명 맨손으로 케이지에서) , (전수민 vs 김재연 코딩 대결하면 누가 이기나 )
+* **주제** : 극악무도한 범죄자들의 판결을 실시간 투표로 정하고 , Ai를 통해 판례를 가져와서 죄질에 대한 형량을 국민끼리 투표해보고 , 유머 혹은 정치적 이야기를 재미있게 토론하는 웹사이트입니다. (맥그리거 vs 할머니 500명 맨손으로 케이지에서) , (전수민 vs 김재연 코딩 대결하면 누가 이기나 )
 * **주요기능** :<br> 
-[투표] Web-Socket을 통한 실시간 찬반투표<br>
+ Web-Socket을 통한 실시간 찬반투표<br>
 <br>
 
-# 👨‍👩‍👧‍👦Team Members
+# 2. 👨‍👩‍👧‍👦Team Members
 
 | Position      | Name          |    Github                                         | Tech Blog                               |
 |:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
@@ -37,7 +43,50 @@
 
 <br>
 
-# ⚒ Tech Stack
+# 3. 📒ERD
+
+https://drawsql.app/teams/kim-14/diagrams/3-erd
+
+
+<br>
+
+# 4.  🤷🏻‍♂️기술적 의사결정
+
+<details>
+  <summary>동시성 제어</summary>
+ 선택 기술 <details>
+  <summary>Bull Queue</summary>
+ Bull Queue
+- 비동기적으로 작업들을 Queue에 추가하여 워커를 통해 동시성을 제어 할 수 있음.
+- 투표 수를 업데이트할 때 비관적 락을 사용하여 동시성을 관리하게 되면, 일관성은 확실하게 보장되나, 부하가 높은 상태일 경우 Race Condition이나 DeadLock이 쉽게 발생할 수 있기 때문에, 비동기적으로 작업을 추가하고 요청을 FIFO로 처리하는 Bull Queue를 선택하게 됨.
+- MSA의 경우 Kafka를 사용하면 좋으나, 현재 프로젝트의 단계에서는 당장 투표 수 관리에 있어서만 메시지 브로커가 필요했기 때문에 Bull Queue를 선택
+</details>
+  <details>
+ <summary>Pessimistic Lock</summary>
+ 
+</details>
+ <details>
+ <summary>Apache Kafka</summary>
+ 
+</details>
+</details>
+
+
+<details>
+  <summary>채팅</summary>
+ 선택 기술 <details>
+  <summary>Socket.io</summary>
+</details>
+  <details>
+ <summary>WebSocket</summary>
+ 
+</details>
+</details>
+
+
+<br>
+
+# 5. ⚒ Tech Stack
 
 <br>
 
@@ -46,22 +95,19 @@
 |Runtime|Node.js|Language|TypeScript|
 |Framework|Nest.js|DB|PostgreSQL(AWS RDS), Redis|
 
-
-
  
 <br>
 
-# 🕸 Architecture
+# 6. 🕸 Architecture
+
+< 바뀐 아키텍처 삽입>
 
 <br>
 
-#  📒 ERD
 
-https://drawsql.app/teams/kim-14/diagrams/3-erd
+# 7. 💣 Troubleshooting
 
-<br>
 
-# 💣 Troubleshooting
 
 <br>
 
