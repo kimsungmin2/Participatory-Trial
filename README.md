@@ -4,7 +4,7 @@
 
 <br>
 
-#### 🏠 배포 주소 : 미정
+#### 🏠 배포 주소 : ahwlsqja.store
 #### 🔥 작업 로그 : [Notion](https://teamsparta.notion.site/9c0f63d669cd4eeaabf9c42afeabfdb9)
 #### 📹 소개 영상 : 미정
 
@@ -12,7 +12,11 @@
 
 <br>
 
-# 📝 Intro
+목차 
+
+
+
+1. # 📝 Intro
 
 * **프로젝트명** : 국민 참여 재판
 * **기간** : 2024년 3월 25일 ~ 2024년 5월 1일
