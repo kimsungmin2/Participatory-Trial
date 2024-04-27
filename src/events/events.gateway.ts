@@ -14,9 +14,10 @@ import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
 import { Redis } from 'ioredis';
 import { OptionalWsJwtGuard } from '../utils/guard/ws.guard';
-import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
-import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
+import { HumorVotesService } from '../humors_votes/humors_votes.service';
+import { PolticalVotesService } from '../poltical_debates_vote/poltical_debates_vote.service';
 import { LikeService } from '../like/like.service';
+import { PushService } from '../alarm/alarm.service';
 @WebSocketGateway({
   namespace: '',
   cors: {
@@ -33,6 +34,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly humorVotesService: HumorVotesService,
     private readonly polticalVotesService: PolticalVotesService,
     private readonly likesService: LikeService,
+    private readonly pushService: PushService,
   ) {}
   async onModuleInit() {
     await this.redisSubClient.subscribe('notifications', 'userNotifications');
@@ -59,6 +61,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const { roomId, channelType } = data;
     const userId = socket.userId;
+
     try {
       const updatedLikes = await this.likesService.like(
         channelType,
@@ -105,11 +108,16 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = socket.userId;
     const { channelType, roomId, message } = data;
     try {
+      const xForwardedFor = socket.request.headers['x-forwarded-for'];
+      const ip = Array.isArray(xForwardedFor)
+        ? xForwardedFor[0]
+        : xForwardedFor;
       const user = await this.chatsService.createChannelChat(
         channelType,
         userId,
         message,
         roomId,
+        ip,
       );
       this.server.to(`${channelType}:${roomId}`).emit('message', {
         userId,
@@ -134,7 +142,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = socket.userId;
     const { channelType, roomId, voteFor } = data;
     try {
-      const ip = socket.request.connection.remoteAddress;
+      const xForwardedFor = socket.request.headers['x-forwarded-for'];
+      const ip = Array.isArray(xForwardedFor)
+        ? xForwardedFor[0]
+        : xForwardedFor;
       if (channelType === 'trials') {
         await this.votesService.addVoteUserorNanUser(
           ip,
@@ -147,12 +158,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
-        }
       } else if (channelType === 'humors') {
         await this.humorVotesService.addHumorVoteUserorNanUser(
+          ip,
           userId,
           roomId,
           voteFor,
@@ -162,12 +170,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
-        }
       } else if (channelType === 'poltical-debates') {
         await this.polticalVotesService.addPolticalVoteUserorNanUser(
+          ip,
           userId,
           roomId,
           voteFor,
@@ -177,10 +182,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId,
           votes: votes,
         });
-        if (votes.totalVotes >= 1) {
-          const notificationMessage = `${channelType}의 ${roomId}게시물이 핫합니다.`;
-          this.chatsService.publishNotification(notificationMessage);
-        }
       }
     } catch (error) {
       console.error('투표 생성 과정에서 오류가 발생했습니다:', error);

@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsEnum,
-  IsNotEmpty,
   IsOptional,
   IsString,
-  MaxLength,
-  Min,
-  MinLength,
 } from 'class-validator';
-import { BoardIndex } from '../type/board_index.type';
-import { SearchType } from '@elastic/elasticsearch/api/types';
 
 export class SearchAllQueryDto {
   @ApiProperty({

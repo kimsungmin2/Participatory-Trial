@@ -16,29 +16,47 @@
     <link rel="stylesheet" href="/css/board-style.css" />
   </head>
   <body>
-    <%- include('partials/nav')  %>
-    <% 
-    let boardName;
-    switch (boardType) {
-          case 'humor':
-          boardName = 'humors';
-            break;
-          case 'onlineBoard':
-          boardName = 'online-boards';
-            break;
-          case 'polticalDebate':
-          boardName = 'poltical-debates';
-            break;
-          case 'trial':
-          boardName = 'trials';
-            break;
-        }
-    %>
-
     <header>
-      <%- include('partials/board-title') %>
-
-      <hr width="70%" color="black" size="2" style="margin-left: 30px" />
+      <div class="search-container">
+        <form action="/search" method="get" id="searchForm">
+          <div>
+            <select name="searchOption" id="searchOption">
+              <option value="title">제목</option>
+              <option value="content">내용</option>
+              <option value="titleContent">제목/내용</option>
+            </select>
+          </div>
+          <input type="text" placeholder="게시글 검색" name="search" id="searchInput"/>
+          <button type="submit" id="searchBtn">검색</button>
+        </form>
+      </div>
+      <%- include('partials/nav')  %>
+    </header>
+    <main>
+      <div class="board-name">
+        <div class="board-name-btn">
+          <% 
+          let boardName;
+          switch (boardType) {
+                case 'humor':
+                boardName = 'humors';
+                  break;
+                case 'onlineBoard':
+                boardName = 'online-boards';
+                  break;
+                case 'polticalDebate':
+                boardName = 'poltical-debates';
+                  break;
+                case 'trial':
+                boardName = 'trials';
+                  break;
+              }
+          %>
+            <%- include('partials/board-title') %>
+            <a class="submit-button" id="createPostLink" href="/<%= boardName %>/create">글쓰기</a>
+        </div>
+        <hr width="100%" color="black" size="2"/>
+      </div>
       
       <div class="cards-container">
         <% if (data.length !== 0) {%>
@@ -46,7 +64,7 @@
         <div class="card">
             <div class="card-header" ><a href="/<%= boardName %>/<%= data[i].id%>"><%= data[i].title %></a></div>
           <div class="card-stats">
-            <div>작성자: <%= data[i].userId %></div>
+            <div>작성자: <%= data[i].userName %></div>
             <div>조회 : <%= data[i].view %></div>
             <% if (boardType !== 'polticalDebate') { %>
             <div>좋아요 : <%= data[i].like %></div>
@@ -93,27 +111,12 @@
         
         <% if (nextGroupPage) { %>
           <a href="<%= baseUrl + nextGroupPage %>">다음 »</a>
-        <% } %>
-        
+        <% } %>     
       </div>
 
-        <a class="submit-button" id="createPostLink" href="/<%= boardName %>/create">글쓰기</a>
-
-      <div class="search-container">
-        <form action="/search" method="get" id="searchForm">
-          <div>
-            <select name="searchOption" id="searchOption">
-              <option value="title">제목</option>
-              <option value="content">내용</option>
-              <option value="titleContent">제목+내용</option>
-            </select>
-          </div>
-          <input type="text" placeholder="검색..." name="search" id="searchInput"/>
-          <button type="submit">검색</button>
-        </form>
-      </div>
-      
-    </header>
+    </main>
+    <footer>
+    </footer>
     <script defer>
       document.getElementById('createPostLink').addEventListener('click', function(e) {
         e.preventDefault();
@@ -149,21 +152,20 @@
             break;
         }
 
-      document.getElementById('searchForm').addEventListener('submit', function(event) {
-      event.preventDefault();
+        document.getElementById('searchForm').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-      const searchInput = document.getElementById('searchInput').value;
-      const selectedOption = document.getElementById('searchOption').value;
-      const queryParams = new URLSearchParams();
+        const searchInput = document.getElementById('searchInput').value;
+        const selectedOption = document.getElementById('searchOption').value;
+        const queryParams = new URLSearchParams();
 
-      queryParams.append('search', searchInput); // 검색어 항상 추가
-      queryParams.append('type', selectedOption); // 선택된 검색 옵션 추가
-      queryParams.append('boardName', boardIndex)
+        queryParams.append('search', searchInput); // 검색어 항상 추가
+        queryParams.append('type', selectedOption); // 선택된 검색 옵션 추가
+        queryParams.append('boardName', boardIndex)
 
-      // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
-      window.location.href = `/search?${queryParams.toString()}`;
-});
-
+        // 폼 액션 URL과 쿼리 파라미터를 조합하여 요청 URL 생성
+        window.location.href = `/search?${queryParams.toString()}`;
+      });
     </script>
   </body>
 </html>

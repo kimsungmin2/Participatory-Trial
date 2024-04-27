@@ -2,16 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { TrialsChat } from './trialsChat.entity';
 import { Trials } from '../../trials/entities/trial.entity';
 
 @Entity()

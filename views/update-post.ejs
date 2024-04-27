@@ -58,7 +58,6 @@
 <script>
   let boardType;
   boardType = "<%= boardType %>";
-  console.log(boardType);
   let postId;
   if (boardType === 'humor') { 
           boardType = 'humors'
@@ -107,7 +106,6 @@
     }
   })
   .then(data => {
-    console.log(data); 
     alert('게시물 수정에 성공하였습니다.')
     window.location.href = `/${boardType}/${postId}`
   })

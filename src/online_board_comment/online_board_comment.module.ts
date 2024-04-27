@@ -9,7 +9,6 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { BoardIdValidationPipe } from '../online_boards/pipes/exist-board.pipe';
 import { S3Module } from '../s3/s3.module';
-import { OnlineBoardsModule } from '../online_boards/online_boards.module';
 
 @Module({
   imports: [

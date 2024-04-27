@@ -1,17 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { LikeInputDto } from './dto/create-like.dto';
-import { BoardType } from '../s3/board-type';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
-import { deflate } from 'zlib';
-import { Users } from '../users/entities/user.entity';
 import { HumorLike } from '../humors/entities/humor_like.entity';
 import { OnlineBoardLike } from '../online_boards/entities/online_board_like.entity';
 import { Trials } from '../trials/entities/trial.entity';
 import { TrialLike } from '../trials/entities/trials.like.entity';
-type boardTypes = HumorBoards | OnlineBoards | Trials;
 interface LikeEntity {
   humorBoardId?: number;
   onlineBoardId?: number;
@@ -51,7 +46,7 @@ export class LikeService {
         likeRepository = this.humorLikeRepository;
         entityKey = `humorBoardId`;
         break;
-      case 'onlineBoards':
+      case 'online-boards':
         boardRepository = this.onlineBoardRepository;
         likeRepository = this.onlineLikeRepository;
         entityKey = `onlineBoardId`;

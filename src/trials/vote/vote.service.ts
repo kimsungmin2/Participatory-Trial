@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -9,7 +8,6 @@ import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Votes } from '../entities/vote.entity';
 import { Request } from 'express';
 import { EachVote } from '../entities/Uservote.entity';
-import { VoteTitleDto } from './dto/voteDto';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 @Injectable()
 export class VotesService {
@@ -63,22 +61,22 @@ export class VotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       voteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       voteId: number;
       voteFor: boolean;
     },
     queryRunner: QueryRunner,
   ) {
     // 1. 이미 userId가 null이 아니면 userId를 이용해 찾고, 없으면 userCodoe를 이요해서 찾는다.
-    const isExistingVote = await queryRunner.manager.findOneBy(EachVote, {
-      userId,
-      voteId,
-    });
+    const isExistingVote = userId
+      ? await queryRunner.manager.findOneBy(EachVote, { userId, voteId })
+      : await queryRunner.manager.findOneBy(EachVote, { ip, voteId });
+
     // 2. 투표 있으면 에러 던지기(400번)
     if (isExistingVote) {
       if (isExistingVote.voteFor === voteFor) {
@@ -92,6 +90,7 @@ export class VotesService {
     }
     const voteData = this.eachVoteRepository.create({
       userId,
+      ip,
       voteId,
       voteFor,
     });
@@ -99,20 +98,23 @@ export class VotesService {
   }
   // 투표하기
   async addVoteUserorNanUser(
-    userCode: string,
-    userId: number,
+    ip: string,
+    userId: number | null,
     voteId: number,
     voteFor: boolean,
   ) {
-    // const userCodes = await this.findOrCreateUserCodeVer2(req, userId);
+    // const userCode = await this.findOrCreateUserCodeVer2(req, userId);
     const queryRunner = this.dataSource.createQueryRunner();
+
     await queryRunner.connect();
+
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, voteId, voteFor },
+        { userId, ip, voteId, voteFor },
         queryRunner,
       );
+      // await this.updateVoteCount(voteId, voteFor, queryRunner);
       await queryRunner.commitTransaction();
     } catch (err) {
       console.log(err);
@@ -163,7 +165,6 @@ export class VotesService {
         'voteForFalse',
       )
       .where('eachVote.voteId = :voteId', { voteId })
-      .andWhere('eachVote.userCode IS NULL')
       .getRawOne();
     const voteForTrue = parseInt(result.voteForTrue, 10);
     const voteForFalse = parseInt(result.voteForFalse, 10);
@@ -204,6 +205,7 @@ export class VotesService {
       vote2Percentage: `${vote2Percentage.toFixed(2)}%`,
     };
   }
+  
   async updateVoteCounts(voteId: number) {
     const result = await this.dataSource
       .getRepository(EachVote)
@@ -217,7 +219,6 @@ export class VotesService {
         'voteCount2',
       )
       .where('eachVote.voteId = :voteId', { voteId })
-      .andWhere('eachVote.userCode IS NULL')
       .getRawOne();
     const voteCount1 = parseInt(result.voteCount1, 10);
     const voteCount2 = parseInt(result.voteCount2, 10);

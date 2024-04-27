@@ -1,12 +1,7 @@
 import {
   IsEnum,
-  IsNumber,
-  IsString,
-  MaxLength,
-  MinLength,
-  isString,
 } from 'class-validator';
-import { BoardType } from '../../s3/board-type';
+import { BoardType } from '../../s3/type/board-type';
 
 export class LikeInputDto {
   @IsEnum(BoardType)

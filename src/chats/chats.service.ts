@@ -1,20 +1,19 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { Users } from '../users/entities/user.entity';
 import Redis from 'ioredis';
 import { Chat } from '../events/entities/chat.entity';
 import { Interval } from '@nestjs/schedule';
 import { TrialsChat } from '../events/entities/trialsChat.entity';
 import { HumorsChat } from '../events/entities/humorsChat.entity';
 import { PolticalsChat } from '../events/entities/polticalsChat.entity';
-import { CustomSocket } from '../utils/interface/socket.interface';
 import { ChannelType } from '../events/type/channeltype';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ChatDocument } from '../schemas/chat.schemas';
-import { FcmService } from '../alarm/fcm.service';
+import { NicknameGeneratorService } from './nickname.service';
+import { PushService } from '../alarm/alarm.service';
 
 @Injectable()
 export class ChatsService implements OnModuleInit {
@@ -30,7 +29,8 @@ export class ChatsService implements OnModuleInit {
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
-    private readonly alarmService: FcmService,
+    private readonly pushService: PushService,
+    private readonly nickNameService: NicknameGeneratorService,
   ) {}
 
   async publishNotification(message: string) {
@@ -133,9 +133,20 @@ export class ChatsService implements OnModuleInit {
     userId: number | null,
     message: string,
     roomId: number,
+    ip: string,
   ) {
     try {
-      let userName = '익명';
+      let userName = await this.redisDataClient.get(`userName:${ip}`);
+
+      if (!userName) {
+        userName = this.nickNameService.generateNickname();
+        await this.redisDataClient.set(
+          `userName:${ip}`,
+          userName,
+          'EX',
+          60 * 60 * 24,
+        );
+      }
 
       if (userId) {
         userName = await this.redisDataClient.get(`userName:${userId}`);
@@ -172,7 +183,7 @@ export class ChatsService implements OnModuleInit {
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
       await this.redisDataClient.publish(chatKey, chatValue);
 
-      // await this.alarmService.sendPushNotification(channelType, roomId, 'chat');
+      // await this.pushService.sendNotification(channelType, roomId, 'chat');
 
       return userName;
     } catch (error) {

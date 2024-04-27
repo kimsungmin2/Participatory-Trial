@@ -14,7 +14,9 @@
     <title>sign up</title>
   </head>
   <body>
-    <%- include('partials/nav') %>
+    <header>
+      <%- include('partials/nav') %>
+    </header>
     <main>
       <form id="signupForm">
         <div class="email">
@@ -35,7 +37,7 @@
             class="passwordInput"
             name="password"
             placeholder="password"
-            type="text"
+            type="password"
           />
         </div>
         <div class="confirm password">
@@ -45,7 +47,7 @@
             class="confirmPasswordInput"
             name="passwordConfirm"
             placeholder="confirm password"
-            type="text"
+            type="password"
           />
         </div>
         <div class="nickname">
@@ -65,7 +67,9 @@
         <button id="submitBtn" class="submitBtn" type="submit">회원가입</button>
       </form>
     </main>
-    <footer>footer 영역</footer>
+    <footer>
+      <h6>copyright Team 고려거란전쟁</h6>
+    </footer>
     <script src="/scripts/sign-up.js"></script>
   </body>
 </html>

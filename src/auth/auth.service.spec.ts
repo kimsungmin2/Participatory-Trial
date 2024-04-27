@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcrypt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Users } from '../users/entities/user.entity';
@@ -13,7 +13,6 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { EmailService } from '../email/email.service';
 import { DataSource } from 'typeorm';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisService } from '../cache/redis.service';
 
 jest.mock('bcrypt', () => ({

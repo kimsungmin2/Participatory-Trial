@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { TrialsService } from "../trials.service";
-import { Observable } from "rxjs";
 
 @Injectable()
 export class IsActiveGuard implements CanActivate {

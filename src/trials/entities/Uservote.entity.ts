@@ -17,14 +17,14 @@ export class EachVote {
   @Column({ type: 'int', nullable: true })
   userId?: number;
   @Column({ type: 'varchar', nullable: true })
-  userCode?: string;
+  ip?: string;
   @Column({ type: 'boolean' })
   voteFor: boolean;
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
-  @ManyToOne(() => Votes, (votes) => votes.eachVote)
+  @ManyToOne(() => Votes, (votes) => votes.eachVote, { onDelete: 'CASCADE'  })
   @JoinColumn({ name: 'voteId', referencedColumnName: 'id' })
-  vote: Votes;
+  votes: Votes;
   @ManyToOne(() => Users, (user) => user.eachVote, {
     onDelete: 'CASCADE',
   })

@@ -1,0 +1,233 @@
+/* ----------------header-------------------- */
+/* .navbar-nav .nav-item:not(:last-child) {
+  margin-right: 100px;
+  font-family: 'MBC1961GulimM';
+}
+.nav-item {
+  font-family: 'MBC1961GulimM';
+  font-size: 20px;
+}
+.navbar-brand {
+  font-size: 24px;
+} */
+
+/* -----------------main------------------------ */
+.realtime-voting-container {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+/* .user {
+  font-size: 30px;
+  font-weight: bold;
+} */
+.container-info {
+  display: flex;
+  justify-content: space-between;
+}
+.progress {
+  display: flex; /* Flexbox를 사용하여 내용을 표시 */
+  height: 5rem; /* 프로그레스바의 높이 */
+  overflow: hidden; /* 내용이 넘칠 경우 숨김 처리 */
+  font-size: 0.75rem; /* 내부 텍스트의 크기 */
+  background-color: #ffffff; /* 배경 색상 */
+  border-radius: 0.25rem; /* 모서리 둥글게 처리 */
+}
+
+.progress-bar {
+  display: flex; /* Flexbox를 사용하여 내용을 표시 */
+  justify-content: center; /* 내부 텍스트를 중앙으로 정렬 */
+  align-items: center; /* 세로 방향으로 중앙 정렬 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  white-space: nowrap; /* 텍스트가 넘칠 경우 줄바꿈하지 않음 */
+  background-color: #007bff; /* 프로그레스바 색상 */
+  transition: width 0.6s ease; /* 너비 변경 시 부드러운 전환 효과 */
+}
+
+.btn-container > button {
+  margin-bottom: 20px;
+}
+.info-container {
+  display: flex;
+}
+.like-count {
+  font-size: 16px;
+}
+.view-count {
+  font-size: 16px;
+  margin-left: 15px;
+}
+#like-count,
+#view-count {
+  font-weight: bold;
+  margin-left: 5px;
+}
+.btn-container {
+  text-align: center;
+}
+.bg-success {
+  background-color: #28a745 !important;
+}
+.chat-container {
+  /* position: relative; */
+  height: 500px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.chat-messages {
+  padding: 10px;
+}
+.message {
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+.me {
+  background-color: #007bff;
+  color: #fff;
+  text-align: right;
+}
+.other-user {
+  background-color: #e2e3e5;
+  color: #000;
+  text-align: left;
+}
+/* .input-group {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px;
+  } */
+.input-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: absolute;
+
+  width: 100%;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ddd;
+}
+.input-group input[type='text'] {
+  flex: 1;
+  margin-right: 10px;
+}
+.input-group button {
+  margin-top: 20px;
+  height: 40px;
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.input-group button:hover {
+  background-color: #0056b3;
+}
+.btn {
+  display: inline-block;
+}
+.btn-container {
+  text-align: center;
+}
+.comments-section {
+  margin-top: 20px;
+}
+.comments-section h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.comment-list {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.comment {
+  margin-bottom: 10px;
+}
+.comment-container {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+.comment-title {
+  top: -20px;
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 20px;
+}
+.comment-input {
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  resize: none;
+  margin-top: 20px;
+}
+.comment-btn {
+  margin-top: 10px;
+}
+.comment-user {
+  font-weight: bold;
+}
+.modal {
+  z-index: 1050; /* Bootstrap 기본 z-index 값보다 높거나, 필요에 따라 조정 */
+}
+
+/* 모달이 화면 중앙에 잘 보이도록 스타일 조정 */
+.modal-dialog {
+  margin-top: 10vh; /* 화면의 수직 중앙에 가깝게 위치 */
+}
+
+/* 모달 내용의 가시성 향상 */
+.modal-content {
+  background-color: #fff; /* 배경색 지정 */
+  border-radius: 8px; /* 모달 모서리 둥글게 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 모달에 그림자 효과 추가 */
+}
+
+/* 모달 헤더 스타일 */
+.modal-header {
+  border-bottom: 1px solid #e9ecef; /* 헤더와 본문 사이의 구분선 */
+}
+
+/* 모달 본문 스타일 */
+.modal-body {
+  padding: 20px; /* 적절한 패딩으로 내용 간격 조정 */
+}
+
+.message-row {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  font-weight: bold;
+  margin-right: 5px;
+  color: #007bff; /* Bootstrap primary color */
+}
+
+.message-content {
+  line-break: anywhere;
+}
+.chatbar-container {
+  display: flex;
+  justify-content: center; /* 가로 방향 중앙 정렬 */
+  align-items: center; /* 세로 방향 중앙 정렬 */
+  height: 100vh; /* 컨테이너 높이를 뷰포트 높이와 동일하게 설정 */
+}

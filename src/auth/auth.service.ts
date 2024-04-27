@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { compare, hash } from 'bcryptjs';
+import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,9 +15,7 @@ import { EmailService } from '../email/email.service';
 import * as _ from 'lodash';
 import { Users } from '../users/entities/user.entity';
 import { VerifiCation } from './dto/verification.dto';
-import { CACHE_MANAGER, Cache, CacheKey } from '@nestjs/cache-manager';
 import { RedisService } from '../cache/redis.service';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -95,9 +93,7 @@ export class AuthService {
     let emailCode;
     try {
       emailCode = await this.redisService.getCluster().get(email);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
     if (emailCode) {
       await this.redisService.getCluster().del(email);
     }
@@ -165,7 +161,6 @@ export class AuthService {
 
   async verifiCationEmail(verifiCation: VerifiCation) {
     const code = await this.redisService.getCluster().get(verifiCation.email);
-
     const user = await this.usersService.findByEmail(verifiCation.email);
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
@@ -191,7 +186,7 @@ export class AuthService {
       select: ['id', 'email', 'password', 'emailVerified'],
       where: { email: email },
     });
-    
+
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');
     }
@@ -204,7 +199,6 @@ export class AuthService {
     }
 
     const payload = { sub: user.id };
-    
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET_KEY,
@@ -217,7 +211,7 @@ export class AuthService {
     });
     const refreshTokenCacheKey = `refreshToken:${refreshToken}`;
     // const newClientId = uuidv4();
-    // const clientsInfo = await this.usersService.updateClientsInfo({
+    // await this.usersService.updateClientsInfo({
     //   userId: user.id,
     //   clientId: newClientId,
     // });

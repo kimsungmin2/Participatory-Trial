@@ -5,14 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, DataSource, Repository } from 'typeorm';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
 import { PolticalDebateHallOfFame } from './entities/poltical_hall_of_fame.entity';
 import { PolticalDebateBoardsViewHallOfFames } from './entities/polticalView_hall_of_fame.entity';
-import { PolticalVotesService } from './poltical_debates_vote/poltical_debates_vote.service';
+import { PolticalVotesService } from '../poltical_debates_vote/poltical_debates_vote.service';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
-import { th } from '@faker-js/faker';
 
 @Injectable()
 export class PolticalDabateHallOfFameService {

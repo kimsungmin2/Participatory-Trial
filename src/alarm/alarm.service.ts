@@ -1,21 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Alarm, AlarmDocument } from '../schemas/alarm.schemas';
-import { Model } from 'mongoose';
-import { RedisService } from '../cache/redis.service';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { Repository } from 'typeorm';
-import { Trials } from '../trials/entities/trial.entity';
-import { HumorBoards } from '../humors/entities/humor-board.entity';
-import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
+import * as webPush from 'web-push';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { HumorBoards } from '../humors/entities/humor-board.entity';
+import { Trials } from '../trials/entities/trial.entity';
+import { Clients } from '../users/entities/client.entity';
+import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
+import { RedisService } from '../cache/redis.service';
 
 @Injectable()
-export class AlarmService {
+export class PushService {
   constructor(
-    @InjectModel(Alarm.name) private alarmModel: Model<AlarmDocument>,
-    private readonly redisService: RedisService,
+    @InjectRepository(Clients)
+    private readonly clientsRepository: Repository<Clients>,
     @InjectRepository(Trials)
     private readonly trialsRepository: Repository<Trials>,
     @InjectRepository(HumorBoards)
@@ -24,38 +22,117 @@ export class AlarmService {
     private readonly polticalsRepository: Repository<PolticalDebateBoards>,
     @InjectRepository(OnlineBoards)
     private readonly onlineBoardsRepository: Repository<OnlineBoards>,
-  ) {}
+    private readonly redisService: RedisService,
+  ) {
+    webPush.setVapidDetails(
+      'mailto:tjdals1344@gmail.com',
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY,
+    );
+  }
 
-  async createAlarm(
-    userId: number,
+  async sendNotification(
+
     channelType: string,
     boardId: number,
     messageType: string,
   ) {
-    const writerId = await this.findByBoardId(channelType, boardId);
-    const alarmKey = `alarm:${writerId.userId}`;
-    const alarmIdentifier = `${boardId}:${messageType}`;
+    const writer = await this.findByBoardId(channelType, boardId);
 
-    const timestamp = new Date().getTime();
-    const alarm = {
-      boardId: boardId,
-      channelType: channelType,
-      messageType: messageType,
+    const client = await this.clientsRepository.findOne({
+      where: { userId: writer.userId },
+      select: ['endpoint', 'keys'],
+    });
+
+    if (!client) {
+      console.error('Client not found');
+      return;
+    }
+
+    let message;
+    switch (messageType) {
+      case 'chat':
+        message = '채팅이';
+        break;
+      case 'votes':
+        message = `${channelType}:${boardId}투표가 핫합니다.`;
+        break;
+      case 'like':
+        message = '좋아요가';
+        break;
+    }
+
+    const payload = {
+      title: '국민 참여 재판',
+      body: message,
+      data: {
+        channelType,
+        boardId,
+      },
     };
 
-    const alarmValue = JSON.stringify(alarm);
+    const subscription = {
+      endpoint: client.endpoint,
+      keys: {
+        p256dh: client.keys.p256dh,
+        auth: client.keys.auth,
+      },
+    };
 
     try {
-      const redisCluster = this.redisService.getCluster();
-
-      await redisCluster.zrem(alarmKey, alarmIdentifier);
-
-      await redisCluster.zadd(alarmKey, timestamp, alarmValue);
-
-      return true;
+      await webPush.sendNotification(subscription, JSON.stringify(payload));
     } catch (error) {
-      console.error('레디스 저장 에러:', error);
+      if (error.statusCode === 410) {
+        await this.clientsRepository.delete({ userId: writer.userId });
+      }
     }
+  }
+
+  async sendAllNotifications(
+    channelType: string,
+    boardId: number,
+    messageType: string,
+  ) {
+    let message;
+    switch (messageType) {
+      case 'chat':
+        message = '채팅이 시작되었습니다.';
+        break;
+      case 'votes':
+        message = `${channelType}:${boardId} 투표가 핫합니다.`;
+        break;
+      case 'like':
+        message = '좋아요가 많이 받았습니다.';
+        break;
+    }
+
+    const payload = {
+      title: '국민 참여 재판',
+      body: message,
+      data: { channelType, boardId },
+    };
+
+    const clients = await this.clientsRepository.find();
+    const promises = clients.map((client) => {
+      const subscription = {
+        endpoint: client.endpoint,
+        keys: {
+          p256dh: client.keys.p256dh,
+          auth: client.keys.auth,
+        },
+      };
+
+      return webPush
+        .sendNotification(subscription, JSON.stringify(payload))
+        .catch(async (error) => {
+          console.error('Notification send error:', error);
+          if (error.statusCode === 410) {
+            await this.clientsRepository.delete({ clientId: client.clientId });
+          }
+        });
+    });
+
+    await Promise.all(promises);
   }
 
   async findByBoardId(channelType: string, boardId: number) {
@@ -85,7 +162,7 @@ export class AlarmService {
 
     const writerId = await channelRepository.findOne({
       where: { id: boardId },
-      select: ['userId'],
+      select: ['userId', 'title'],
     });
 
     await this.redisService

@@ -27,23 +27,22 @@ import {
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
 import { VoteTitleDto } from './vote/dto/voteDto';
-import { number } from 'joi';
 import { IsActiveGuard } from './guards/isActive.guard';
 import { UpdateVoteDto } from './vote/dto/updateDto';
 import { TrialHallOfFameService } from './trial_hall_of_fame.service';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateTrialDto } from './dto/create-trial.dto';
-import { BoardType } from '../s3/board-type';
+import { BoardType } from '../s3/type/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { Request } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { LikeInputDto } from '../like/dto/create-like.dto';
 import { LikeService } from '../like/like.service';
 import { Users } from '../users/entities/user.entity';
-import { PaginateQueryDto } from 'src/search/dto/paginateQuery.dto';
-import { HalloffameType } from 'src/s3/halloffame-type';
+import { HalloffameType } from 'src/utils/type/halloffame-type';
 import { PaginationQueryHallOfFameDto } from 'src/humors/dto/get-pagenation.dto';
+import { PolticalDebatesService } from '../poltical_debates/poltical_debates.service';
+import { HumorsService } from '../humors/humors.service';
 
 @ApiTags('재판')
 @Controller('trials')
@@ -52,6 +51,8 @@ export class TrialsController {
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
     private readonly likeServise: LikeService,
+    private readonly politicalService: PolticalDebatesService,
+    private readonly humorsService: HumorsService,
   ) {}
   // 모든 API는 비동기 처리
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
@@ -250,8 +251,12 @@ export class TrialsController {
   @Get('update/:id')
   @UseGuards(AuthGuard('jwt'))
   @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
-    const data = await this.trialsService.findOneByTrialsId(id);
+  async getUpdatePostPage(
+    @Req() req: Request,
+    @Param('id') id: number,
+    @UserInfo() user: Users,
+  ) {
+    const data = await this.trialsService.checkPostOwner(id, user);
     return {
       boardType: BoardType.Trial,
       isLoggedIn: req['isLoggedIn'],
@@ -292,6 +297,10 @@ export class TrialsController {
       +trialsId,
       updateTrialDto,
     );
+    return {
+      data,
+      message: '재판 수정에 성공하였습니다.',
+    };
   }
 
   //   return {
@@ -310,10 +319,10 @@ export class TrialsController {
     description: ' 재판 게시물 ID',
     type: Number,
   })
-  @UseGuards()
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':trialsId')
-  async remove(@Param('trialsId') id: string) {
-    await this.trialsService.deleteTrials(+id);
+  async remove(@Param('trialsId') id: number, @UserInfo() user: any) {
+    await this.trialsService.deleteTrials(id, user);
     return {
       statusCode: HttpStatus.OK,
       message: '재판 삭제에 성공하였습니다.',
@@ -445,7 +454,6 @@ export class TrialsController {
     type: Number,
   })
   @UseGuards(AuthGuard('jwt'))
-  @UseGuards()
   @UseGuards(IsActiveGuard)
   @Delete(':trialId/vote/:voteId')
   async deleteVote(
@@ -684,6 +692,30 @@ export class TrialsController {
       message: '명예의 전당 데이터를 조회 성공하였습니다.',
       data,
       halloffameType: HalloffameType.TrialsHallofFameViews,
+      isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 가장 인기있는 투표 탑 10 조회
+  @Get('Top10/Votes')
+  @Render('index.ejs')
+  async getTop10VotesByType(@Req() req: Request, @Query('type') type: string) {
+    let data;
+    switch (type) {
+      case '':
+        data = await this.trialsService.findTop10TrialsByVotes();
+        break;
+      case 'option2':
+        data = await this.humorsService.findTop10VotedHumorPosts();
+        break;
+      case 'option3':
+        data = await this.politicalService.findTop10PolticalByVotes();
+        break;
+    }
+    return {
+      statusCode: HttpStatus.OK,
+      message: '실시간핫한투표수데이터입니다.',
+      data,
       isLoggedIn: req['isLoggedIn'],
     };
   }

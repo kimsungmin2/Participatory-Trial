@@ -8,13 +8,11 @@ import { Trials } from './entities/trial.entity';
 import { Between, DataSource, Repository } from 'typeorm';
 import { Votes } from './entities/vote.entity';
 import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
 import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
-import { th } from '@faker-js/faker';
 import { VotesService } from './vote/vote.service';
 import { PaginationQueryDto } from 'src/humors/dto/get-humorBoard.dto';
-import { throwIfEmpty } from 'rxjs';
 
 @Injectable()
 export class TrialHallOfFameService {
@@ -50,7 +48,7 @@ export class TrialHallOfFameService {
 
     const lastWeekTrials = await this.trialsRepository.find({
       where: {
-        createdAt: Between(start, end),
+        created_at: Between(start, end),
       },
     });
 

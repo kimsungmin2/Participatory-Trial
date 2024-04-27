@@ -2,29 +2,21 @@
 import {
   Controller,
   Post,
-  Body,
   Param,
-  Req,
   Delete,
   UseGuards,
   HttpStatus,
   Get,
 } from '@nestjs/common';
 import { VotesService } from './vote.service';
-import { userInfo } from 'os';
-import { UserInfos } from '../../users/entities/user-info.entity';
-import { Request } from 'express';
 import { IsVoteGuard } from '../guards/isvote.guard';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiOperation,
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { VoteForDto } from '../dto/vote.dto';
-import { Users } from '../../users/entities/user.entity';
 
 @ApiTags('재판 투표')
 @Controller('trials/vote')

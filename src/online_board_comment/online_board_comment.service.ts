@@ -8,7 +8,6 @@ import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.d
 import { InjectRepository } from '@nestjs/typeorm';
 import { OnlineBoardComments } from './entities/online_board_comment.entity';
 import { OnlineBoardsService } from '../online_boards/online_boards.service';
-import { UsersService } from '../users/users.service';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Repository } from 'typeorm';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';

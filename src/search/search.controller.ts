@@ -1,11 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
   Query,
   HttpStatus,
   Render,
@@ -13,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { SearchQueryDto } from './dto/search.dto';
-import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SearchAllQueryDto } from './dto/searchAll.dto';
 import { PaginateQueryDto } from './dto/paginateQuery.dto';
 @ApiTags('검색')

@@ -6,7 +6,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { NotFoundException } from '@nestjs/common';
 import { Readable } from 'winston-daily-rotate-file';

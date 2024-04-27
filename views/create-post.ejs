@@ -17,9 +17,11 @@
     <link rel="stylesheet" href="/css/create-style.css">
   </head>
   <body>
-    <%- include('partials/nav')  %>
-
     <header>
+      <%- include('partials/nav')  %>
+    </header>
+
+    <main>
       <div class="board_title">
         <% if (boardType === 'humor') { %>
           <span>유머 게시판</span>
@@ -34,7 +36,6 @@
       <hr width="100%" color="black" size="2" style="margin-left: 30px" />
       
       <div class="container">
-        <h2>게시물 생성</h2>
         <% if (boardType === 'onlineBoard') { %>
           <form id="postForm">
             <div class="form-group">
@@ -102,8 +103,8 @@
                 <button type="submit">게시물 등록</button>
             </form>
               <% } %>
-    </div>
-    </header>
+      </div>
+    </main>
 <script>
   let boardType;
   boardType = "<%= boardType %>";
@@ -147,7 +148,6 @@
     }
   })
   .then(data => {
-    console.log(data); 
     alert('게시물 생성을 성공하였습니다.')
     window.location.href = `/${boardType}`
   })

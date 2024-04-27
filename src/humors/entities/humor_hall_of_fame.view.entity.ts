@@ -2,15 +2,9 @@ import {
     Column,
     CreateDateColumn,
     Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    OneToOne,
     PrimaryColumn,
-    PrimaryGeneratedColumn,
     UpdateDateColumn,
   } from 'typeorm';
-  import { Users } from '../../users/entities/user.entity';
   
   @Entity()
   export class HumorsViewHallOfFames {

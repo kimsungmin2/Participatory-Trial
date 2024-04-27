@@ -1,30 +1,20 @@
 // votes.controller.ts
 import {
   Controller,
-  Post,
-  Body,
   Param,
-  Req,
   Delete,
   UseGuards,
   HttpStatus,
   Get,
 } from '@nestjs/common';
-import { userInfo } from 'os';
-import { Request } from 'express';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiOperation,
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Users } from '../../users/entities/user.entity';
 import { HumorVotesService } from './humors_votes.service';
-import { UserInfo } from '../../utils/decorator/userInfo.decorator';
-import { VoteForDto } from '../../trials/dto/vote.dto';
-import { UserInfos } from '../../users/entities/user-info.entity';
 
 @ApiTags('유머 투표')
 @Controller('humors/vote')

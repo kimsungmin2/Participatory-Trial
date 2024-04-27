@@ -3,13 +3,11 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from '../../users/entities/user.entity';
 import { Trials } from './trial.entity';
 import { EachVote } from './Uservote.entity';
 
@@ -39,10 +37,10 @@ export class Votes {
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
-  @OneToMany(() => EachVote, (eachVote) => eachVote.vote, { cascade: true })
+  @OneToMany(() => EachVote, (eachVote) => eachVote.votes, { onDelete: 'CASCADE'  })
   eachVote: EachVote[];
-  
-  @OneToOne(() => Trials, (trial) => trial.vote)
+
+  @OneToOne(() => Trials, (trial) => trial.votes)
   @JoinColumn({ name: 'trialId', referencedColumnName: 'id' })
   trial: Trials;
 }

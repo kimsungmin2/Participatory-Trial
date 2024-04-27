@@ -11,7 +11,6 @@ import { Trials } from '../trials/entities/trial.entity';
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
 import { DeleteResult, Repository } from 'typeorm';
-import { date } from 'joi';
 import {
   ForbiddenException,
   InternalServerErrorException,
@@ -95,6 +94,7 @@ describe('HumorCommentsService', () => {
           boardId: 1,
           user: mockedUser,
         };
+        console.log(1);
         jest.spyOn(humorBoardRepository, 'findOneBy').mockResolvedValue({
           id: 1,
         } as HumorBoards);

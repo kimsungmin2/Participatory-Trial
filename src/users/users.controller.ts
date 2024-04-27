@@ -16,8 +16,6 @@ import { DeleteDto } from './dto/delete.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtOpAuthGuard } from '../utils/guard/jwtop.guard';
 import { IGuestRequest } from '../utils/interface/guest.interface';
-import { ClientsDto } from './dto/client.dto';
-import { v4 as uuidv4 } from 'uuid';
 
 @ApiTags('USER_UD')
 @Controller('users')
@@ -59,19 +57,16 @@ export class UsersController {
 
   @UseGuards(JwtOpAuthGuard)
   @Post('register-token')
-  async registerToken(@Body() body: ClientsDto, @Req() req: IGuestRequest) {
+  async registerToken(
+    @Body() subscriptionData: any,
+    @Req() req: IGuestRequest,
+  ) {
     const id = req.id;
 
-    let clientId = body.clientId;
-    if (!clientId) {
-      clientId = uuidv4();
-    }
-    const clientsDto = {
-      ...body,
-      userId: id,
-      clientId: clientId,
-    };
-    const result = await this.usersService.updateClientsInfo(clientsDto);
+    const result = await this.usersService.updateClientsInfo(
+      id,
+      subscriptionData,
+    );
     return result;
   }
 }

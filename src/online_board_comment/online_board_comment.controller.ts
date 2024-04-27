@@ -15,7 +15,6 @@ import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.d
 import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { ParamOnlineBoardComment } from './dto/param-online_board_comment.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -47,7 +46,6 @@ export class OnlineBoardCommentController {
     @Body() createOnlineBoardCommentDto: CreateOnlineBoardCommentDto,
     @UserInfo() userInfo: UserInfos,
   ) {
-    console.log(userInfo);
     const comment = await this.onlineBoardCommentService.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,

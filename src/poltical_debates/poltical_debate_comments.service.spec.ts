@@ -7,7 +7,6 @@ import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_com
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
 import { Users } from '../users/entities/user.entity';
-import { Role } from '../users/types/userRole.type';
 
 const mockedUser = {
   id: 1,

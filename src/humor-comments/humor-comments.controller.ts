@@ -16,7 +16,6 @@ import { HumorComments } from './entities/humor_comment.entity';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { Users } from '../users/entities/user.entity';
-import { userInfo } from 'os';
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 @ApiTags('유머 게시판 댓글 API')
 @Controller('humors/:boardId/comments')

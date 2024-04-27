@@ -1,5 +1,5 @@
 import {
-  BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -12,15 +12,14 @@ import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDebateVotes } from './entities/polticalVote.entity';
-import { InjectRedis } from '@nestjs-modules/ioredis';
 import { S3Service } from '../s3/s3.service';
-import Redis from 'ioredis';
-import { BoardType } from '../s3/board-type';
+import { BoardType } from '../s3/type/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
-import { NotFound } from '@aws-sdk/client-s3';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
+import { Users } from '../users/entities/user.entity';
 
 @Injectable()
 export class PolticalDebatesService {
@@ -30,9 +29,12 @@ export class PolticalDebatesService {
   constructor(
     @InjectRepository(PolticalDebateBoards)
     private readonly polticalDebateRepository: Repository<PolticalDebateBoards>,
+    @InjectRepository(PolticalDebateVotes)
+    private readonly polticalVoteRepository: Repository<PolticalDebateVotes>,
     private readonly dataSource: DataSource,
     private s3Service: S3Service,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
   ) {}
 
   /**
@@ -135,6 +137,14 @@ export class PolticalDebatesService {
     }
   }
 
+  async checkPostOwner(id: number, user: Users) {
+    const post = await this.findBoardbyId(id);
+    if (post.userId !== user.id) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
+    return post;
+  }
+
   async findAll() {
     const findAllPolticalDebateBoard = await this.polticalDebateRepository.find(
       {
@@ -158,15 +168,27 @@ export class PolticalDebatesService {
           createdAt: 'DESC',
         },
       });
+      const polticalDbatesBoardsWithUserNames = await Promise.all(
+        polticalDebateBoards.map(async (polticalBoard) => {
+          const userName = await this.usersService.findById(
+            polticalBoard.userId,
+          );
+          return {
+            ...polticalBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        polticalDebateBoards: polticalDbatesBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      polticalDebateBoards,
-      totalItems,
-    };
   }
 
   async findMyBoards(userId: number) {
@@ -255,7 +277,7 @@ export class PolticalDebatesService {
     }
 
     if (politicalDebateBoard.userId !== userId) {
-      throw new UnauthorizedException('게시판를 삭제할 권한이 없습니다.');
+      throw new ForbiddenException('게시판를 삭제할 권한이 없습니다.');
     }
 
     const deleteBoard = await this.polticalDebateRepository.softDelete(
@@ -369,7 +391,28 @@ export class PolticalDebatesService {
     }
   }
 
-  async sum() {
-    return 1 + 2;
+  // Top 10 humors
+  async findTop10PolticalByVotes() {
+    return this.polticalVoteRepository
+      .createQueryBuilder('polticalDebateVotes')
+      .leftJoin('polticalDebateVotes.eachPolticalVote', 'eachPolticalVote')
+      .groupBy('polticalDebateVotes.id')
+      .select('polticalDebateVotes.id', 'id')
+      .addSelect('polticalDebateVotes.title1', 'title1')
+      .addSelect('polticalDebateVotes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachPolticalVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachPolticalVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
+      .take(10)
+      .getRawMany();
   }
 }

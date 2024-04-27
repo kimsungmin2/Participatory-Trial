@@ -1,26 +1,26 @@
 import { DataSource } from 'typeorm';
 import { faker } from '@faker-js/faker';
-import { Users } from './users/entities/user.entity';
-import { UserInfos } from './users/entities/user-info.entity';
-import { HumorsHallOfFame } from './humors/entities/humor_hall_of_fame.entity';
-import { HumorLike } from './humors/entities/humor_like.entity';
-import { HumorBoards } from './humors/entities/humor-board.entity';
-import { OnlineBoardComments } from './online_board_comment/entities/online_board_comment.entity';
-import { OnlineBoards } from './online_boards/entities/online_board.entity';
-import { PolticalDebateComments } from './poltical_debates/entities/poltical_debate_comments.entity';
-import { PolticalDebateBoards } from './poltical_debates/entities/poltical_debate.entity';
-import { Trials } from './trials/entities/trial.entity';
-import { OnlineBoardLike } from './online_boards/entities/online_board_like.entity';
-import { Votes } from './trials/entities/vote.entity';
-import { EachVote } from './trials/entities/Uservote.entity';
-import { HumorComments } from './humor-comments/entities/humor_comment.entity';
-import { TrialHallOfFames } from './trials/entities/trial_hall_of_fame.entity';
-import { PolticalDebateVotes } from './poltical_debates/entities/polticalVote.entity';
-import { TrialLike } from './trials/entities/trials.like.entity';
-import { TrialsChat } from './events/entities/trialsChat.entity';
-import { HumorVotes } from './humors/entities/HumorVote.entity';
-import { EachHumorVote } from './humors/entities/UservoteOfHumorVote.entity';
-import { EachPolticalVote } from './poltical_debates/entities/userVoteOfPoltical_debate.entity';
+import { Users } from '../../users/entities/user.entity';
+import { UserInfos } from '../../users/entities/user-info.entity';
+import { HumorsHallOfFame } from '../../humors/entities/humor_hall_of_fame.entity';
+import { HumorLike } from '../../humors/entities/humor_like.entity';
+import { HumorBoards } from '../../humors/entities/humor-board.entity';
+import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
+import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
+import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
+import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
+import { Trials } from '../../trials/entities/trial.entity';
+import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.entity';
+import { Votes } from '../../trials/entities/vote.entity';
+import { EachVote } from '../../trials/entities/Uservote.entity';
+import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
+import { TrialHallOfFames } from '../../trials/entities/trial_hall_of_fame.entity';
+import { PolticalDebateVotes } from '../../poltical_debates/entities/polticalVote.entity';
+import { TrialLike } from '../../trials/entities/trials.like.entity';
+import { TrialsChat } from '../../events/entities/trialsChat.entity';
+import { HumorVotes } from '../../humors/entities/HumorVote.entity';
+import { EachHumorVote } from '../../humors/entities/UservoteOfHumorVote.entity';
+import { EachPolticalVote } from '../../poltical_debates/entities/userVoteOfPoltical_debate.entity';
 
 const AppDataSource = new DataSource({
   type: 'postgres',

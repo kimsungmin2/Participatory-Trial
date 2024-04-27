@@ -8,17 +8,16 @@ import { CreateHumorBoardDto } from './dto/create-humor.dto';
 import { UpdateHumorDto } from './dto/update-humor.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HumorBoards } from './entities/humor-board.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Users } from '../users/entities/user.entity';
 import { S3Service } from '../s3/s3.service';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
-import { BoardType } from '../s3/board-type';
-import { InjectRedis } from '@nestjs-modules/ioredis';
-import Redis from 'ioredis';
-import { cache } from 'joi';
+import { BoardType } from '../s3/type/board-type';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
+import { EachHumorVote } from './entities/UservoteOfHumorVote.entity';
 
 @Injectable()
 export class HumorsService {
@@ -28,7 +27,11 @@ export class HumorsService {
     @InjectRepository(HumorVotes)
     private HumorVotesRepository: Repository<HumorVotes>,
     private s3Service: S3Service,
+    @InjectRepository(EachHumorVote)
+    private eachHumorVoteRepository: Repository<EachHumorVote>,
     private readonly redisService: RedisService,
+    private readonly usersService: UsersService,
+    private readonly dataSource: DataSource,
   ) {}
 
   //게시물 생성
@@ -82,6 +85,10 @@ export class HumorsService {
     user: Users,
     files: Express.Multer.File[],
   ): Promise<HumorBoards> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(
@@ -95,27 +102,32 @@ export class HumorsService {
     const imageUrl =
       uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
     try {
-      const createdBoard = await this.HumorBoardRepository.save({
-        userId: user.id,
-        ...createHumorBoardDto,
-        imageUrl,
-      });
+      const createdBoard = await queryRunner.manager
+        .getRepository(HumorBoards)
+        .save({
+          userId: user.id,
+          ...createHumorBoardDto,
+          imageUrl,
+        });
 
-      await this.HumorVotesRepository.save({
+      await queryRunner.manager.getRepository(HumorVotes).save({
         humorId: createdBoard.id,
         ...voteTitleDto,
       });
+      await queryRunner.commitTransaction();
 
       return createdBoard;
     } catch {
+      await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
         '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
       );
+    } finally {
+      await queryRunner.release();
     }
   }
 
   //모든 게시물 조회(페이지네이션)
-
   async getAllHumorBoards(paginationQueryDto: PaginationQueryDto) {
     let humorBoards: HumorBoards[];
 
@@ -131,16 +143,28 @@ export class HumorsService {
         },
         relations: ['humorComment'],
       });
+
+      const humorBoardsWithUserNames = await Promise.all(
+        humorBoards.map(async (humorBoard) => {
+          const userName = await this.usersService.findById(humorBoard.userId);
+
+          return {
+            ...humorBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      return {
+        humorBoards: humorBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       console.log(err.message);
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-    return {
-      humorBoards,
-      totalItems,
-    };
   }
 
   //단건 게시물 조회
@@ -153,6 +177,14 @@ export class HumorsService {
     return findHumorBoard;
   }
 
+  async checkPostId(id: number, user: Users) {
+    const post = await this.findOneHumorBoard(id);
+    if (post.userId !== user.id) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
+    return post;
+  }
+
   //조회수를 증가시키고 데이터를 반환
   async findOneHumorBoardWithIncreaseView(id: number): Promise<HumorBoards> {
     const findHumorBoard: HumorBoards = await this.HumorBoardRepository.findOne(
@@ -161,6 +193,7 @@ export class HumorsService {
         relations: ['humorComment', 'humorVotes'],
       },
     );
+
     if (!findHumorBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
@@ -168,7 +201,7 @@ export class HumorsService {
     try {
       cachedView = await this.redisService
         .getCluster()
-        .incr(`humors:${id}:view`);
+        .incr(`{humors}:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',
@@ -220,5 +253,28 @@ export class HumorsService {
       );
     }
     return deletedHumorBoard;
+  }
+
+  async findTop10VotedHumorPosts() {
+    return this.HumorVotesRepository.createQueryBuilder('humorVotes')
+      .leftJoin('humorVotes.eachHumorVote', 'eachHumorVote')
+      .groupBy('humorVotes.id')
+      .select('humorVotes.id', 'id')
+      .addSelect('humorVotes.title1', 'title1')
+      .addSelect('humorVotes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachHumorVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachHumorVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
+      .take(10)
+      .getRawMany();
   }
 }

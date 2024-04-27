@@ -5,11 +5,11 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { Trials } from '../trials/entities/trial.entity';
 import { HumorBoards } from './entities/humor-board.entity';
-import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
+
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { CreateHumorBoardDto } from './dto/create-humor.dto';
 import {
   ForbiddenException,
@@ -17,10 +17,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UpdateHumorDto } from './dto/update-humor.dto';
-import { forbidden } from 'joi';
 import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
-import { Redis } from 'ioredis';
 import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
 import { HumorVotes } from './entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
@@ -36,7 +34,6 @@ const mockedUser: Users = {
   onlineBoardComment: [new OnlineBoardComments()],
   trial: [new Trials()],
   humorBoard: [new HumorBoards()],
-  humorComment: [new HumorComments()],
   polticalDebateBoards: [new PolticalDebateBoards()],
   polticalDebateComments: [new PolticalDebateComments()],
   humorLike: [],

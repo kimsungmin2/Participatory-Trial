@@ -1,4 +1,4 @@
-import { IsString, MaxLength, MinLength, isString } from 'class-validator';
+import { IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateHumorCommentDto {
   @IsString()

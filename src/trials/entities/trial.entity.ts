@@ -5,7 +5,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -36,6 +35,9 @@ export class Trials {
   @Column({ type: 'int', nullable: false, default: 0 })
   like: number;
 
+  @Column({ type: 'timestamp', nullable:true })
+  trialTime: Date;
+
   @Column({ type: 'varchar', nullable: true })
   top_comments: string;
 
@@ -43,10 +45,10 @@ export class Trials {
   is_time_over: boolean;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
+  updated_at: Date;
 
   @DeleteDateColumn({ type: 'timestamp', nullable: true })
   deletedAt: Date;
@@ -57,8 +59,8 @@ export class Trials {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: Users;
 
-  @OneToOne(() => Votes, (vote) => vote.trial, { cascade: true })
-  vote: Votes;
+  @OneToOne(() => Votes, (votes) => votes.trial, { cascade: true })
+  votes: Votes;
 
   @OneToOne(() => TrialLike, (trialLike) => trialLike.trial, { cascade: true })
   trialLike: TrialLike;

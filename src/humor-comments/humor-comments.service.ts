@@ -11,7 +11,6 @@ import { HumorComments } from './entities/humor_comment.entity';
 import { DeleteResult, Repository } from 'typeorm';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { Users } from '../users/entities/user.entity';
-import { forbidden } from 'joi';
 
 @Injectable()
 export class HumorCommentsService {

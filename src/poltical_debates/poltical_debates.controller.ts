@@ -9,10 +9,8 @@ import {
   UseGuards,
   Patch,
   NotFoundException,
-  BadRequestException,
   Render,
   UseInterceptors,
-  UploadedFiles,
   Query,
   Req,
 } from '@nestjs/common';
@@ -35,11 +33,11 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { PolticalDabateHallOfFameService } from './politcal_debate_hall_of_fame.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { start } from 'repl';
-import { BoardType } from '../s3/board-type';
+import { BoardType } from '../s3/type/board-type';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { th } from '@faker-js/faker';
-import { HalloffameType } from '../s3/halloffame-type';
+import { HalloffameType } from '../utils/type/halloffame-type';
 import { PaginationQueryHallOfFameDto } from '../humors/dto/get-pagenation.dto';
 
 @ApiTags('정치 토론')
@@ -63,8 +61,12 @@ export class PolticalDebatesController {
   @Get('update/:id')
   @UseGuards(AuthGuard('jwt'))
   @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
-    const data = await this.polticalDebatesService.findOne(id);
+  async getUpdatePostPage(
+    @Req() req: Request,
+    @Param('id') id: number,
+    @UserInfo() user: Users,
+  ) {
+    const data = await this.polticalDebatesService.checkPostOwner(id, user);
     return {
       boardType: BoardType.PolticalDebate,
       isLoggedIn: req['isLoggedIn'],
@@ -412,6 +414,18 @@ export class PolticalDebatesController {
       data,
       halloffameType: HalloffameType.PolticalHallofFameViews,
       isLoggedIn: req['isLoggedIn'],
+    };
+  }
+
+  // 가장 인기있는 투표 탑 10 조회
+  @Get('Top10/Votes')
+  async findTop10PolticalsByVotes(@Req() req: Request) {
+    const data = await this.polticalDebatesService.findTop10PolticalByVotes();
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '실시간핫한투표수데이터입니다.',
+      data,
     };
   }
 }

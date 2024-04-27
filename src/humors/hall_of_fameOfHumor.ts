@@ -10,10 +10,9 @@ import { HumorVotes } from './entities/HumorVote.entity';
 import { HumorsHallOfFame } from './entities/humor_hall_of_fame.entity';
 import { HumorsLikeHallOfFames } from './entities/humor_hall_of_fame.like.entity';
 import { HumorsViewHallOfFames } from './entities/humor_hall_of_fame.view.entity';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
-import { th } from '@faker-js/faker';
-import { HumorVotesService } from './humors_votes/humors_votes.service';
+import { HumorVotesService } from '../humors_votes/humors_votes.service';
 
 @Injectable()
 export class HumorHallOfFameService {
@@ -297,7 +296,6 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
-      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는 도중오류가 발생했습니다',
       );
@@ -324,7 +322,6 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
-      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는 도중오류가발생했습니다.',
       );
@@ -351,7 +348,6 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
-      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는도중 오류가 발생했습니다.',
       );

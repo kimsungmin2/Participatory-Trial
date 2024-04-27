@@ -17,7 +17,6 @@ import {
 import { OnlineBoardsService } from './online_boards.service';
 import { CreateOnlineBoardDto } from './dto/create-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
-import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfos } from '../users/entities/user-info.entity';
 import {
@@ -33,10 +32,9 @@ import { OnlineBoardHallOfFameService } from './online_boards.hollofFame.service
 import { BoardOwnerGuard } from './guards/online_boards.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
-import { start } from 'repl';
-import { BoardType } from '../s3/board-type';
+import { BoardType } from '../s3/type/board-type';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
-import { HalloffameType } from '../s3/halloffame-type';
+import { HalloffameType } from '../utils/type/halloffame-type';
 import { PaginationQueryHallOfFameDto } from '../humors/dto/get-pagenation.dto';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 
@@ -92,7 +90,6 @@ export class OnlineBoardsController {
     @UserInfo() userInfo: UserInfos,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    console.log(1, files);
     const board = await this.onlineBoardsService.createBoard(
       createOnlineBoardDto,
       userInfo,
@@ -194,7 +191,6 @@ export class OnlineBoardsController {
     @Param('id') id: number,
     @Body() updateOnlineBoardDto: UpdateOnlineBoardDto,
   ) {
-    console.log(updateOnlineBoardDto);
     const board = await this.onlineBoardsService.updateBoard(
       id,
       updateOnlineBoardDto,

@@ -12,7 +12,6 @@ import { OnlineBoards } from '../../online_boards/entities/online_board.entity';
 import { OnlineBoardComments } from '../../online_board_comment/entities/online_board_comment.entity';
 import { Trials } from '../../trials/entities/trial.entity';
 import { HumorBoards } from '../../humors/entities/humor-board.entity';
-import { HumorComments } from '../../humor-comments/entities/humor_comment.entity';
 import { PolticalDebateBoards } from '../../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../../poltical_debates/entities/poltical_debate_comments.entity';
 import { Role } from '../types/userRole.type';

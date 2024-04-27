@@ -1,6 +1,5 @@
 // votes.service.ts
 import {
-  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -72,12 +71,12 @@ export class HumorVotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       humorVoteId: number;
       voteFor: boolean;
     },
@@ -90,7 +89,7 @@ export class HumorVotesService {
           humorVoteId,
         })
       : await queryRunner.manager.findOneBy(EachHumorVote, {
-          userCode,
+          ip,
           humorVoteId,
         });
 
@@ -107,7 +106,7 @@ export class HumorVotesService {
     }
     const voteData = this.eachHumorVoteRepository.create({
       userId,
-      userCode,
+      ip,
       humorVoteId,
       voteFor,
     });
@@ -133,7 +132,6 @@ export class HumorVotesService {
       );
       await queryRunner.commitTransaction();
     } catch (err) {
-      console.log(err);
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {

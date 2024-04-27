@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PolticalDebateVotes } from './polticalVote.entity';
@@ -22,7 +21,7 @@ export class EachPolticalVote {
   userId?: number;
 
   @Column({ type: 'varchar', nullable: true })
-  userCode?: string;
+  ip?: string;
 
   @Column({ type: 'boolean' })
   voteFor: boolean;

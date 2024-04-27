@@ -1,11 +1,8 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   HttpStatus,
 } from '@nestjs/common';
@@ -13,10 +10,9 @@ import { LikeService } from './like.service';
 
 import { AuthGuard } from '@nestjs/passport';
 import { LikeInputDto } from './dto/create-like.dto';
-import { userInfo } from 'os';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { Users } from '../users/entities/user.entity';
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('좋아요 기능')
 @UseGuards(AuthGuard('jwt'))

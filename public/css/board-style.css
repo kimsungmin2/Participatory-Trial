@@ -22,15 +22,13 @@
   font-weight: normal;
   font-style: normal;
 }
-/* body {
-  background-color: lightskyblue;
-} */
 
 * {
   margin: 0px;
   padding: 0px;
 }
-header {
+
+main {
   padding: 0 20%;
 }
 
@@ -43,29 +41,78 @@ a {
   text-decoration: none;
 }
 
-.navbar {
-  background-color: #f4edcc;
+/* body {
+  background-color: lightskyblue;
+} */
+
+/* --------------header -------------------- */
+header {
+  position: -webkit-sticky; /* 사파리 브라우저 지원을 위함 */
+  position: sticky;
+  top: 0;
+  background-color: #f4edcc;;
+}
+
+.search-container {
+  display: flex; /* flexbox를 활성화 */
+  justify-content: center; /* 가로 방향으로 중앙 정렬 */
+}
+
+#searchForm {
+  display: flex; /* flexbox를 활성화 */
+  align-items: center; /* 세로 방향으로 아이템들을 중앙 정렬 */
+}
+
+#searchInput {
+  width: 500px;
+  height: 40px;
+  margin-top: 15px;
+}
+
+#searchForm > div, #searchForm > input, #searchForm > button {
+  margin-right: 10px; /* 요소들 사이의 간격 */
+}
+
+#searchOption {
+  width: 150px; /* 너비 조절 */
+  height: 40px; /* 높이 조절 */
+  padding: 5px; /* 안쪽 여백 추가 */
+  margin-top: 15px;
+}
+
+#searchBtn {
+  width: 100px;
+  height: 40px;
+  margin-top: 10px;
+  background-color: #007bff; /* 배경색 설정 */
+  color: white; /* 텍스트 색상 설정 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 패딩 설정 */
+  font-size: 1rem; /* 버튼 텍스트 크기 설정 */
+  border-radius: 5px; /* 버튼 모서리를 둥글게 설정 */
+  cursor: pointer; /* 커서 타입 설정 */
+  transition:
+    background-color 0.3s,
+    transform 0.2s; /* 부드러운 색상 및 크기 변화 효과 */
+}
+
+/* -------------------main ---------------------- */
+
+.board-name{
+  align-items: center;
+  justify-content: center;
+  width: 100%
+}
+
+.board-name-btn {
+  display: flex;
+  width: 100%;
 }
 
 .no_posts {
   font-size: 30px;
   margin: 0 auto;
 }
-
-.navbar-nav .nav-item:not(:last-child) {
-  margin-right: 100px;
-  font-family: 'MBC1961GulimM';
-}
-
-.nav-item {
-  font-family: 'MBC1961GulimM';
-  font-size: 20px;
-}
-
-.navbar-brand {
-  font-size: 24px;
-}
-
 .board_title,
 .post_title,
 .post_content,
@@ -110,43 +157,6 @@ a {
   height: auto;
 }
 
-/* 검색창 스타일 */
-.search-container {
-  display: flex;
-  margin-top: 20px;
-  justify-content: flex-end; /* 내용을 오른쪽으로 정렬 */
-  /* 컨테이너의 너비를 필요에 따라 조정하세요 */
-  margin-bottom: 50px;
-}
-
-input[type='text'],
-button[type='submit'] {
-  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
-}
-
-input[type='text'] {
-  padding: 10px;
-  font-size: 17px;
-  border: 1px solid grey;
-  width: calc(100% - 120px); /* 버튼 너비와 마진을 고려하여 조정 */
-  background: #f1f1f1;
-  margin-right: 10px; /* 버튼과의 간격 */
-}
-
-button[type='submit'] {
-  width: 100px; /* 버튼의 너비를 고정값으로 설정 */
-  padding: 10px;
-  background: #2196f3;
-  color: white;
-  font-size: 17px;
-  border: 1px solid grey;
-  cursor: pointer;
-}
-
-select {
-  margin-right: 10px; /* 셀렉트 박스와 인풋 박스 사이의 간격 */
-}
-
 .board-container {
   width: 100%;
   background-color: #2196f3;
@@ -160,7 +170,7 @@ select {
 }
 
 .card {
-  background-color: #a1b1dc;
+  background-color: #ffebdd;
   border-radius: 8px; /* 둥근 모서리 */
   padding: 20px; /* 내부 여백 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 그림자 효과 */
@@ -215,8 +225,16 @@ select {
   background-color: #007bff; /* 밝은 파란색 */
   color: white; /* 텍스트 색상은 흰색 */
   border: none; /* 테두리 없음 */
-  padding: 10px 20px; /* 상하 10px, 좌우 20px의 패딩 */
-  font-size: 16px; /* 폰트 크기 */
+  width: 100px;
+  height: 50px;
+  margin: auto;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  display: flex; /* 플렉스 박스 모델을 사용합니다 */
+  justify-content: center; /* 가로 방향으로 가운데 정렬합니다 */
+  align-items: center; /* 세로 방향으로 가운데 정렬합니다 */
+  height: 50px; /* `<a>` 태그의 높이를 지정합니다 */
+  font-size: 20px; /* 폰트 크기 */
   border-radius: 5px; /* 버튼 모서리를 약간 둥글게 */
   cursor: pointer; /* 마우스 오버 시 커서 모양 변경 */
   transition:
@@ -251,6 +269,17 @@ select {
 
 .like_button {
   text-align: center;
+  margin-top: 20px;
+}
+
+.like_button > button {
+  height: 40px;
+  padding: 0 20px;
+  margin-bottom: 50px;
+  border: none;
+  border-radius: 8px;
+  background-color: blue;
+  color: white;
 }
 
 .search_not_found {

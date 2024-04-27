@@ -1,6 +1,5 @@
 // votes.service.ts
 import {
-  BadRequestException,
   Inject,
   Injectable,
   NotFoundException,
@@ -64,12 +63,12 @@ export class PolticalVotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       polticalVoteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       polticalVoteId: number;
       voteFor: boolean;
     },
@@ -82,7 +81,7 @@ export class PolticalVotesService {
           polticalVoteId,
         })
       : await queryRunner.manager.findOneBy(EachPolticalVote, {
-          userCode,
+          ip,
           polticalVoteId,
         });
     // 2. 투표 있으면 에러 던지기(400번)
@@ -99,7 +98,7 @@ export class PolticalVotesService {
 
     const voteData = this.eachPolticalVoteRepository.create({
       userId,
-      userCode,
+      ip,
       polticalVoteId,
       voteFor,
     });

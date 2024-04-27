@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SearchService } from './search.service';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { SearchQueryDto } from './dto/search.dto';
 import { SearchAllQueryDto } from './dto/searchAll.dto';
 
 describe('SearchService', () => {

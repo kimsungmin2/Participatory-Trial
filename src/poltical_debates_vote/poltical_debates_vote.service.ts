@@ -1,16 +1,13 @@
 // votes.service.ts
 import {
-  BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Request } from 'express';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
-import { EachPolticalVote } from '../entities/userVoteOfPoltical_debate.entity';
-import { PolticalDebateVotes } from '../entities/polticalVote.entity';
+import { EachPolticalVote } from '../poltical_debates/entities/userVoteOfPoltical_debate.entity';
+import { PolticalDebateVotes } from '../poltical_debates/entities/polticalVote.entity';
 @Injectable()
 export class PolticalVotesService {
   constructor(
@@ -64,12 +61,12 @@ export class PolticalVotesService {
   private async validationAndSaveVote(
     {
       userId,
-      userCode,
+      ip,
       polticalVoteId,
       voteFor,
     }: {
       userId?: number;
-      userCode?: string;
+      ip?: string;
       polticalVoteId: number;
       voteFor: boolean;
     },
@@ -82,7 +79,7 @@ export class PolticalVotesService {
           polticalVoteId,
         })
       : await queryRunner.manager.findOneBy(EachPolticalVote, {
-          userCode,
+          ip,
           polticalVoteId,
         });
 
@@ -100,7 +97,7 @@ export class PolticalVotesService {
 
     const voteData = this.eachPolticalVoteRepository.create({
       userId,
-      userCode,
+      ip,
       polticalVoteId,
       voteFor,
     });
@@ -108,6 +105,7 @@ export class PolticalVotesService {
   }
   // 투표하기
   async addPolticalVoteUserorNanUser(
+    ip: string,
     userId: number | null,
     polticalVoteId: number,
     voteFor: boolean,
@@ -118,7 +116,7 @@ export class PolticalVotesService {
     await queryRunner.startTransaction();
     try {
       await this.validationAndSaveVote(
-        { userId, polticalVoteId, voteFor },
+        { userId, ip, polticalVoteId, voteFor },
         queryRunner,
       );
       await queryRunner.commitTransaction();
@@ -169,7 +167,6 @@ export class PolticalVotesService {
       .where('eachPolticalVote.polticalVoteId = :polticalVoteId', {
         polticalVoteId,
       })
-      .andWhere('eachPolticalVote.userCode IS NULL')
       .getRawOne();
 
     const voteForTrue = parseInt(result.voteForTrue, 10);

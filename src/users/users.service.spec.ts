@@ -4,7 +4,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Users } from './entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
 import { UserInfos } from './entities/user-info.entity';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { RedisService } from '../cache/redis.service';
 
 describe('UsersService', () => {

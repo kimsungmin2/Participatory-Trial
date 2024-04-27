@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { BoardIndex } from '../type/board_index.type';
+import { IsOptional, IsString } from 'class-validator';
 
 export class SearchQueryDto {
   // 제목 쿼리

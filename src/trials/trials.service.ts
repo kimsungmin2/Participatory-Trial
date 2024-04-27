@@ -3,13 +3,13 @@ import {
   InternalServerErrorException,
   NotAcceptableException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trials } from './entities/trial.entity';
-import { Between, DataSource, Like, Repository, getRepository } from 'typeorm';
-import { firstValueFrom, map, retry } from 'rxjs';
+import { DataSource, Like, Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { PanryeInfo } from './entities/panryedata.entity';
 import { InjectQueue } from '@nestjs/bull';
@@ -17,11 +17,10 @@ import { Queue } from 'bull';
 import { Votes } from './entities/vote.entity';
 import { VoteTitleDto } from './vote/dto/voteDto';
 import { UpdateVoteDto } from './vote/dto/updateDto';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { TrialHallOfFames } from './entities/trial_hall_of_fame.entity';
-import { TrialLikeHallOfFames } from './entities/trail_hall_of_fame.like.entity';
-import { TrialViewHallOfFames } from './entities/trial_hall_of_fame.view.entity';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { UsersService } from '../users/users.service';
+import { Users } from '../users/entities/user.entity';
 
 @Injectable()
 export class TrialsService {
@@ -37,6 +36,7 @@ export class TrialsService {
     private dataSource: DataSource,
     private httpService: HttpService,
     @InjectQueue('trial-queue') private trialQueue: Queue,
+    private readonly usersService: UsersService,
   ) {}
   // 재판 생성
   /**
@@ -65,6 +65,7 @@ export class TrialsService {
         content,
         userId,
         is_time_over: false,
+        trialTime,
       };
       // 3. 재판 생성
       const newTrial = queryRunner.manager.create(Trials, data);
@@ -127,20 +128,29 @@ export class TrialsService {
         skip,
         take: limit,
         order: {
-          createdAt: 'DESC',
+          created_at: 'DESC',
         },
       });
+      const trialBoardsWithUserNames = await Promise.all(
+        allTrials.map(async (trialBoard) => {
+          const userName = await this.usersService.findById(trialBoard.userId);
+          return {
+            ...trialBoard,
+            userName: userName.nickName,
+          };
+        }),
+      );
+
+      // 3. 있으면 리턴
+      return {
+        allTrials: trialBoardsWithUserNames,
+        totalItems,
+      };
     } catch (err) {
       throw new InternalServerErrorException(
         '게시물을 불러오는 도중 오류가 발생했습니다.',
       );
     }
-
-    // 3. 있으면 리턴
-    return {
-      allTrials,
-      totalItems,
-    };
   }
 
   // 특정 재판 조회 매서드(회원/비회원 구분 X)
@@ -155,6 +165,15 @@ export class TrialsService {
     }
 
     // 있으면 리턴
+    return { OneTrials, vote };
+  }
+
+  //수정 권한 확인 메서드
+  async checkPostOwner(id: number, user: Users) {
+    const { OneTrials, vote } = await this.findOneByTrialsId(id);
+    if (OneTrials.userId !== user.id) {
+      throw new ForbiddenException('권한이 없습니다.');
+    }
     return { OneTrials, vote };
   }
 
@@ -186,11 +205,13 @@ export class TrialsService {
       await queryRunner.manager.save(Trials, OneTrials);
 
       //     // 5. 트랜잭션 종료
-      //     await queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
 
       return OneTrials;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -205,16 +226,20 @@ export class TrialsService {
   // }
 
   // 내 재판 삭제
-  async deleteTrials(id: number) {
+  async deleteTrials(id: number, user: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
+    const { OneTrials, vote } = await this.findOneByTrialsId(id);
+    if (OneTrials.userId !== user.id) {
+      throw new ForbiddenException('해당 게시물을 삭제할 권한이 없습니다.');
+    }
     try {
       // 1. 삭제하려는 재판이 존재하는지 검사
       const deleteResult = await queryRunner.manager.softDelete(Trials, {
         id: id,
       });
-
+      await this.deleteVote(id);
       // 2. 404 던지기
       if (deleteResult.affected === 0) {
         throw new NotFoundException(`존재하지 않거나 이미 삭제된 재판입니다.`);
@@ -401,6 +426,36 @@ export class TrialsService {
     }
 
     return trial;
+  }
+
+  // Top 10 find
+  async findTop10TrialsByVotes() {
+    return this.votesRepository
+      .createQueryBuilder('votes')
+      .leftJoin('votes.trial', 'trial')
+      .leftJoin('votes.eachVote', 'eachVote')
+      .groupBy('votes.id')
+      .addGroupBy('trial.title')
+      .addGroupBy('trial.trialTime')
+      .select('votes.id', 'id')
+      .addSelect('trial.title', 'title')
+      .addSelect('trial.trialTime', 'trialTime')
+      .addSelect('votes.title1', 'title1')
+      .addSelect('votes.title2', 'title2')
+      .addSelect(
+        'SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END)',
+        'votesCount1',
+      )
+      .addSelect(
+        'SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)',
+        'votesCount2',
+      )
+      .orderBy(
+        'SUM(CASE WHEN eachVote.voteFor = true THEN 1 ELSE 0 END) + SUM(CASE WHEN eachVote.voteFor = false THEN 1 ELSE 0 END)',
+        'DESC',
+      )
+      .take(10)
+      .getRawMany();
   }
 
   // 판례 조회

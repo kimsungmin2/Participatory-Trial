@@ -9,7 +9,6 @@ import {
   HttpStatus,
   UseGuards,
   UseInterceptors,
-  UploadedFile,
   UploadedFiles,
   Query,
   Render,
@@ -32,15 +31,16 @@ import { UserInfo } from '../utils/decorator/userInfo.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
-import { BoardType } from '../s3/board-type';
+import { BoardType } from '../s3/type/board-type';
 import { LikeService } from '../like/like.service';
 import { LikeInputDto } from '../like/dto/create-like.dto';
 import { HumorHallOfFameService } from './hall_of_fameOfHumor';
 import { Request } from 'express';
-import { HumorSeedService } from './humor-seeed.service';
+
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
-import { HalloffameType } from '../s3/halloffame-type';
+import { HalloffameType } from '../utils/type/halloffame-type';
 import { PaginationQueryHallOfFameDto } from './dto/get-pagenation.dto';
+import { userInfo } from 'os';
 @ApiTags('유머 게시판')
 @Controller('humors')
 export class HumorsController {
@@ -48,7 +48,6 @@ export class HumorsController {
     private readonly humorsService: HumorsService,
     private readonly likeService: LikeService,
     private readonly humorHallOfFameService: HumorHallOfFameService,
-    private readonly humorSeedService: HumorSeedService,
   ) {}
 
   //글쓰기 페이지
@@ -64,8 +63,12 @@ export class HumorsController {
   @Get('update/:id')
   @UseGuards(AuthGuard('jwt'))
   @Render('update-post.ejs') // index.ejs 파일을 렌더링하여 응답
-  async getUpdatePostPage(@Req() req: Request, @Param('id') id: number) {
-    const data = await this.humorsService.findOneHumorBoard(id);
+  async getUpdatePostPage(
+    @Req() req: Request,
+    @Param('id') id: number,
+    @UserInfo() user: Users,
+  ) {
+    const data = await this.humorsService.checkPostId(id, user);
     return { boardType: BoardType.Humor, isLoggedIn: req['isLoggedIn'], data };
   }
 
@@ -447,22 +450,6 @@ export class HumorsController {
       data,
       halloffameType: HalloffameType.TrialsHallofFameViews,
       isLoggedIn: req['isLoggedIn'],
-    };
-  }
-
-  @ApiOperation({ summary: '더미 생성' })
-  @ApiParam({
-    name: 'count',
-    required: true,
-    description: '유머 게시물 ID',
-    type: Number,
-  })
-  @Post('some/:count')
-  async createDummyData(@Param('count') count: number) {
-    await this.humorSeedService.saveHumorToDataBase(count);
-
-    return {
-      message: `${count}개 생성 완료`,
     };
   }
 }

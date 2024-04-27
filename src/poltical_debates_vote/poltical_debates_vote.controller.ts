@@ -1,19 +1,12 @@
 // votes.controller.ts
 import {
   Controller,
-  Post,
-  Body,
   Param,
-  Req,
   Delete,
   UseGuards,
   HttpStatus,
   Get,
 } from '@nestjs/common';
-import { UserInfo } from '../../utils/decorator/userInfo.decorator';
-import { userInfo } from 'os';
-import { UserInfos } from '../../users/entities/user-info.entity';
-import { Request } from 'express';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -22,10 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { Users } from '../../users/entities/user.entity';
 import { PolticalVotesService } from './poltical_debates_vote.service';
-import { VoteForDto } from '../../trials/dto/vote.dto';
-import { IsVoteGuard } from '../../trials/guards/isvote.guard';
 
 @ApiTags('정치 토론 투표')
 @Controller('poltical-debates/vote')

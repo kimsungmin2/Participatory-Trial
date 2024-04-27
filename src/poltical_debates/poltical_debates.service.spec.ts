@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, QueryRunner, Repository, UpdateResult } from 'typeorm';
+import { DataSource, Repository, UpdateResult } from 'typeorm';
 import { PolticalDebatesService } from './poltical_debates.service';
 import { PolticalDebateBoards } from './entities/poltical_debate.entity';
 
 import {
-  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
@@ -20,7 +19,6 @@ import Redis from 'ioredis';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { UserInfo } from 'os';
 import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
 
 const mockedUser = {

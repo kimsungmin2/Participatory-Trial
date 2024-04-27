@@ -4,12 +4,6 @@ body {
   padding: 0;
 }
 
-header, footer {
-  background-color: #333;
-  color: white;
-  padding: 10px;
-}
-
 .navbar-nav .nav-item:not(:last-child) {
   margin-right: 100px;
   font-family: 'MBC1961GulimM';

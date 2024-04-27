@@ -9,7 +9,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Users } from '../../users/entities/user.entity';
 import { HumorBoards } from '../../humors/entities/humor-board.entity';
 
 @Entity()

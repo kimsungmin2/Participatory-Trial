@@ -20,8 +20,12 @@ async function bootstrap() {
   const logger = winstonLogger;
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const cors = require('cors');
-
-  app.use(cors({ credentials: true, origin: 'http://3.35.170.197:3000/:3000' }));
+  app.use(
+    cors(
+      { credentials: true, origin: 'http://localhost:3000' },
+      { credentials: true, origin: 'http://3.35.170.197:3000/' },
+    ),
+  );
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
@@ -35,7 +39,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
-  app.set('views', join(__dirname, '..', 'views'));
+  app.set('views', join(__dirname, '..', '..', 'views'));
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);
