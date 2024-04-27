@@ -52,37 +52,9 @@ https://drawsql.app/teams/kim-14/diagrams/3-erd
 
 # 4.  🤷🏻‍♂️기술적 의사결정
 
-<details>
-  <summary>동시성 제어</summary>
- 선택 기술 <details>
-  <summary>Bull Queue</summary>
- Bull Queue
-- 비동기적으로 작업들을 Queue에 추가하여 워커를 통해 동시성을 제어 할 수 있음.
-- 투표 수를 업데이트할 때 비관적 락을 사용하여 동시성을 관리하게 되면, 일관성은 확실하게 보장되나, 부하가 높은 상태일 경우 Race Condition이나 DeadLock이 쉽게 발생할 수 있기 때문에, 비동기적으로 작업을 추가하고 요청을 FIFO로 처리하는 Bull Queue를 선택하게 됨.
-- MSA의 경우 Kafka를 사용하면 좋으나, 현재 프로젝트의 단계에서는 당장 투표 수 관리에 있어서만 메시지 브로커가 필요했기 때문에 Bull Queue를 선택
-</details>
-  <details>
- <summary>Pessimistic Lock</summary>
- 
-</details>
- <details>
- <summary>Apache Kafka</summary>
- 
-</details>
-</details>
-
-
-<details>
-  <summary>채팅</summary>
- 선택 기술 <details>
-  <summary>Socket.io</summary>
-</details>
-  <details>
- <summary>WebSocket</summary>
- 
-</details>
-</details>
-
+| 사용 기술       | 사용 이유      |    고민 기술                                         | 기술 정의                               |
+|:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
+|     |
 
 <br>
 
@@ -107,6 +79,10 @@ https://drawsql.app/teams/kim-14/diagrams/3-erd
 
 # 7. 💣 Troubleshooting
 
+
+| ㅁ       | ㅇ      |    ㅊ                                         | ㅁ                              |
+|:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
+|     |
 
 
 <br>
