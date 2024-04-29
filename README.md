@@ -46,12 +46,12 @@
 
 목차 
 #### 1. [📝인트로](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#1--intro)
-#### 2. [👨‍👩‍👧‍👦팀 소개](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#2--Team-Members)
-#### 3. [📒ERD](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#3--ERD)
+#### 2. [📒ERD](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#2--ERD)
+#### 3. [💣트러블 슈팅](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#3--Troubleshooting)
 #### 4. [🤷🏻‍♂️기술적 의사결정](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#4--기술적-의사결정)
 #### 5. [⚒사용한 기술 Stack](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#5--Tech-Stack)
 #### 6. [🕸아키텍쳐](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#6--Architecture)
-#### 7. [💣트러블 슈팅](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#7--Troubleshooting)
+#### 7. [👨‍👩‍👧‍👦팀 소개](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#7--Team-Members)
 
 
 # 1. 📝 Intro
@@ -63,21 +63,21 @@
  Web-Socket을 통한 실시간 찬반투표<br>
 <br>
 
-# 2. 👨‍👩‍👧‍👦Team Members
 
-| Position      | Name          |    Github                                         | Tech Blog                               |
-|:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
-| Backend       | 김재연        | [APD-Kim](https://github.com/APD-Kim)             |https://velog.io/@lol0620/posts          |
-| Backend       | 김성민        | [kimsungmin2](https://github.com/kimsungmin2)     |https://velog.io/@anrl8913/posts         |
-| Backend       | 모진영        | [ahwlsqja](https://github.com/ahwlsqja)           |https://velog.io/@bubblegum95           |
-| Backend       | 황세민        | [bubblegum95](https://github.com/bubblegum95)     |https://velog.io/@bubblegum95            |
-| Backend       | 박재형        | [jaecoder222](https://github.com/jaecoder222)     |https://dev-jacoder222.tistory.com/      |
+
+# 2. 📒ERD
+
+https://drawsql.app/teams/kim-14/diagrams/3-erd
+
 
 <br>
 
-# 3. 📒ERD
+# 3. 💣 Troubleshooting
 
-https://drawsql.app/teams/kim-14/diagrams/3-erd
+
+| ㅁ       | ㅇ      |    ㅊ                                         | ㅁ                              |
+|:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
+|     |
 
 
 <br>
@@ -126,13 +126,15 @@ https://drawsql.app/teams/kim-14/diagrams/3-erd
 <br>
 
 
-# 7. 💣 Troubleshooting
+# 7. 👨‍👩‍👧‍👦Team Members
 
-
-| ㅁ       | ㅇ      |    ㅊ                                         | ㅁ                              |
+| Position      | Name          |    Github                                         | Tech Blog                               |
 |:--------------|:--------------|:--------------------------------------------------|-----------------------------------------|
-|     |
-
+| Backend       | 김재연        | [APD-Kim](https://github.com/APD-Kim)             |https://velog.io/@lol0620/posts          |
+| Backend       | 김성민        | [kimsungmin2](https://github.com/kimsungmin2)     |https://velog.io/@anrl8913/posts         |
+| Backend       | 모진영        | [ahwlsqja](https://github.com/ahwlsqja)           |https://velog.io/@bubblegum95           |
+| Backend       | 황세민        | [bubblegum95](https://github.com/bubblegum95)     |https://velog.io/@bubblegum95            |
+| Backend       | 박재형        | [jaecoder222](https://github.com/jaecoder222)     |https://dev-jacoder222.tistory.com/      |
 
 <br>
 
