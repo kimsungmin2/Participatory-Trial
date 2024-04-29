@@ -36,13 +36,13 @@ Be
 <br>
 
 목차 
-#### 1. [📝인트로](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--intro)
-#### 2. [👨‍👩‍👧‍👦팀 소개](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Team-Members)
-#### 3. [📒ERD](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--ERD)
-#### 4. [🤷🏻‍♂️기술적 의사결정](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--기술적-의사결정)
-#### 5. [⚒사용한 기술 Stack](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Tech-Stack)
-#### 6. [🕸아키텍쳐](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Architecture)
-#### 7. [💣트러블 슈팅](https://github.com/kimsungmin2/Participatory-Trial/edit/dev/README.md#1--Troubleshooting)
+#### 1. [📝인트로](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#1--intro)
+#### 2. [👨‍👩‍👧‍👦팀 소개](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#2--Team-Members)
+#### 3. [📒ERD](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#3--ERD)
+#### 4. [🤷🏻‍♂️기술적 의사결정](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#4--기술적-의사결정)
+#### 5. [⚒사용한 기술 Stack](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#5--Tech-Stack)
+#### 6. [🕸아키텍쳐](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#6--Architecture)
+#### 7. [💣트러블 슈팅](https://github.com/kimsungmin2/Participatory-Trial?tab=readme-ov-file#7--Troubleshooting)
 
 
 # 1. 📝 Intro
