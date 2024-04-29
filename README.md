@@ -121,7 +121,8 @@ https://drawsql.app/teams/kim-14/diagrams/3-erd
 
 # 6. 🕸 Architecture
 
-< 바뀐 아키텍처 삽입>
+![image](https://github.com/kimsungmin2/Participatory-Trial/assets/100296444/6cb6930f-53ad-4768-ab08-8e961aa3fa5f)
+
 
 <br>
 
