@@ -1,4 +1,8 @@
+<p align="center">
+ 
 <img width="393" alt="스크린샷 2024-04-29 오후 4 35 54" src="https://github.com/kimsungmin2/Participatory-Trial/assets/154573616/7d9b2cbd-997a-436a-884b-686eda6b26e1">
+
+</p>
 
 
 
@@ -7,15 +11,19 @@
 #### 🏠 배포 주소 : [ahwlsqja.store](https://ahwlsqja.store)
 #### 🔥 작업 로그 : [Notion](https://teamsparta.notion.site/9c0f63d669cd4eeaabf9c42afeabfdb9)
 #### 📹 소개 영상 : 미정
+#### 📜 팀 브로셔 : [Brochure](https://www.notion.so/teamsparta/090ada5a49ea47569fd0091ddf49ada8?v=ffe985b3767049e1a3b5a9efe385b30b)
+
 
 -------------------
-Fe
+<p align="center">프론트엔드 <br>
 <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=HTML5&logoColor=white">
 <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=CSS3&logoColor=white">
 <img src="https://img.shields.io/badge/EJS-B4CA65?style=flat-square&logo=EJS&logoColor=white">
 <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=white">
+</p>
 
-Be
+<p align="center">
+백엔드 <br>
 <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white">
 <img src="https://img.shields.io/badge/NestJS-E0234E?style=flat-square&logo=NestJS&logoColor=white">
 <img src="https://img.shields.io/badge/TypeORM-262627?style=flat-square&logo=Typeform&logoColor=white">
@@ -23,7 +31,7 @@ Be
 <img src="https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=MongoDB&logoColor=white">
 <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white">
 <img src="https://img.shields.io/badge/Socket.io-010101?style=flat-square&logo=Socket.io&logoColor=white">
-<img src="https://img.shields.io/badge/elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white">
+<img src="https://img.shields.io/badge/elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white"><br>
 <img src="https://img.shields.io/badge/Logstash-005571?style=flat-square&logo=Logstash&logoColor=white">
 <img src="https://img.shields.io/badge/kibana-005571?style=flat-square&logo=kibana&logoColor=white">
 <img src="https://img.shields.io/badge/Jest-C21325?style=flat-square&logo=Jest&logoColor=white">
@@ -31,6 +39,7 @@ Be
 <img src="https://img.shields.io/badge/Bull-DB0A40?style=flat-square&logo=Red Bull&logoColor=white">
 <img src="https://img.shields.io/badge/SentenceTransformer-0066FF?style=flat-square&logo=chatbot&logoColor=white">
 <img src="https://img.shields.io/badge/Bull-DB0A40?style=flat-square&logo=Red Bull&logoColor=white">
+</p>
 
 
 <br>
