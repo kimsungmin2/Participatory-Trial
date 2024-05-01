@@ -201,7 +201,7 @@ export class OnlineBoardHallOfFameService {
     } catch(err) {
       console.log(err.message);
       throw new InternalServerErrorException(
-        '명에의 전당을 불러오는 도중오류가발생했습니다.'
+        '명에의 전당을 불러오는 도중 오류가 발생했습니다.'
       )
     }
     return {
@@ -228,7 +228,7 @@ export class OnlineBoardHallOfFameService {
     } catch(err) {
       console.log(err.message);
       throw new InternalServerErrorException(
-        '명예의 전당을 불러오는 도중오류가발생했습니다.'
+        '명예의 전당을 불러오는 도중 오류가 발생했습니다.'
       )
   }
   return {
@@ -244,7 +244,7 @@ export class OnlineBoardHallOfFameService {
     const OneHallOfOnlineLike = await this.onlineBoardLikeHallOfFames.findOneBy({ id });
 
     if(!OneHallOfOnlineLike) {
-      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.999")
     }
 
     return { OneHallOfOnlineLike }
@@ -256,7 +256,7 @@ export class OnlineBoardHallOfFameService {
     const OneHallOfOnlineView = await this.onlineBoardViewHallOfFames.findOneBy({ id });
 
     if(!OneHallOfOnlineView) {
-      throw new NotFoundException("검색한 명예의 전당이 없습니다.")
+      throw new NotFoundException("검색한 명예의 전당이 없습니다.999")
     }
 
     return { OneHallOfOnlineView }
