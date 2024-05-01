@@ -65,7 +65,7 @@ export class PolticalDabateHallOfFameService {
     await this.updateViewHallOfFameDatabase(viewHallOfFameData);
   }
 
-  private getLastWeekRange() {
+   getLastWeekRange() {
     // 1. 현재 날짜와 시간 laskWeekStart에 할당
     const lastWeekStart = new Date(); // 현재 날짜와 시간 laskWeekStart에 할당
     // 2. lastWeekStart의 날짜를 지난 주의 첫번째 날로 설정
@@ -86,7 +86,7 @@ export class PolticalDabateHallOfFameService {
   }
 
   // 날짜 추상화 매서드(getThisMonthRange 메서드는 이번 달의 시작과 끝을 정확히 나타내는 날짜 범위를 제공)
-  private getThisMonthRange() {
+   getThisMonthRange() {
     const start = new Date();
     // start의 날짜를 이번 달의 첫 번째 날로 설정한다. 이는 Date 객체의 setDate 메서드를 사용하여 달의 날짜를 1로 설정함으로써 달의 시작을 나타낸다.
     start.setDate(1); // 이번달 첫쨰날
@@ -99,7 +99,7 @@ export class PolticalDabateHallOfFameService {
   }
 
   // 투표 데이터 집계 매서드(조회수 수 기준)
-  private async aggVotesViewForHallOfFame(
+   async aggVotesViewForHallOfFame(
     polticalDebateBoards: PolticalDebateBoards[],
   ) {
     const { start, end } = this.getThisMonthRange();
@@ -126,7 +126,7 @@ export class PolticalDabateHallOfFameService {
   }
 
   // 투표 데이터 집계 매서드(투표 수 기준)
-  private async aggVotesForHallOfFame(
+   async aggVotesForHallOfFame(
     polticalDebateVotes: PolticalDebateVotes[],
   ) {
     const { start, end } = this.getThisMonthRange();
@@ -162,7 +162,7 @@ export class PolticalDabateHallOfFameService {
   }
 
   // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(투표수)
-  private async updateHallOfFameDatabase(hallOfFameData: any) {
+   async updateHallOfFameDatabase(hallOfFameData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -196,7 +196,7 @@ export class PolticalDabateHallOfFameService {
   }
 
   // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(조회수)
-  private async updateViewHallOfFameDatabase(hallOfFameData: any) {
+   async updateViewHallOfFameDatabase(hallOfFameData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
