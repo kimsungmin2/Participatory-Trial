@@ -126,16 +126,18 @@ export class OnlineBoardsService {
 
   //조회수를 증가시키고 데이터를 반환
   async findOneOnlineBoardWithIncreaseView(id: number): Promise<OnlineBoards> {
-    const findHumorBoard: OnlineBoards =
+    const findOnlineBoard: OnlineBoards =
       await this.onlineBoardsRepository.findOne({
         where: { id },
         relations: ['onlineBoardComment'],
       });
-    console.log(findHumorBoard);
-    if (!findHumorBoard) {
+
+    if (!findOnlineBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
+
     let cachedView: number;
+
     try {
       cachedView = await this.redisService
         .getCluster()
@@ -147,8 +149,8 @@ export class OnlineBoardsService {
     }
 
     return {
-      ...findHumorBoard,
-      view: findHumorBoard.view + cachedView,
+      ...findOnlineBoard,
+      view: findOnlineBoard.view + cachedView,
     };
   }
 

@@ -53,7 +53,7 @@ export class RedisService implements OnModuleDestroy {
   getCluster(): Redis.Cluster {
     return this.cluster;
   }
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy() {
     this.cluster.disconnect();
   }
 }

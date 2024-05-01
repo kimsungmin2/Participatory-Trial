@@ -39,6 +39,7 @@ import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { HalloffameType } from '../s3/halloffame-type';
 import { PaginationQueryHallOfFameDto } from '../humors/dto/get-pagenation.dto';
 import { UserInfo } from '../utils/decorator/userInfo.decorator';
+import { BoardIdValidationPipe } from './pipes/exist-board.pipe';
 
 @ApiTags('자유 게시판')
 @Controller('online-boards')
@@ -156,7 +157,10 @@ export class OnlineBoardsController {
   })
   @Get(':id')
   @Render('post.ejs')
-  async findOne(@Param('id') id: number, @Req() req: Request) {
+  async findOne(
+    @Param('id', BoardIdValidationPipe) id: number,
+    @Req() req: Request,
+  ) {
     const board =
       await this.onlineBoardsService.findOneOnlineBoardWithIncreaseView(id);
     return {
@@ -194,7 +198,6 @@ export class OnlineBoardsController {
     @Param('id') id: number,
     @Body() updateOnlineBoardDto: UpdateOnlineBoardDto,
   ) {
-    console.log(updateOnlineBoardDto);
     const board = await this.onlineBoardsService.updateBoard(
       id,
       updateOnlineBoardDto,

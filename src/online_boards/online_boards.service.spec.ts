@@ -12,10 +12,12 @@ import { NotFoundException } from '@nestjs/common';
 import { Readable } from 'stream';
 import { S3Service } from '../s3/s3.service';
 import { RedisService } from '../cache/redis.service';
+import Redis from 'ioredis';
 
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
   let usersService: UsersService;
+  let redisService: RedisService;
   let repository: Repository<OnlineBoards>;
   const files: Express.Multer.File[] = [
     {
@@ -37,6 +39,7 @@ describe('OnlineBoardsService', () => {
       providers: [
         OnlineBoardsService,
         S3Service,
+        UsersService,
         RedisService,
         {
           provide: getRepositoryToken(OnlineBoards),
@@ -51,6 +54,7 @@ describe('OnlineBoardsService', () => {
 
     service = module.get<OnlineBoardsService>(OnlineBoardsService);
     usersService = module.get<UsersService>(UsersService);
+    redisService = module.get<RedisService>(RedisService);
     repository = module.get<Repository<OnlineBoards>>(
       getRepositoryToken(OnlineBoards),
     );
@@ -123,7 +127,7 @@ describe('OnlineBoardsService', () => {
     expect(result).toEqual(expectedResult);
   });
 
-  it('should get a board', async () => {
+  it('should get a board and increase view', async () => {
     const id: number = 1;
 
     const expectedResult: OnlineBoards = {
@@ -143,10 +147,60 @@ describe('OnlineBoardsService', () => {
       onlineBoardLike: null,
     };
 
-    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
+    // const cluster = new Redis.Cluster(
+    //   [
+    //     {
+    //       host: process.env.REDIS_HOST_1,
+    //       port: parseInt(process.env.REDIS_PORT_1, 10),
+    //     },
+    //     {
+    //       host: process.env.REDIS_HOST_2,
+    //       port: parseInt(process.env.REDIS_PORT_2, 10),
+    //     },
+    //     {
+    //       host: process.env.REDIS_HOST_3,
+    //       port: parseInt(process.env.REDIS_PORT_3, 10),
+    //     },
+    //   ],
+    //   {
+    //     natMap: {
+    //       '172.20.0.2:6380': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_1),
+    //       },
+    //       '172.20.0.3:6381': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_2),
+    //       },
+    //       '172.20.0.4:6382': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_3),
+    //       },
+    //       '172.20.0.5:6383': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_4),
+    //       },
+    //       '172.20.0.6:6384': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_5),
+    //       },
+    //       '172.20.0.7:6385': {
+    //         host: process.env.REDIS_HOST,
+    //         port: parseInt(process.env.REDIS_PORT_6),
+    //       },
+    //     },
+    //     scaleReads: 'slave',
+    //   },
+    // );
 
+    let cachedView: number;
+    const cluster = redisService.getCluster();
     const result = await service.findBoard(id);
+
+    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedResult);
+    jest.spyOn(redisService, 'getCluster').mockReturnValue(cluster);
     expect(result).toEqual(expectedResult);
+    expect(cluster).toBeInstanceOf(Redis.Cluster);
   });
 
   it('should update a board', async () => {

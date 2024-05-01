@@ -8,7 +8,7 @@ export class BoardIdValidationPipe implements PipeTransform {
   async transform(value: number) {
     const board = await this.onlineBoardsService.findBoardId(value); // 이거시 온라인 보드 서비스 메서드!
     if (!board) {
-      throw new NotFoundException(`Board with ID ${value} not found`);
+      throw new NotFoundException(`${value}번 게시물을 찾을 수 없습니다.`);
     }
     return value;
   }
