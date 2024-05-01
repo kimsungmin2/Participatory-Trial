@@ -23,9 +23,11 @@ export class UpdateViewsScheduler {
       const reply = await this.redisService
         .getCluster()
         .scan(cursor, 'MATCH', '{humors}:*:view');
+      console.log(reply);
       cursor = reply[0];
       const keys = reply[1];
       keysBatch = keysBatch.concat(keys);
+      console.log(keysBatch);
     } while (cursor !== '0');
 
     if (keysBatch.length > 0) {
@@ -35,12 +37,13 @@ export class UpdateViewsScheduler {
         const match = key.match(/{humors}:(.*):view/);
         if (match && viewCount) {
           const id = match[1];
-          await this.humorBoardRepository
+          const result = await this.humorBoardRepository
             .createQueryBuilder()
             .update(HumorBoards)
             .set({ view: () => `view + ${viewCount}` })
             .where('id = :id', { id: Number(id) })
             .execute();
+          console.log(result);
           await this.redisService.getCluster().del(key);
         }
       });
@@ -58,6 +61,7 @@ export class UpdateViewsScheduler {
       cursor = reply[0];
       const keys = reply[1];
       keysBatch = keysBatch.concat(keys);
+      console.log('online', keysBatch);
     } while (cursor !== '0');
 
     if (keysBatch.length > 0) {

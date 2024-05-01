@@ -45,16 +45,18 @@ export class S3Service {
   ) {
     //AWS S3에 이미지 업로드 실행
     const command = new PutObjectCommand({
-      Bucket: this.configService.get('AWS_S3_BUCKET_NAME'), // 버켓 이름
+      Bucket: 'eaglebackfromthenest', // 버켓 이름
       Key: fileName, // 업로드 될 파일의 이름
       Body: file.buffer, // 업로드할 파일
       ACL: 'public-read', // 파일 접근 권한
       ContentType: `image/${ext}`, //파일 타입
     });
+    console.log(command);
 
     try {
-      await this.s3Client.send(command);
-    } catch {
+      const a = await this.s3Client.send(command);
+    } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(
         '이미지 저장 중 오류가 발생했습니다.',
       );
