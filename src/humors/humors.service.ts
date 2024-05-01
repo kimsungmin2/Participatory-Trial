@@ -35,50 +35,7 @@ export class HumorsService {
   ) {}
 
   //게시물 생성
-  /**
-   *
-   * @deprecated 아마 게시물과 투표를 한번에 만들어야 해서 새로 만들어야 할겁니다. 밑에 새로 만들어 놨어요
-   */
-  // async createHumorBoard(
-  //   createHumorBoardDto: CreateHumorBoardDto,
-  //   user: Users,
-  //   files: Express.Multer.File[],
-  // ): Promise<HumorBoards> {
-  //   let uploadResult: string[] = [];
-  //   if (files.length !== 0) {
-  //     const uploadResults = await this.s3Service.saveImages(
-  //       files,
-  //       BoardType.Humor,
-  //     );
-  //     for (let i = 0; i < uploadResults.length; i++) {
-  //       uploadResult.push(uploadResults[i].imageUrl);
-  //     }
-  //   }
-  //   const imageUrl =
-  //     uploadResult.length > 0 ? JSON.stringify(uploadResult) : null;
-  //   try {
-  //     const createdBoard = await this.HumorBoardRepository.save({
-  //       userId: user.id,
-  //       ...createHumorBoardDto,
-  //       imageUrl,
-  //     });
-  //     return createdBoard;
-  //   } catch {
-  //     throw new InternalServerErrorException(
-  //       '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
-  //     );
-  //   }
-  // }
 
-  /**
-   * 유머게시판 투표와 게시물 동시에 생성함수
-   *
-   * @param createHumorBoardDto title, content
-   * @param voteTitleDto title1, title2
-   * @param user user
-   * @param files 파일
-   * @returns
-   */
   async createHumorBoardAndVotes(
     createHumorBoardDto: CreateHumorBoardDto,
     voteTitleDto: VoteTitleDto,
@@ -117,10 +74,11 @@ export class HumorsService {
       await queryRunner.commitTransaction();
 
       return createdBoard;
-    } catch {
+    } catch (err) {
+      console.log(err);
       await queryRunner.rollbackTransaction();
       throw new InternalServerErrorException(
-        '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
+        '예기치 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
       );
     } finally {
       await queryRunner.release();

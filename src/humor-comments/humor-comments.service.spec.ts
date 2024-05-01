@@ -32,6 +32,12 @@ const mockedUser = {
   humorComment: [new HumorComments()],
   polticalDebateBoards: [new PolticalDebateBoards()],
   polticalDebateComments: [new PolticalDebateComments()],
+  eachHumorVote: [],
+  eachPolticalVote: [],
+  eachVote: [],
+  humorLike: [],
+  onlineBoardLike: [],
+  trialsChat: [],
 } as Users;
 
 describe('HumorCommentsService', () => {

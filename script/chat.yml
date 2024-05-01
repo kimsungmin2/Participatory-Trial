@@ -3,14 +3,12 @@ config:
   socketio:
     transports: ['websocket']
     extraHeaders:
-      cookie: 'authorization=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjksImlhdCI6MTcxMzYxMTc3NywiZXhwIjoxNzU2ODExNzc3fQ.88NUy1QFWuH5uu7psUXz24KyN4zMRVPN7NdfhbthWfw'
+      cookie: 'authorization=Bearer%20eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImlhdCI6MTcxNDQ4ODYyNywiZXhwIjoxNzU3Njg4NjI3fQ.o10waArAEvkGAeEeFxqk_ZUZKJ__UPe3ByivOUcwqyQ'
   phases:
-    - duration: 60
-      arrivalRate: 10
-      name: 'ramp up'
-    - duration: 60
-      arrivalRate: 20
-      name: 'spike load'
+    - duration: 300 # 5분
+      arrivalRate: 1
+      rampTo: 1000
+      name: 'ramp up to 1000 users'
 scenarios:
   - engine: 'socketio'
     flow:
@@ -19,7 +17,6 @@ scenarios:
           data:
             roomId: 1
             channelType: 'trials'
-            think: 1
       - loop:
           - emit:
               channel: 'createChat'
@@ -27,16 +24,9 @@ scenarios:
                 roomId: 1
                 message: 'Message number {{ $randomNumber(1, 10000) }}'
                 channelType: 'trials'
-          - think: 30
-            count: 3
-      # - emit:
-      #     channel: 'createVote'
-      #     data:
-      #       roomId: 1
-      #       voteFor: true
-      #       channelType: 'trials'
-      # - think: 1
-      #   count: 1
+          - think: 3 # 30초에 10번 메시지를 보내려면, 각 메시지 사이에 3초 대기
+            count: 10 # 10번 반복
+      - think: 250 # 채팅 이후에 추가로 대기하여 총 5분을 유지
       - emit:
           channel: 'leaveRoom'
           data:

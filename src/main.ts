@@ -39,7 +39,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.engine('ejs', require('ejs').__express);
   app.set('view engine', 'ejs');
-  app.set('views', join(__dirname, '..', '..', 'views'));
+  app.set('views', join(__dirname, '..', 'views'));
   setupSwagger(app);
   const port = 3000;
   await app.listen(port);
