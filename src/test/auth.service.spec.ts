@@ -10,7 +10,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { Users } from '../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService } from './auth.service';
+import { AuthService } from '../auth/auth.service';
 import { EmailService } from '../email/email.service';
 import { DataSource } from 'typeorm';
 import { RedisService } from '../cache/redis.service';

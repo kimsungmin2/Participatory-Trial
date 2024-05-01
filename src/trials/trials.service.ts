@@ -35,7 +35,7 @@ export class TrialsService {
     private trialHallOfFamesRepository: Repository<TrialHallOfFames>,
     private dataSource: DataSource,
     private httpService: HttpService,
-    @InjectQueue('trial-queue') private trialQueue: Queue,
+    // @InjectQueue('trial-queue') private trialQueue: Queue,
     private readonly usersService: UsersService,
   ) {}
   // 재판 생성
@@ -83,11 +83,7 @@ export class TrialsService {
       // 5. 불 큐로 지연시간 후 찍어줌
       const delay = trialDate.getTime() - Date.now();
       // 6. 제한 시간끝나면 불큐로 비동기 처리
-      await this.trialQueue.add(
-        'updateTimeDone',
-        { trialId: savedTrial.id },
-        { delay: delay },
-      );
+
       // 7. 트랜 잭션 종료
       await queryRunner.commitTransaction();
       return { savedTrial, savedVote };
@@ -251,58 +247,54 @@ export class TrialsService {
       await queryRunner.rollbackTransaction();
 
       console.log('재판 삭제 에러:', error);
-
-      throw new InternalServerErrorException(
-        '재판 삭제 중 오류가 발생했습니다.',
-      );
     } finally {
       await queryRunner.release();
     }
   }
 
-  // 내 재판인지 찾기 매서드
-  async isMyTrials(userId: number, trialsId: number) {
-    return !!(await this.trialsRepository.findOne({
-      where: {
-        id: trialsId,
-        user: {
-          id: userId,
-        },
-      },
-    }));
-  }
+  // // 내 재판인지 찾기 매서드
+  // async isMyTrials(userId: number, trialsId: number) {
+  //   return !!(await this.trialsRepository.findOne({
+  //     where: {
+  //       id: trialsId,
+  //       user: {
+  //         id: userId,
+  //       },
+  //     },
+  //   }));
+  // }
 
   // 모든 판례 조회 매서드
-  async getAllDetails(cursor: number, limit: number) {
-    const queryBuilder = this.panryeRepository
-      .createQueryBuilder('panrye')
-      .orderBy('panrye.판례정보일련번호', 'ASC')
-      .limit(limit);
+  // async getAllDetails(cursor: number, limit: number) {
+  //   const queryBuilder = this.panryeRepository
+  //     .createQueryBuilder('panrye')
+  //     .orderBy('panrye.판례정보일련번호', 'ASC')
+  //     .limit(limit);
 
-    if (cursor) {
-      queryBuilder.where('panrye.판례정보일련번호 > :cursor', { cursor });
-    }
+  //   if (cursor) {
+  //     queryBuilder.where('panrye.판례정보일련번호 > :cursor', { cursor });
+  //   }
 
-    return queryBuilder.getMany();
-  }
+  //   return queryBuilder.getMany();
+  // }
 
-  // 판례 조회 매서드
-  async findKeyWordDetails(name: string) {
-    return this.panryeRepository.find({
-      where: {
-        판결유형: Like(`%${name}%`),
-      },
-    });
-  }
+  // // 판례 조회 매서드
+  // async findKeyWordDetails(name: string) {
+  //   return this.panryeRepository.find({
+  //     where: {
+  //       판결유형: Like(`%${name}%`),
+  //     },
+  //   });
+  // }
 
-  // 판결 유형으로 조회 매서드
-  async findBypanguelcaseDetails(name: string) {
-    return this.panryeRepository.find({
-      where: {
-        판결유형: name,
-      },
-    });
-  }
+  // // 판결 유형으로 조회 매서드
+  // async findBypanguelcaseDetails(name: string) {
+  //   return this.panryeRepository.find({
+  //     where: {
+  //       판결유형: name,
+  //     },
+  //   });
+  // }
 
   // 타임아웃되면 업데이트 매서드(불큐에서갖다씀 trialQueue.ts )
   async updateTimeDone(trialId: number) {
@@ -457,7 +449,4 @@ export class TrialsService {
       .take(10)
       .getRawMany();
   }
-
-  // 판례 조회
-  async getCaseDetails(caseId: string) {}
 }

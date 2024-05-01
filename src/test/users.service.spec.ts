@@ -1,16 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from './users.service';
+import { UsersService } from '../users/users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Users } from './entities/user.entity';
+import { Users } from '../users/entities/user.entity';
 import { NotFoundException } from '@nestjs/common';
-import { UserInfos } from './entities/user-info.entity';
+import { UserInfos } from '../users/entities/user-info.entity';
 import { RedisService } from '../cache/redis.service';
+import { Clients } from '../users/entities/client.entity';
 
 describe('UsersService', () => {
   let service: UsersService;
   let redisService: RedisService;
-
-  const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
 
   const mockUserRepository = {
     findByEmail: jest.fn(),
@@ -28,6 +27,13 @@ describe('UsersService', () => {
     save: jest.fn(),
     findOne: jest.fn(),
     findOneBy: jest.fn(),
+  };
+
+  const mockclientRepository = {
+    delete: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
   };
 
   const cachedUser: UserInfos = {
@@ -82,6 +88,10 @@ describe('UsersService', () => {
           useValue: mockUserInfoRepository,
         },
         { provide: RedisService, useValue: mockRedisService },
+        {
+          provide: getRepositoryToken(Clients),
+          useValue: mockclientRepository,
+        },
         // { provide: JwtService, useValue: mockJwtService },
       ],
     }).compile();
@@ -222,6 +232,95 @@ describe('UsersService', () => {
       });
 
       expect(mockUserRepository.softDelete).not.toHaveBeenCalled();
+    });
+  });
+  describe('updateClientsInfo', () => {
+    it('should create a new client if userId is null', async () => {
+      const subscriptionInfo = {
+        endpoint: 'example.com/endpoint',
+        keys: 'keyData',
+      };
+      const mockClient = {
+        clientId: '8c9fa6d0-bacf-42a8-aaa7-0948cfababce', // 동적으로 생성된 UUID
+        endpoint: subscriptionInfo.endpoint,
+        keys: subscriptionInfo.keys,
+      };
+
+      mockclientRepository.create.mockReturnValue(mockClient);
+      mockclientRepository.save.mockResolvedValue(mockClient);
+
+      const result = await service.updateClientsInfo(null, subscriptionInfo);
+
+      expect(mockclientRepository.delete).toHaveBeenCalledWith({
+        endpoint: subscriptionInfo.endpoint,
+      });
+      expect(mockclientRepository.create).toHaveBeenCalledWith({
+        clientId: expect.any(String), // UUID의 정확한 값 대신 어떤 문자열이든 허용
+        endpoint: subscriptionInfo.endpoint,
+        keys: subscriptionInfo.keys,
+      });
+      expect(mockclientRepository.save).toHaveBeenCalledWith(mockClient);
+      expect(result).toEqual(mockClient);
+    });
+
+    it('should update existing client if userId matches and endpoint changes', async () => {
+      const userId = 1;
+      const subscriptionInfo = {
+        endpoint: 'newendpoint.com',
+        keys: 'newKeyData',
+      };
+      const existingClient = {
+        userId,
+        endpoint: 'oldendpoint.com',
+        keys: 'oldKeyData',
+      };
+
+      mockclientRepository.findOne.mockResolvedValue(existingClient);
+      mockclientRepository.save.mockResolvedValue({
+        ...existingClient,
+        endpoint: subscriptionInfo.endpoint,
+        keys: subscriptionInfo.keys,
+      });
+
+      const result = await service.updateClientsInfo(userId, subscriptionInfo);
+
+      expect(mockclientRepository.delete).toHaveBeenCalledWith({
+        endpoint: subscriptionInfo.endpoint,
+      });
+      expect(mockclientRepository.findOne).toHaveBeenCalledWith({
+        where: { userId },
+      });
+      expect(mockclientRepository.save).toHaveBeenCalled();
+      expect(result.endpoint).toBe(subscriptionInfo.endpoint);
+      expect(result.keys).toBe(subscriptionInfo.keys);
+    });
+
+    it('should not create or delete anything if client exists and endpoint does not change', async () => {
+      const userId = 1;
+      const subscriptionInfo = {
+        endpoint: 'sameendpoint.com',
+        keys: 'newKeyData',
+      };
+      const existingClient = {
+        userId,
+        endpoint: subscriptionInfo.endpoint,
+        keys: 'oldKeyData',
+      };
+
+      mockclientRepository.findOne.mockResolvedValue(existingClient);
+      mockclientRepository.save.mockResolvedValue({
+        ...existingClient,
+        keys: subscriptionInfo.keys,
+      });
+
+      const result = await service.updateClientsInfo(userId, subscriptionInfo);
+
+      expect(mockclientRepository.delete).not.toHaveBeenCalled();
+      expect(mockclientRepository.findOne).toHaveBeenCalledWith({
+        where: { userId },
+      });
+      expect(mockclientRepository.save).toHaveBeenCalled();
+      expect(result.keys).toBe(subscriptionInfo.keys);
     });
   });
 });

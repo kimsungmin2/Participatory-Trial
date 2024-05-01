@@ -11,6 +11,9 @@ export class Clients {
   @Column({ type: 'int', nullable: true })
   userId: number;
 
+  @Column({ type: 'int', nullable: true })
+  pushToken: string;
+
   @Column({ type: 'varchar', nullable: true })
   endpoint: string;
 

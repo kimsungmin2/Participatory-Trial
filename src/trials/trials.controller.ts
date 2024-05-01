@@ -119,64 +119,64 @@ export class TrialsController {
   }
 
   // 모든 판례 조회 API
-  @ApiOperation({ summary: '모든 판례 조회 API' })
-  @ApiQuery({
-    name: 'cursor',
-    required: false,
-    description: '커서',
-    type: 'string',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    description: '몇 장 가져오건지 ',
-    type: 'string',
-    example: 1,
-  })
-  @Get('cases')
-  async getAllDetails(
-    @Query('cursor') cursor: string,
-    @Query('limit') limit: string,
-  ) {
-    let cursorNumber = parseInt(cursor);
-    let limitNumber = parseInt(limit);
+  // @ApiOperation({ summary: '모든 판례 조회 API' })
+  // @ApiQuery({
+  //   name: 'cursor',
+  //   required: false,
+  //   description: '커서',
+  //   type: 'string',
+  //   example: 1,
+  // })
+  // @ApiQuery({
+  //   name: 'limit',
+  //   required: false,
+  //   description: '몇 장 가져오건지 ',
+  //   type: 'string',
+  //   example: 1,
+  // })
+  // @Get('cases')
+  // async getAllDetails(
+  //   @Query('cursor') cursor: string,
+  //   @Query('limit') limit: string,
+  // ) {
+  //   let cursorNumber = parseInt(cursor);
+  //   let limitNumber = parseInt(limit);
 
-    if (isNaN(cursorNumber) || isNaN(limitNumber)) {
-      cursorNumber = 0;
-      limitNumber = 10;
-    }
+  //   if (isNaN(cursorNumber) || isNaN(limitNumber)) {
+  //     cursorNumber = 0;
+  //     limitNumber = 10;
+  //   }
 
-    return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
-  }
+  //   return await this.trialsService.getAllDetails(cursorNumber, limitNumber);
+  // }
 
   // 특정 판례 조회 API(Like 구문)
-  @ApiOperation({ summary: '특정 판례 조회 API' })
-  @ApiQuery({
-    name: 'name',
-    required: false,
-    description: '키워드',
-    type: String,
-    example: '재판',
-  })
-  @Get('cases/some')
-  async findKeyWordDetails(@Query('name') name: string) {
-    return await this.trialsService.findKeyWordDetails(name);
-  }
+  // @ApiOperation({ summary: '특정 판례 조회 API' })
+  // @ApiQuery({
+  //   name: 'name',
+  //   required: false,
+  //   description: '키워드',
+  //   type: String,
+  //   example: '재판',
+  // })
+  // @Get('cases/some')
+  // async findKeyWordDetails(@Query('name') name: string) {
+  //   return await this.trialsService.findKeyWordDetails(name);
+  // }
 
   // 판결 유형으로 조회 API(일반 인덱싱 구문)
-  @ApiOperation({ summary: ' 판례 유형 조회 API' })
-  @ApiQuery({
-    name: 'name',
-    required: false,
-    description: '유형',
-    type: String,
-    example: '폭행',
-  })
-  @Get('cases/panguelcase')
-  async findBypanguelcaseDetails(@Query('name') name: string) {
-    return await this.trialsService.findBypanguelcaseDetails(name);
-  }
+  // @ApiOperation({ summary: ' 판례 유형 조회 API' })
+  // @ApiQuery({
+  //   name: 'name',
+  //   required: false,
+  //   description: '유형',
+  //   type: String,
+  //   example: '폭행',
+  // })
+  // @Get('cases/panguelcase')
+  // async findBypanguelcaseDetails(@Query('name') name: string) {
+  //   return await this.trialsService.findBypanguelcaseDetails(name);
+  // }
 
   // 내가 만든 재판 조회 API(유저)
   @ApiOperation({ summary: ' 내가 만든 재판 게시물 API' })
@@ -718,12 +718,6 @@ export class TrialsController {
       data,
       isLoggedIn: req['isLoggedIn'],
     };
-  }
-
-  // 판례 조회 API
-  @Get('cases')
-  async getCaseDetails(@Query('caseId') caseId: string) {
-    return await this.trialsService.getCaseDetails(caseId);
   }
 
   // 명예의 전당 올리기 API

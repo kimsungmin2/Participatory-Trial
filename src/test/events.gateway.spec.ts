@@ -1,12 +1,13 @@
 import { Test } from '@nestjs/testing';
-import { EventsGateway } from './events.gateway';
+import { EventsGateway } from '../events/events.gateway';
 import { ChatsService } from '../chats/chats.service';
 import { VotesService } from '../trials/vote/vote.service';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { ConfigModule } from '@nestjs/config';
 import { Redis } from 'ioredis';
-import { HumorVotesService } from '../humors/humors_votes.service';
-import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote.service';
+import { HumorVotesService } from '../humors_votes/humors_votes.service';
+import { PolticalVotesService } from '../poltical_debates_vote/poltical_debates_vote.service';
+import { LikeService } from '../like/like.service';
 
 describe('EventsGateway', () => {
   let gateway: EventsGateway;
@@ -70,6 +71,10 @@ describe('EventsGateway', () => {
           provide: 'REDIS_SUB_CLIENT',
           useValue: mockRedisSubClient,
         },
+        {
+          provide: LikeService,
+          useValue: {},
+        },
       ],
     }).compile();
 
@@ -85,13 +90,13 @@ describe('EventsGateway', () => {
     } as any;
     mockSocket = {
       id: 'socketId',
+      userId: 1,
       emit: jest.fn(),
       join: jest.fn(),
-      userId: 1,
-      broadcast: {
-        to: jest.fn(() => ({
-          emit: jest.fn(),
-        })),
+      request: {
+        headers: {
+          'x-forwarded-for': ['127.0.0.1'],
+        },
       },
     } as any;
 
@@ -132,33 +137,10 @@ describe('EventsGateway', () => {
     expect(gateway).toBeDefined();
   });
 
-  it('알림을 위한 서버 구독', async () => {
-    await gateway.onModuleInit();
-
-    expect(mockRedisSubClient.subscribe).toHaveBeenCalledWith('notifications');
-    expect(mockRedisSubClient.on).toHaveBeenCalledWith(
-      'message',
-      expect.any(Function),
-    );
-
-    const messageHandler = mockRedisSubClient.on.mock.calls.find(
-      (call) => call[0] === 'message',
-    )[1];
-    const testMessage = 'Test notification message';
-    const testChannel = 'notifications';
-
-    messageHandler(testChannel, testMessage);
-
-    expect(gateway.server.emit).toHaveBeenCalledWith(
-      'notification',
-      testMessage,
-    );
-  });
-
   it('조인', async () => {
     const testData = { roomId: 1, channelType: 'testType' };
 
-    await gateway.handleJoinMessage(testData, mockSocket as any);
+    await gateway.handleJoinMessage(testData, mockSocket);
 
     expect(mockSocket.join).toHaveBeenCalledWith(
       `${testData.channelType}:${testData.roomId}`,
@@ -169,29 +151,36 @@ describe('EventsGateway', () => {
     it('메시지 성공적으로 생성', async () => {
       const testData = {
         channelType: 'testType',
-        userId: 1,
         message: 'testMessage',
         roomId: 1,
       };
-      mockSocket.userId = testData.userId;
 
       jest
         .spyOn(chatsService, 'createChannelChat')
-        .mockResolvedValue(undefined);
+        .mockResolvedValue('testUser');
 
-      await gateway.handleCreateChat(testData, mockSocket as any);
+      await gateway.handleCreateChat(testData, mockSocket);
 
+      // 함수 호출 검증
       expect(chatsService.createChannelChat).toHaveBeenCalledWith(
         testData.channelType,
-        testData.userId,
+        mockSocket.userId,
         testData.message,
         testData.roomId,
+        '127.0.0.1',
       );
 
+      // 서버 메시지 전송 검증
       expect(gateway.server.to).toHaveBeenCalledWith(
         `${testData.channelType}:${testData.roomId}`,
       );
+      expect(gateway.server.emit).toHaveBeenCalledWith('message', {
+        userId: mockSocket.userId,
+        message: testData.message,
+        userName: 'testUser',
+      });
     });
+
     it('생성 실패', async () => {
       const testData = {
         channelType: 'testType',
@@ -218,107 +207,82 @@ describe('EventsGateway', () => {
   });
 
   describe('투표', () => {
-    it('재판', async () => {
+    it('정치', async () => {
       const testData = {
         channelType: 'trials',
         roomId: 1,
         voteFor: true,
       };
 
-      const userCode = mockSocket.id;
-      const userId = mockSocket.userId;
-
-      const getUserVoteCountsMock = jest.spyOn(
-        votesService,
-        'getUserVoteCounts',
-      );
-      getUserVoteCountsMock.mockResolvedValue({
-        totalVotes: 1,
-        vote1Percentage: '50%',
-        vote2Percentage: '50%',
-      });
-
-      const publishNotificationMock = jest
-        .spyOn(chatsService, 'publishNotification')
+      jest
+        .spyOn(votesService, 'addVoteUserorNanUser')
         .mockResolvedValue(undefined);
-
-      const addVoteUserorNanUserMock = jest.spyOn(
-        votesService,
-        'addVoteUserorNanUser',
-      );
-      const serverToMock = jest.spyOn(gateway.server, 'to').mockReturnThis();
-      const emitMock = jest.spyOn(gateway.server, 'emit');
+      jest.spyOn(votesService, 'getUserVoteCounts').mockResolvedValue({
+        vote1Percentage: '60%',
+        vote2Percentage: '40%',
+        totalVotes: 100, // 이 필드를 포함하여 모의 반환값을 설정
+      });
 
       await gateway.handleCreateVote(testData, mockSocket);
 
-      expect(addVoteUserorNanUserMock).toHaveBeenCalledWith(
-        userCode,
-        userId,
+      expect(votesService.addVoteUserorNanUser).toHaveBeenCalledWith(
+        '127.0.0.1',
+        mockSocket.userId,
         testData.roomId,
         testData.voteFor,
       );
-      expect(getUserVoteCountsMock).toHaveBeenCalledWith(testData.roomId);
-      expect(serverToMock).toHaveBeenCalledWith(
-        `${testData.channelType}:${testData.roomId}`,
+      expect(votesService.getUserVoteCounts).toHaveBeenCalledWith(
+        testData.roomId,
       );
-      expect(emitMock).toHaveBeenCalledWith('vote', {
-        userId: userId,
-        votes: expect.any(Object),
+      expect(gateway.server.to).toHaveBeenCalledWith('trials:1');
+      expect(gateway.server.emit).toHaveBeenCalledWith('vote', {
+        userId: mockSocket.userId,
+        votes: {
+          vote1Percentage: '60%',
+          vote2Percentage: '40%',
+          totalVotes: 100,
+        },
       });
-
-      expect(publishNotificationMock).toHaveBeenCalledWith(expect.any(String));
     });
-    it('유머', async () => {
+
+    it('정치', async () => {
       const testData = {
         channelType: 'humors',
         roomId: 1,
         voteFor: true,
       };
 
-      const userCode = mockSocket.id;
-      const userId = mockSocket.userId;
-
-      const getUserVoteCountsMock = jest.spyOn(
-        humorVotesService,
-        'getUserVoteCounts',
-      );
-      getUserVoteCountsMock.mockResolvedValue({
-        totalVotes: 1,
-        vote1Percentage: '50%',
-        vote2Percentage: '50%',
-      });
-
-      const publishNotificationMock = jest
-        .spyOn(chatsService, 'publishNotification')
+      jest
+        .spyOn(votesService, 'addVoteUserorNanUser')
         .mockResolvedValue(undefined);
-
-      const addHumorVoteUserorNanUserMock = jest.spyOn(
-        humorVotesService,
-        'addHumorVoteUserorNanUser',
-      );
-
-      const serverToMock = jest.spyOn(gateway.server, 'to').mockReturnThis();
-      const emitMock = jest.spyOn(gateway.server, 'emit');
+      jest.spyOn(humorVotesService, 'getUserVoteCounts').mockResolvedValue({
+        vote1Percentage: '60%',
+        vote2Percentage: '40%',
+        totalVotes: 100, // 이 필드를 포함하여 모의 반환값을 설정
+      });
 
       await gateway.handleCreateVote(testData, mockSocket);
 
-      expect(addHumorVoteUserorNanUserMock).toHaveBeenCalledWith(
-        userCode,
-        userId,
+      expect(humorVotesService.addHumorVoteUserorNanUser).toHaveBeenCalledWith(
+        '127.0.0.1',
+        mockSocket.userId,
         testData.roomId,
         testData.voteFor,
       );
-      expect(getUserVoteCountsMock).toHaveBeenCalledWith(testData.roomId);
-      expect(serverToMock).toHaveBeenCalledWith(
-        `${testData.channelType}:${testData.roomId}`,
+      expect(humorVotesService.getUserVoteCounts).toHaveBeenCalledWith(
+        testData.roomId,
       );
-      expect(emitMock).toHaveBeenCalledWith('vote', {
-        userId: userId,
-        votes: expect.any(Object),
+      expect(gateway.server.to).toHaveBeenCalledWith('humors:1');
+      expect(gateway.server.emit).toHaveBeenCalledWith('vote', {
+        userId: mockSocket.userId,
+        votes: {
+          vote1Percentage: '60%',
+          vote2Percentage: '40%',
+          totalVotes: 100,
+        },
       });
-
-      expect(publishNotificationMock).toHaveBeenCalledWith(expect.any(String));
     });
+
     it('정치', async () => {
       const testData = {
         channelType: 'poltical-debates',
@@ -326,52 +290,40 @@ describe('EventsGateway', () => {
         voteFor: true,
       };
 
-      const userCode = mockSocket.id;
-      const userId = mockSocket.userId;
-
-      const getUserVoteCountsMock = jest.spyOn(
-        polticalVotesService,
-        'getUserVoteCounts',
-      );
-
-      getUserVoteCountsMock.mockResolvedValue({
-        totalVotes: 1,
-        vote1Percentage: '50%',
-        vote2Percentage: '50%',
-      });
-
-      const publishNotificationMock = jest
-        .spyOn(chatsService, 'publishNotification')
+      jest
+        .spyOn(polticalVotesService, 'addPolticalVoteUserorNanUser')
         .mockResolvedValue(undefined);
-
-      const addHumorVoteUserorNanUserMock = jest.spyOn(
-        polticalVotesService,
-        'addPolticalVoteUserorNanUser',
-      );
-
-      const serverToMock = jest.spyOn(gateway.server, 'to').mockReturnThis();
-      const emitMock = jest.spyOn(gateway.server, 'emit');
+      jest.spyOn(polticalVotesService, 'getUserVoteCounts').mockResolvedValue({
+        vote1Percentage: '60%',
+        vote2Percentage: '40%',
+        totalVotes: 100, // 모의 데이터 설정
+      });
 
       await gateway.handleCreateVote(testData, mockSocket);
 
-      expect(addHumorVoteUserorNanUserMock).toHaveBeenCalledWith(
-        userCode,
-        userId,
+      expect(
+        polticalVotesService.addPolticalVoteUserorNanUser,
+      ).toHaveBeenCalledWith(
+        '127.0.0.1',
+        mockSocket.userId,
         testData.roomId,
         testData.voteFor,
       );
-
-      expect(getUserVoteCountsMock).toHaveBeenCalledWith(testData.roomId);
-      expect(serverToMock).toHaveBeenCalledWith(
-        `${testData.channelType}:${testData.roomId}`,
+      expect(polticalVotesService.getUserVoteCounts).toHaveBeenCalledWith(
+        testData.roomId,
       );
-      expect(emitMock).toHaveBeenCalledWith('vote', {
-        userId: userId,
-        votes: expect.any(Object),
+      expect(gateway.server.to).toHaveBeenCalledWith('poltical-debates:1');
+      expect(gateway.server.emit).toHaveBeenCalledWith('vote', {
+        userId: mockSocket.userId,
+        votes: {
+          totalVotes: 100,
+          vote1Percentage: '60%',
+          vote2Percentage: '40%',
+          // totalVotes 필드 제외하고 테스트 예상치 수정
+        },
       });
-
-      expect(publishNotificationMock).toHaveBeenCalledWith(expect.any(String));
     });
+
     describe('handleCreateVote failures', () => {
       const testData = {
         channelType: 'trials',

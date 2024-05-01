@@ -29,17 +29,12 @@ export class ChatsService implements OnModuleInit {
     private readonly dataSource: DataSource,
     @Inject('REDIS_DATA_CLIENT') private redisDataClient: Redis,
     @InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
-    private readonly pushService: PushService,
+    // private readonly pushService: PushService,
     private readonly nickNameService: NicknameGeneratorService,
   ) {}
 
   async publishNotification(message: string) {
     const channelName = 'notifications';
-    await this.redisDataClient.publish(channelName, message);
-  }
-
-  async userPublishNotification(message: string) {
-    const channelName = 'userNotifications';
     await this.redisDataClient.publish(channelName, message);
   }
 
@@ -182,8 +177,6 @@ export class ChatsService implements OnModuleInit {
       await this.redisDataClient.rpush(chatKey, chatValue);
       await this.redisDataClient.expire(chatKey, 60 * 60 * 24 * 2);
       await this.redisDataClient.publish(chatKey, chatValue);
-
-      // await this.pushService.sendNotification(channelType, roomId, 'chat');
 
       return userName;
     } catch (error) {

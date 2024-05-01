@@ -34,24 +34,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly humorVotesService: HumorVotesService,
     private readonly polticalVotesService: PolticalVotesService,
     private readonly likesService: LikeService,
-    private readonly pushService: PushService,
   ) {}
-  async onModuleInit() {
-    await this.redisSubClient.subscribe('notifications', 'userNotifications');
-    this.redisSubClient.on('message', (channel, message) => {
-      switch (channel) {
-        case 'notifications':
-          this.server.emit('notification', message);
-          console.log('Notification:', message);
-          break;
-        case 'userNotifications':
-          const data = JSON.parse(message);
-          const userId = data.userId;
-          this.server.to(`user:${userId}`).emit('userNotification', data);
-          break;
-      }
-    });
-  }
 
   @UseGuards(OptionalWsJwtGuard)
   @SubscribeMessage('like')
@@ -92,8 +75,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await socket.join(`${channelType}:${roomId}`);
   }
   @SubscribeMessage('userConnect')
-  handleConnection(@ConnectedSocket() socket: CustomSocket) {
-  }
+  handleConnection(@ConnectedSocket() socket: CustomSocket) {}
   @UseGuards(OptionalWsJwtGuard)
   @SubscribeMessage('createChat')
   async handleCreateChat(

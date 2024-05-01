@@ -1,8 +1,5 @@
 // votes.service.ts
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { Request } from 'express';
@@ -13,52 +10,10 @@ export class PolticalVotesService {
   constructor(
     @InjectRepository(EachPolticalVote)
     private eachPolticalVoteRepository: Repository<EachPolticalVote>,
-    // @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private dataSource: DataSource,
   ) {}
-  // userCode 난수 생성 함수
-  private generateUserCode(): string {
-    return Math.random().toString(36).substring(2, 15);
-  }
-  // 유저 코드 생성 또는 조회(코드 수정 전 ver 1)
-  private async findOrCreateUserCode(req: Request, userId: number | null) {
-    let userCode = null;
-    if (!userId) {
-      userCode = req.cookies['user-code']; // 이런 쿠키가 있는지 확인
-      if (!userCode) {
-        userCode = this.generateUserCode();
-        req.res.cookie('user-code', userCode, {
-          maxAge: 900000,
-          httpOnly: true,
-        });
-      }
-    }
-    return userCode;
-  }
-  // // 유저 코드 생성 또는 조회 (리팩토링 버전(검증 속도를 위해서 redis 캐시 사용 and 유저마다 고유 ip로 저장) ver2)
-  // private async findOrCreateUserCodeVer2(req: Request, userId: number | null) {
-  //   if (userId) {
-  //     return null;
-  //   }
-  //   let userCode = req.cookies['user-code'];
-  //   if (userCode) {
-  //     return userCode;
-  //   }
-  //   const userKey = req.ip;
-  //   // 레디스에서 찾기
-  //   userCode = await this.cacheManager.get<string>(userKey);
-  //   if (!userCode) {
-  //     userCode = this.generateUserCode();
-  //     await this.cacheManager.set(userKey, userCode, 1000 * 24 * 60 * 60); // 밀리초 단위임
-  //     req.res.cookie('user-code', userCode, {
-  //       maxAge: 1000 * 24 * 60 * 60,
-  //       httpOnly: true,
-  //     });
-  //   }
-  //   return userCode;
-  // }
-  // 투표 중복 검증 and 투표수 업데이트 함수
-  private async validationAndSaveVote(
+
+  async validationAndSaveVote(
     {
       userId,
       ip,
@@ -136,11 +91,7 @@ export class PolticalVotesService {
       id: uservoteId,
     });
     // 2. 없으면 404
-    if (deleteResult.affected === 0) {
-      throw new NotFoundException(
-        '찾는 재판이 없습니다. 또는 이미 삭제되었습니다.',
-      );
-    }
+
     return deleteResult;
   }
   // 투표 했는지 검사 (isvoteGuard에서 사용함)
@@ -229,7 +180,6 @@ export class PolticalVotesService {
       .where('eachPolticalVote.polticalVoteId = :polticalVoteId', {
         polticalVoteId,
       })
-      .andWhere('eachPolticalVote.userCode IS NULL')
       .getRawOne();
 
     const voteCount1 = parseInt(result.voteCount1, 10);
