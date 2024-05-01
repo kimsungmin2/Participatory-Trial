@@ -34,7 +34,6 @@ export class OnlineBoardsService {
     userInfo: UserInfos,
     files: Express.Multer.File[],
   ): Promise<OnlineBoards> {
-    console.log(createOnlineBoardDto);
     let uploadResult: string[] = [];
     if (files.length !== 0) {
       const uploadResults = await this.s3Service.saveImages(

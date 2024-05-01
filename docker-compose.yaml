@@ -2,12 +2,88 @@ version: '3.7'
 services:
   postgres:
     image: postgres:15
+<<<<<<< Updated upstream
+=======
     restart: always
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     ports:
       - '5432:5432'
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres123
+  redis-0:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6380
+    ports:
+      - '6380:6380'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-0-data:/data
+  redis-1:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6381
+    ports:
+      - '6381:6381'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-1-data:/data
+  redis-2:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6382
+    ports:
+      - '6382:6382'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-2-data:/data
+  redis-3:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6383
+    ports:
+      - '6383:6383'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-3-data:/data
+  redis-4:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6384
+    ports:
+      - '6384:6384'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-4-data:/data
+  redis-5:
+    image: redis:latest
+    command: redis-server --appendonly yes --cluster-enabled yes --cluster-config-file nodes.conf --cluster-node-timeout 5000 --port 6385
+    ports:
+      - '6385:6385'
+    networks:
+      - redis-cluster-net
+    volumes:
+      - redis-5-data:/data
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - '6379:6379'
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.9.3
+    env_file:
+      - .env
+>>>>>>> Stashed changes
+    restart: always
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    environment:
+<<<<<<< Updated upstream
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
@@ -159,6 +235,33 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/24
+=======
+      LS_JAVA_OPTS: '-Xmx256m -Xms256m'
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.3
+    user: root # 필요한 경우 root 권한으로 실행
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro # 파일비트 구성 파일
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro # 도커 컨테이너 로그에 접근하기 위함
+      - /var/run/docker.sock:/var/run/docker.sock:ro # 도커 정보에 접근하기 위함
+      - ./logs:/usr/share/filebeat/logs:ro
+    depends_on:
+      - logstash
+    command:
+      [
+        'filebeat',
+        '-e',
+        '-strict.perms=false',
+        '-E',
+        "output.logstash.hosts=['logstash:5044']",
+        '-E',
+        'setup.kibana.host=kibana:5601',
+      ]
+    restart: always
+networks:
+  redis-cluster-net:
+    driver: bridge
+>>>>>>> Stashed changes
 volumes:
   postgres-data:
   redis-0-data:

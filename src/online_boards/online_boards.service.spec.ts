@@ -9,7 +9,9 @@ import { UserInfos } from '../users/entities/user-info.entity';
 import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { NotFoundException } from '@nestjs/common';
-import { Readable } from 'winston-daily-rotate-file';
+import { Readable } from 'stream';
+import { S3Service } from '../s3/s3.service';
+import { RedisService } from '../cache/redis.service';
 
 describe('OnlineBoardsService', () => {
   let service: OnlineBoardsService;
@@ -34,7 +36,8 @@ describe('OnlineBoardsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OnlineBoardsService,
-        UsersService,
+        S3Service,
+        RedisService,
         {
           provide: getRepositoryToken(OnlineBoards),
           useClass: Repository,
