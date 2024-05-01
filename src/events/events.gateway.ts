@@ -14,7 +14,6 @@ import { ChatsService } from '../chats/chats.service';
 import { CustomSocket } from '../utils/interface/socket.interface';
 import { VotesService } from '../trials/vote/vote.service';
 import { Redis } from 'ioredis';
-import { createAdapter } from 'socket.io-redis';
 import { HumorVotesService } from '../humors/humors_votes/humors_votes.service';
 import { PolticalVotesService } from '../poltical_debates/poltical_debates_vote/poltical_debates_vote.service';
 
@@ -86,7 +85,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.server.to(`${channelType}:${roomId}`).emit('message', {
         userId,
         message,
-        userName: user.nickName,
+        userName: user,
       });
     } catch (error) {
       socket.emit('error', '채팅 생성에 실패하였습니다.');
@@ -152,7 +151,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           roomId,
           voteFor,
         );
-        const votes = await this.humorVotesService.getUserVoteCounts(roomId);
+        const votes = await this.polticalVotesService.getUserVoteCounts(roomId);
 
         this.server.to(`${channelType}:${roomId}`).emit('vote', {
           userId,

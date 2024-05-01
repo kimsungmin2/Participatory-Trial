@@ -2,12 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Users } from './user.entity';
+@Index('Email')
 @Entity({ name: 'userInfos' })
 export class UserInfos {
   @PrimaryColumn({ type: 'int' })

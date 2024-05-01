@@ -41,7 +41,7 @@ export class Votes {
 
   @OneToMany(() => EachVote, (eachVote) => eachVote.vote, { cascade: true })
   eachVote: EachVote[];
-  
+
   @OneToOne(() => Trials, (trial) => trial.vote)
   @JoinColumn({ name: 'trialId', referencedColumnName: 'id' })
   trial: Trials;

@@ -34,7 +34,6 @@ export class UsersService {
 
     return data;
   }
-
   async findById(id: number) {
     const userCache = await this.redisService.getCluster().get(`id:${id}`);
 

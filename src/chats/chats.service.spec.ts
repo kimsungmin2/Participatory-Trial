@@ -8,7 +8,6 @@ import { TrialsChat } from '../events/entities/trialsChat.entity';
 import { HumorsChat } from '../events/entities/humorsChat.entity';
 import { PolticalsChat } from '../events/entities/polticalsChat.entity';
 import { ChannelType } from '../events/type/channeltype';
-import { mock } from 'jest-mock-extended';
 
 describe('ChatsService', () => {
   let service: ChatsService;
@@ -107,28 +106,22 @@ describe('ChatsService', () => {
       );
     });
   });
-  //   describe('onModuleInit', () => {
-  //     it('should call handleScheduledTasks', async () => {
-  //       // handleScheduledTasks 메서드를 스파이합니다.
-  //       const handleScheduledTasksSpy = jest.spyOn(
-  //         service,
-  //         'handleScheduledTasks',
-  //       );
-  //       await service.onModuleInit();
 
-  //       // handleScheduledTasks 메서드가 호출되었는지 검증합니다.
-  //       expect(handleScheduledTasksSpy).toHaveBeenCalled();
-  //     });
-  //   });
-  describe('onModuleDestroy', () => {
-    it('should quit redis clients', async () => {
-      await service.onModuleDestroy();
+  describe('onModuleInit', () => {
+    it('should call handleScheduledTasks method', async () => {
+      const handleScheduledTasksSpy = jest.spyOn(
+        service,
+        'handleScheduledTasks',
+      );
 
-      // 각 Redis 클라이언트의 quit 메서드가 호출되었는지 검증합니다.
-      expect(mockRedisDataClient.quit).toHaveBeenCalled();
-      expect(mockRedisSubClient.quit).toHaveBeenCalled();
+      await service.onModuleInit();
+
+      expect(handleScheduledTasksSpy).toHaveBeenCalled();
+
+      handleScheduledTasksSpy.mockRestore();
     });
   });
+
   describe('handleScheduledTasks', () => {
     it('should process keys for each channel type', async () => {
       //   const channelType = 'trials';
@@ -239,12 +232,12 @@ describe('ChatsService', () => {
       );
 
       expect(mockRedisDataClient.rpush).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expect.stringMatching(chatValueRegex),
       );
 
       expect(mockRedisDataClient.publish).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expect.stringMatching(chatValueRegex),
       );
     });
@@ -292,15 +285,15 @@ describe('ChatsService', () => {
       });
 
       expect(mockRedisDataClient.rpush).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expectedChatValue,
       );
       expect(mockRedisDataClient.expire).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         60 * 60 * 24 * 2,
       );
       expect(mockRedisDataClient.publish).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expectedChatValue,
       );
 
@@ -351,15 +344,15 @@ describe('ChatsService', () => {
       });
 
       expect(mockRedisDataClient.rpush).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expectedChatValue,
       );
       expect(mockRedisDataClient.expire).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         60 * 60 * 24 * 2,
       );
       expect(mockRedisDataClient.publish).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         expectedChatValue,
       );
 
@@ -377,7 +370,7 @@ describe('ChatsService', () => {
     });
   });
   describe('getChannel', () => {
-    it('should return messages from Redis and the database', async () => {
+    it('should return messages from Redis and 123the database', async () => {
       const channelType = 'trials';
       const roomId = 1;
       const page = 0;
@@ -395,10 +388,10 @@ describe('ChatsService', () => {
       const result = await service.getChannel(channelType, roomId, page, limit);
 
       expect(mockRedisDataClient.llen).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
       );
       expect(mockRedisDataClient.lrange).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         0,
         -1,
       );
@@ -414,7 +407,7 @@ describe('ChatsService', () => {
         ...dbMessages,
       ]);
     });
-    it('should return messages from Redis and the database', async () => {
+    it('should return messages from Redis and12 the database', async () => {
       const channelType = 'humors';
       const roomId = 1;
       const page = 0;
@@ -432,10 +425,10 @@ describe('ChatsService', () => {
       const result = await service.getChannel(channelType, roomId, page, limit);
 
       expect(mockRedisDataClient.llen).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
       );
       expect(mockRedisDataClient.lrange).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         0,
         -1,
       );
@@ -452,7 +445,7 @@ describe('ChatsService', () => {
       ]);
     });
     it('should return messages from Redis and the database', async () => {
-      const channelType = 'polticals';
+      const channelType = 'poltical-debates';
       const roomId = 1;
       const page = 0;
       const limit = 50;
@@ -469,10 +462,10 @@ describe('ChatsService', () => {
       const result = await service.getChannel(channelType, roomId, page, limit);
 
       expect(mockRedisDataClient.llen).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
       );
       expect(mockRedisDataClient.lrange).toHaveBeenCalledWith(
-        `${channelType}:${roomId}`,
+        `${channelType}:chat:${roomId}`,
         0,
         -1,
       );

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -22,6 +23,7 @@ import { OnlineBoardLike } from '../../online_boards/entities/online_board_like.
 import { EachHumorVote } from '../../humors/entities/UservoteOfHumorVote.entity';
 import { EachPolticalVote } from '../../poltical_debates/entities/userVoteOfPoltical_debate.entity';
 import { TrialsChat } from '../../events/entities/trialsChat.entity';
+
 
 @Entity({
   name: 'users',

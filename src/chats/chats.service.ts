@@ -152,17 +152,33 @@ export class ChatsService implements OnModuleInit {
     roomId: number,
   ) {
     try {
-      // await this.redisConnection();
-      const user = await this.usersInfoRepository.findOne({
-        where: { id: userId },
-        select: ['nickName'],
-      });
+      let userName = await this.redisDataClient.get(`userName:${userId}`);
+
+      if (!userName) {
+        const user = await this.usersInfoRepository.findOne({
+          where: { id: userId },
+          select: ['nickName'],
+        });
+
+        if (user) {
+          userName = user.nickName;
+          await this.redisDataClient.set(
+            `userName:${userId}`,
+            userName,
+            'EX',
+            60 * 60 * 24,
+          );
+        } else {
+          throw new Error('유저가 없음');
+        }
+      }
+
       const chat = new Chat();
       chat.message = message;
       chat.userId = userId;
       chat.RoomId = roomId;
       chat.timestamp = new Date();
-      chat.userName = user.nickName;
+      chat.userName = userName;
 
       const chatKey = `${channelType}:chat:${roomId}`;
       const chatValue = JSON.stringify(chat);
@@ -172,7 +188,7 @@ export class ChatsService implements OnModuleInit {
 
       await this.redisDataClient.publish(chatKey, chatValue);
 
-      return user;
+      return userName;
     } catch (error) {
       throw error;
     }
