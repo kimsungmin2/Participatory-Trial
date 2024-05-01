@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { LikeService } from './like.service';
+import { LikeService } from '../like/like.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HumorBoards } from '../humors/entities/humor-board.entity';

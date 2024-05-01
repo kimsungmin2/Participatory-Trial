@@ -8,12 +8,16 @@ import { UpdateOnlineBoardDto } from './dto/update-online_board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OnlineBoards } from './entities/online_board.entity';
 import { Like, Repository } from 'typeorm';
+import { FindAllOnlineBoardDto } from './dto/findAll-online_board.dto';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
+import { InjectRedis } from '@nestjs-modules/ioredis';
+import Redis from 'ioredis';
 import { S3Service } from '../s3/s3.service';
-import { BoardType } from '../s3/type/board-type';
+
 import { RedisService } from '../cache/redis.service';
 import { UsersService } from '../users/users.service';
+import { BoardType } from '../s3/type/board-type';
 
 @Injectable()
 export class OnlineBoardsService {
@@ -123,19 +127,22 @@ export class OnlineBoardsService {
 
   //조회수를 증가시키고 데이터를 반환
   async findOneOnlineBoardWithIncreaseView(id: number): Promise<OnlineBoards> {
-    const findHumorBoard: OnlineBoards =
+    const findOnlineBoard: OnlineBoards =
       await this.onlineBoardsRepository.findOne({
         where: { id },
         relations: ['onlineBoardComment'],
       });
-    if (!findHumorBoard) {
+
+    if (!findOnlineBoard) {
       throw new NotFoundException(`${id}번 게시물을 찾을 수 없습니다.`);
     }
+
     let cachedView: number;
+
     try {
       cachedView = await this.redisService
         .getCluster()
-        .incr(`{online}:${id}:view`);
+        .incr(`online:${id}:view`);
     } catch (err) {
       throw new InternalServerErrorException(
         '요청을 처리하는 도중 오류가 발생했습니다.',
@@ -143,8 +150,8 @@ export class OnlineBoardsService {
     }
 
     return {
-      ...findHumorBoard,
-      view: findHumorBoard.view + cachedView,
+      ...findOnlineBoard,
+      view: findOnlineBoard.view + cachedView,
     };
   }
 
@@ -174,6 +181,7 @@ export class OnlineBoardsService {
 
   // 자유게시판 아이디 조회
   async findBoardId(boardId: number) {
+    // console.log('boardId: ', boardId);
     const foundBoard = await this.onlineBoardsRepository.findOne({
       where: { id: boardId },
     });

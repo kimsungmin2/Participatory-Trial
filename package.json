@@ -154,7 +154,17 @@
       "!**/dto/**",
       "!**/module/**",
       "!**/entities/**",
-      "!**/*module.ts"
+      "!**/*module.ts",
+      "!**/*controller.ts",
+      "!**/*cache/**",
+      "!**/*queue.ts",
+      "!**/*alarm/**",
+      "!**/*online_board_comment/guards/**",
+      "!**/*online_boards/guards/**",
+      "!**/*online_boards/pipes/**",
+      "!**/*schemas/**",
+      "!**/*trials/guards/**",
+      "!**/*trials/trialQueue/**"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"

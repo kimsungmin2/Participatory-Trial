@@ -2,11 +2,12 @@ import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PolticalDebateCommentsService } from './poltical_debate_comments.service';
-import { CreatePolticalDebateCommentDto } from './dto/create-poltical_debate_comment_dto';
-import { PolticalDebateBoards } from './entities/poltical_debate.entity';
-import { PolticalDebateComments } from './entities/poltical_debate_comments.entity';
+import { PolticalDebateCommentsService } from '../poltical_debates/poltical_debate_comments.service';
+import { CreatePolticalDebateCommentDto } from '../poltical_debates/dto/create-poltical_debate_comment_dto';
+import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
+import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
 import { Users } from '../users/entities/user.entity';
+import { Role } from '../users/types/userRole.type';
 
 const mockedUser = {
   id: 1,

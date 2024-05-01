@@ -1,25 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, Repository, UpdateResult } from 'typeorm';
-import { PolticalDebatesService } from './poltical_debates.service';
-import { PolticalDebateBoards } from './entities/poltical_debate.entity';
+import { DataSource, QueryRunner, Repository, UpdateResult } from 'typeorm';
+import { PolticalDebatesService } from '../poltical_debates/poltical_debates.service';
+import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 
 import {
+  BadRequestException,
+  ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { UpdatePolticalDebateDto } from './dto/update-poltical_debate.dto';
-import { CreatePolticalDebateDto } from './dto/create-poltical_debate.dto';
+import { UpdatePolticalDebateDto } from '../poltical_debates/dto/update-poltical_debate.dto';
+import { CreatePolticalDebateDto } from '../poltical_debates/dto/create-poltical_debate.dto';
 import { S3Service } from '../s3/s3.service';
 import { Readable } from 'stream';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
-import { PolticalDebateVotes } from './entities/polticalVote.entity';
-import Redis from 'ioredis';
+import { PolticalDebateVotes } from '../poltical_debates/entities/polticalVote.entity';
 import { PaginationQueryDto } from '../humors/dto/get-humorBoard.dto';
 import { Users } from '../users/entities/user.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { UpdateVoteDto } from '../trials/vote/dto/updateDto';
+import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
+import { BoardType } from '../s3/type/board-type';
 
 const mockedUser = {
   id: 1,
@@ -51,7 +55,8 @@ describe('PolticalDebatesService', () => {
   let polticalDebatesVoteRepository: Repository<PolticalDebateVotes>;
   let s3Service: S3Service;
   let dataSource: DataSource;
-  let redis: Redis;
+  let redisService: RedisService;
+  let usersService: UsersService;
   const polticalDebatesRepositoryToken =
     getRepositoryToken(PolticalDebateBoards);
 
@@ -60,6 +65,7 @@ describe('PolticalDebatesService', () => {
       providers: [
         PolticalDebatesService,
         DataSource,
+        UsersService,
         {
           provide: polticalDebatesRepositoryToken,
           useValue: {
@@ -84,7 +90,7 @@ describe('PolticalDebatesService', () => {
             update: jest.fn(),
             remove: jest.fn(),
             softDelete: jest.fn(),
-            count: jest.fn(),
+            count: jest.fn().mockResolvedValue(20),
           },
         },
         {
@@ -116,15 +122,32 @@ describe('PolticalDebatesService', () => {
         {
           provide: S3Service,
           useValue: {
-            saveImages: jest.fn(),
+            saveImages: jest
+              .fn()
+              .mockResolvedValue([
+                { imageUrl: 'https://example.com/image.jpg' },
+              ]),
           },
         },
         {
-          provide: 'default_IORedisModuleConnectionToken',
+          provide: RedisService,
           useValue: {
-            set: jest.fn(),
-            get: jest.fn(),
-            incr: jest.fn().mockResolvedValue(5),
+            getCluster: jest.fn().mockReturnValue({
+              incr: jest.fn(),
+              disconnect: jest.fn(),
+            }),
+            onModuleDestroy: jest.fn(),
+          },
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            findByEmail: jest.fn(),
+            findByMyId: jest.fn(),
+            findById: jest.fn().mockResolvedValue({ nickName: 'User1' }),
+            userUpdate: jest.fn(),
+            userDelete: jest.fn(),
+            updateClientsInfo: jest.fn(),
           },
         },
       ],
@@ -140,11 +163,13 @@ describe('PolticalDebatesService', () => {
       getRepositoryToken(PolticalDebateVotes),
     );
 
+    usersService = module.get<UsersService>(UsersService);
+
     s3Service = module.get<S3Service>(S3Service);
 
     dataSource = module.get<DataSource>(DataSource);
 
-    redis = module.get<Redis>('default_IORedisModuleConnectionToken');
+    redisService = module.get<RedisService>(RedisService);
   });
 
   it('polticalDebatesService should be defined', () => {
@@ -190,7 +215,17 @@ describe('PolticalDebatesService', () => {
         files,
       );
 
+      expect(s3Service.saveImages).toHaveBeenCalledTimes(1);
+      expect(s3Service.saveImages).toHaveBeenCalledWith(
+        files,
+        BoardType.PolticalDebate,
+      );
       expect(polticalDebatesRepository.save).toHaveBeenCalledTimes(1);
+      expect(polticalDebatesRepository.save).toHaveBeenCalledWith({
+        userId: mockedUser.id,
+        ...createPolticalDebateDto,
+        imageUrl: JSON.stringify(['https://example.com/image.jpg']),
+      });
       expect(createPolticalDebate).toEqual(mockPolticalDebate);
     });
 
@@ -218,9 +253,9 @@ describe('PolticalDebatesService', () => {
         .spyOn(s3Service, 'saveImages')
         .mockResolvedValue([{ imageUrl: 'https://example.com/image.jpg' }]);
 
-      jest.spyOn(polticalDebatesRepository, 'save').mockImplementation(() => {
-        throw new Error('Database error');
-      });
+      jest
+        .spyOn(polticalDebatesRepository, 'save')
+        .mockRejectedValueOnce(new Error('Database error'));
 
       await expect(
         polticalDebatesService.create(
@@ -230,12 +265,50 @@ describe('PolticalDebatesService', () => {
         ),
       ).rejects.toThrow(InternalServerErrorException);
       expect(polticalDebatesRepository.save).toHaveBeenCalledTimes(1);
+      expect(polticalDebatesRepository.save).toHaveBeenCalledWith({
+        userId: mockedUser.id,
+        ...createPolticalDebateDto,
+        imageUrl: JSON.stringify(['https://example.com/image.jpg']),
+      });
     });
   });
 
   describe('createBothBoardandVote', () => {
+    let polticalDebatesService: PolticalDebatesService;
+    let mockQueryRunner: any;
+
     beforeEach(() => {
       jest.clearAllMocks();
+
+      mockQueryRunner = {
+        connect: jest.fn(),
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+        manager: {
+          create: jest.fn(),
+          save: jest.fn(),
+        },
+      };
+
+      const mockDataSource = {
+        createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
+      };
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
+
+      polticalDebatesService = new PolticalDebatesService(
+        mockRepository,
+        mockVoteRepository,
+        mockDataSource as any,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
+      );
     });
 
     it('성공', async () => {
@@ -266,27 +339,12 @@ describe('PolticalDebatesService', () => {
         polticalId: 1,
       } as PolticalDebateVotes;
 
-      const mockQueryRunner = {
-        connect: jest.fn(),
-        startTransaction: jest.fn(),
-        commitTransaction: jest.fn(),
-        rollbackTransaction: jest.fn(),
-        release: jest.fn(),
-        manager: {
-          create: jest
-            .fn()
-            .mockReturnValueOnce(mockPolticalDebate)
-            .mockReturnValueOnce(mockPolticalDebateVote),
-          save: jest
-            .fn()
-            .mockResolvedValueOnce(mockPolticalDebate)
-            .mockResolvedValueOnce(mockPolticalDebateVote),
-        },
-      };
-
-      jest
-        .spyOn(dataSource, 'createQueryRunner')
-        .mockReturnValueOnce(mockQueryRunner as any);
+      mockQueryRunner.manager.create
+        .mockReturnValueOnce(mockPolticalDebate)
+        .mockReturnValueOnce(mockPolticalDebateVote);
+      mockQueryRunner.manager.save
+        .mockResolvedValueOnce(mockPolticalDebate)
+        .mockResolvedValueOnce(mockPolticalDebateVote);
 
       const result = await polticalDebatesService.createBothBoardandVote(
         mockUserId,
@@ -294,10 +352,10 @@ describe('PolticalDebatesService', () => {
         voteTitleDto,
       );
 
-      expect(dataSource.createQueryRunner).toHaveBeenCalledTimes(1);
       expect(mockQueryRunner.connect).toHaveBeenCalledTimes(1);
       expect(mockQueryRunner.startTransaction).toHaveBeenCalledTimes(1);
-      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
+      expect(mockQueryRunner.manager.create).toHaveBeenNthCalledWith(
+        1,
         PolticalDebateBoards,
         {
           title: 'Test Title',
@@ -305,7 +363,8 @@ describe('PolticalDebatesService', () => {
           userId: 1,
         },
       );
-      expect(mockQueryRunner.manager.create).toHaveBeenCalledWith(
+      expect(mockQueryRunner.manager.create).toHaveBeenNthCalledWith(
+        2,
         PolticalDebateVotes,
         {
           title1: 'Vote Title 1',
@@ -346,9 +405,23 @@ describe('PolticalDebatesService', () => {
         },
       };
 
-      jest
-        .spyOn(dataSource, 'createQueryRunner')
-        .mockReturnValueOnce(mockQueryRunner as any);
+      const mockDataSource = {
+        createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
+      };
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
+
+      const polticalDebatesService = new PolticalDebatesService(
+        mockRepository,
+        mockVoteRepository,
+        mockDataSource as any,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
+      );
 
       await expect(
         polticalDebatesService.createBothBoardandVote(
@@ -369,12 +442,6 @@ describe('PolticalDebatesService', () => {
         page: 1,
         limit: 10,
       };
-
-      const mockTotalItems = 20;
-      jest
-        .spyOn(polticalDebatesRepository, 'count')
-        .mockResolvedValueOnce(mockTotalItems);
-
       const mockPolticalDebateBoards: PolticalDebateBoards[] = [
         {
           id: 1,
@@ -409,8 +476,11 @@ describe('PolticalDebatesService', () => {
         .mockResolvedValueOnce(mockPolticalDebateBoards);
 
       const expectedResult = {
-        polticalDebateBoards: mockPolticalDebateBoards,
-        totalItems: mockTotalItems,
+        polticalDebateBoards: mockPolticalDebateBoards.map((board) => ({
+          ...board,
+          userName: 'User1',
+        })),
+        totalItems: 20,
       };
 
       const result =
@@ -428,11 +498,15 @@ describe('PolticalDebatesService', () => {
 
       jest
         .spyOn(polticalDebatesRepository, 'count')
-        .mockRejectedValueOnce(new Error('Error loading posts'));
+        .mockImplementationOnce(() => {
+          throw new InternalServerErrorException('Error loading posts');
+        });
 
       await expect(
         polticalDebatesService.findAllWithPaginateBoard(paginationQueryDto),
-      ).rejects.toThrow(Error);
+      ).rejects.toThrow(InternalServerErrorException);
+
+      expect(polticalDebatesRepository.count).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -483,7 +557,10 @@ describe('PolticalDebatesService', () => {
         mockBoard,
       );
 
-      (redis.incr as jest.Mock).mockResolvedValueOnce(5);
+      const mockCachedView = 15;
+      (redisService.getCluster().incr as jest.Mock).mockResolvedValue(
+        mockCachedView,
+      );
 
       const result = await polticalDebatesService.findOne(1);
 
@@ -492,7 +569,10 @@ describe('PolticalDebatesService', () => {
         relations: ['polticalDebateComments', 'polticalDebateVotes'],
       });
 
-      expect(result).toEqual({ ...mockBoard, view: mockBoard.view + 5 });
+      expect(result).toEqual({
+        ...mockBoard,
+        view: mockBoard.view + mockCachedView,
+      });
     });
 
     it('게시물을 찾을 수 없습니다.', async () => {
@@ -521,7 +601,9 @@ describe('PolticalDebatesService', () => {
         mockBoard,
       );
 
-      (redis.incr as jest.Mock).mockRejectedValueOnce(new Error('Redis error'));
+      (redisService.getCluster().incr as jest.Mock).mockRejectedValueOnce(
+        new Error('Redis error'),
+      );
 
       await expect(polticalDebatesService.findOne(1)).rejects.toThrow(
         InternalServerErrorException,
@@ -720,7 +802,7 @@ describe('PolticalDebatesService', () => {
 
       await expect(
         polticalDebatesService.delete(userInfo as UserInfos, id),
-      ).rejects.toThrow(UnauthorizedException);
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -753,14 +835,17 @@ describe('PolticalDebatesService', () => {
       };
 
       const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
       const mockS3Service = {} as S3Service;
-      const mockRedis = {} as Redis;
-
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
         mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
         mockS3Service,
         mockRedis,
+        mockUsers,
       );
 
       const result = await polticalDebatesService.createSubject(
@@ -806,11 +891,18 @@ describe('PolticalDebatesService', () => {
         createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
       };
 
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
-        polticalDebatesRepository,
+        mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
-        s3Service,
-        redis,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
       );
 
       await expect(
@@ -853,11 +945,18 @@ describe('PolticalDebatesService', () => {
         createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
       };
 
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
-        polticalDebatesRepository,
+        mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
-        s3Service,
-        redis,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
       );
 
       const result = await polticalDebatesService.updateSubject(
@@ -896,11 +995,18 @@ describe('PolticalDebatesService', () => {
         createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
       };
 
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
-        polticalDebatesRepository,
+        mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
-        s3Service,
-        redis,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
       );
 
       await expect(
@@ -931,11 +1037,18 @@ describe('PolticalDebatesService', () => {
         createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
       };
 
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
-        polticalDebatesRepository,
+        mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
-        s3Service,
-        redis,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
       );
 
       await polticalDebatesService.deleteVote(polticalVoteId);
@@ -961,11 +1074,18 @@ describe('PolticalDebatesService', () => {
         createQueryRunner: jest.fn().mockReturnValue(mockQueryRunner),
       };
 
+      const mockRepository = {} as Repository<PolticalDebateBoards>;
+      const mockVoteRepository = {} as Repository<PolticalDebateVotes>;
+      const mockS3Service = {} as S3Service;
+      const mockRedis = {} as RedisService;
+      const mockUsers = {} as UsersService;
       const polticalDebatesService = new PolticalDebatesService(
-        polticalDebatesRepository,
+        mockRepository,
+        mockVoteRepository,
         mockDataSource as any,
-        s3Service,
-        redis,
+        mockS3Service,
+        mockRedis,
+        mockUsers,
       );
 
       await expect(

@@ -1,30 +1,28 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { OnlineBoardCommentService } from './online_board_comment.service';
+import { OnlineBoardCommentService } from '../online_board_comment/online_board_comment.service';
 import { OnlineBoardsService } from '../online_boards/online_boards.service';
 import { UsersService } from '../users/users.service';
 import { Repository, UpdateResult } from 'typeorm';
-import { OnlineBoardComments } from './entities/online_board_comment.entity';
+import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { UserInfos } from '../users/entities/user-info.entity';
-import { CreateOnlineBoardCommentDto } from './dto/create-online_board_comment.dto';
-import { UpdateOnlineBoardCommentDto } from './dto/update-online_board_comment.dto';
-import { OnlineBoardsModule } from '../online_boards/online_boards.module';
-import { UsersModule } from '../users/users.module';
-import { S3Module } from '../s3/s3.module';
+import { CreateOnlineBoardCommentDto } from '../online_board_comment/dto/create-online_board_comment.dto';
+import { UpdateOnlineBoardCommentDto } from '../online_board_comment/dto/update-online_board_comment.dto';
 import { Users } from '../users/entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { S3Service } from '../s3/s3.service';
-
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-
+import { RedisService } from '../cache/redis.service';
+import { Clients } from '../users/entities/client.entity';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 const mockCacheManager = { set: jest.fn(), get: jest.fn(), del: jest.fn() };
-
 describe('OnlineBoardCommentService', () => {
   let service: OnlineBoardCommentService;
   let onlineBoardsService: OnlineBoardsService;
   let usersService: UsersService;
-
+  let redisService: RedisService;
+  let clientRepository: Repository<Clients>;
   let repository: Repository<OnlineBoardComments>;
   const userInfo: UserInfos = {
     id: 1,
@@ -38,23 +36,14 @@ describe('OnlineBoardCommentService', () => {
     updatedAt: new Date('2024-03-24T02:05:02.602Z'),
     user: null,
   };
-
   beforeEach(async () => {
+    jest.clearAllMocks();
+    jest.resetAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        TypeOrmModule.forRoot({
-          type: 'sqlite',
-          database: ':memory:',
-          entities: [UserInfos, OnlineBoards],
-          synchronize: true,
-        }),
-        OnlineBoardsModule,
-        UsersModule,
-        S3Module,
-      ],
       providers: [
         OnlineBoardCommentService,
         JwtService,
+        UsersService,
         {
           provide: JwtService,
           useValue: {
@@ -64,6 +53,10 @@ describe('OnlineBoardCommentService', () => {
         },
         {
           provide: getRepositoryToken(OnlineBoardComments),
+          useClass: Repository,
+        },
+        {
+          provide: getRepositoryToken(Clients),
           useClass: Repository,
         },
         {
@@ -79,38 +72,41 @@ describe('OnlineBoardCommentService', () => {
           useClass: Repository,
         },
         {
+          provide: OnlineBoardsService,
+          useValue: {
+            findBoardId: jest.fn(),
+          },
+        },
+        {
+          provide: RedisService,
+          useValue: {
+            getCluster: jest.fn().mockReturnValue({
+              incr: jest.fn().mockResolvedValue(1),
+            }),
+          },
+        },
+        {
           provide: S3Service,
           useValue: {
             saveImages: jest.fn(),
           },
         },
-        {
-          provide: 'default_IORedisModuleConnectionToken',
-          useValue: {
-            set: jest.fn(),
-            get: jest.fn(),
-            incr: jest.fn().mockResolvedValue(1),
-          },
-        },
-        { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        // { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
-
     service = module.get<OnlineBoardCommentService>(OnlineBoardCommentService);
     onlineBoardsService = module.get<OnlineBoardsService>(OnlineBoardsService);
     usersService = module.get<UsersService>(UsersService);
     repository = module.get<Repository<OnlineBoardComments>>(
       getRepositoryToken(OnlineBoardComments),
     );
+    redisService = module.get<RedisService>(RedisService);
   });
-
   it('should create board comment', async () => {
     const onlineBoardId: number = 1;
-
     const createOnlineBoardCommentDto: CreateOnlineBoardCommentDto = {
       content: '내용',
     };
-
     const onlineBoard: OnlineBoards = {
       id: onlineBoardId,
       userId: 1,
@@ -127,7 +123,6 @@ describe('OnlineBoardCommentService', () => {
       updated_at: new Date('2024-03-24T02:05:02.602Z'),
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
-
     const expectedValue: OnlineBoardComments = {
       id: 1,
       onlineBoardId: 1,
@@ -140,27 +135,20 @@ describe('OnlineBoardCommentService', () => {
       onlineBoard: null,
       onlineBoardComment: new OnlineBoards(),
     };
-
     jest.spyOn(usersService, 'findById').mockResolvedValue(userInfo);
-
     jest
       .spyOn(onlineBoardsService, 'findBoardId')
       .mockResolvedValue(onlineBoard);
-
     jest.spyOn(repository, 'save').mockResolvedValue(expectedValue);
-
     const result = await service.createComment(
       onlineBoardId,
       createOnlineBoardCommentDto,
       userInfo,
     );
-
     expect(result).toEqual(expectedValue);
   });
-
   it('should find all board comments', async () => {
     const onlineBoardId = 1;
-
     const onlineBoard: OnlineBoards = {
       id: onlineBoardId,
       userId: 1,
@@ -177,7 +165,6 @@ describe('OnlineBoardCommentService', () => {
       imageUrl: null,
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
     };
-
     const expectedValue: OnlineBoardComments[] = [
       {
         id: 1,
@@ -189,23 +176,19 @@ describe('OnlineBoardCommentService', () => {
         deleted_at: new Date('2024-03-24T02:05:02.602Z'),
         user: null,
         onlineBoard: null,
+        onlineBoardComment: null,
       },
     ];
-
     jest.spyOn(repository, 'findBy').mockResolvedValue(expectedValue);
-
     const result = await service.findAllComments(onlineBoardId);
-
     expect(result).toEqual(expectedValue);
   });
-
   it('should update a board comment', async () => {
     const commentId = 1;
     const onlineBoardId = 1;
     const updateOnlineBoardCommentDto: UpdateOnlineBoardCommentDto = {
       content: 'content',
     };
-
     const foundComment: OnlineBoardComments = {
       id: commentId,
       onlineBoardId: 1,
@@ -216,30 +199,25 @@ describe('OnlineBoardCommentService', () => {
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
+      onlineBoardComment: null,
     };
-
     const expectedResult: UpdateResult = {
       raw: {},
       generatedMaps: [],
       affected: 1,
     };
-
     jest.spyOn(service, 'findCommentById').mockResolvedValue(foundComment);
     jest.spyOn(repository, 'update').mockResolvedValue(expectedResult);
-
     const result = await service.updateComment(
       onlineBoardId,
       commentId,
       updateOnlineBoardCommentDto,
     );
-
     expect(result.affected).toBe(1);
   });
-
   it('should remove a board comment', async () => {
     const commentId = 1;
     const onlineBoardId = 1;
-
     const onlineBoardComment: OnlineBoardComments = {
       id: commentId,
       onlineBoardId: 1,
@@ -250,21 +228,17 @@ describe('OnlineBoardCommentService', () => {
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
+      onlineBoardComment: null,
     };
-
     jest
       .spyOn(service, 'findCommentById')
       .mockResolvedValue(onlineBoardComment);
-
     jest.spyOn(repository, 'softDelete').mockResolvedValue(undefined);
     const result = await service.removeComment(onlineBoardId, commentId);
-
     expect(result).toEqual(`This action removes a #${commentId} onlineBoard`);
   });
-
   it('should find comment by Id', async () => {
     const commentId = 1;
-
     const expectedValue: OnlineBoardComments = {
       id: commentId,
       onlineBoardId: 1,
@@ -275,12 +249,83 @@ describe('OnlineBoardCommentService', () => {
       deleted_at: new Date('2024-03-24T02:05:02.602Z'),
       user: null,
       onlineBoard: null,
+      onlineBoardComment: null,
     };
-
     jest.spyOn(repository, 'findOneBy').mockResolvedValue(expectedValue);
-
     const result = await service.findCommentById(commentId);
-
     expect(result).toEqual(expectedValue);
+  });
+  it('should failed by NotFound exception', async () => {
+    const commentId = 1;
+    const expectedValue: OnlineBoardComments = {
+      id: commentId,
+      onlineBoardId: 1,
+      content: 'content',
+      userId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      onlineBoard: null,
+      onlineBoardComment: null,
+    };
+    jest.spyOn(repository, 'findOneBy').mockResolvedValue(null);
+    try {
+      const result = await service.findCommentById(commentId);
+    } catch (err) {
+      expect(err).toBeInstanceOf(NotFoundException);
+      expect(err.message).toEqual('해당 댓글을 조회할 수 없습니다.');
+    }
+    expect(repository.findOneBy).toHaveBeenCalledTimes(1);
+  });
+  it('should find comment by Id', async () => {
+    const commentId = 1;
+    const expectedValue: OnlineBoardComments = {
+      id: commentId,
+      onlineBoardId: 1,
+      content: 'content',
+      userId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      onlineBoard: null,
+      onlineBoardComment: null,
+    };
+    jest.spyOn(repository, 'findOne').mockResolvedValue(expectedValue);
+    const result = await service.verifyCommentOwner(
+      expectedValue.userId,
+      expectedValue.id,
+    );
+    expect(repository.findOne).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(expectedValue);
+  });
+  it('should failed by forbidden exception', async () => {
+    expect.assertions(3);
+    const commentId = 2;
+    const expectedValue: OnlineBoardComments = {
+      id: commentId,
+      onlineBoardId: 1,
+      content: 'content',
+      userId: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deleted_at: new Date('2024-03-24T02:05:02.602Z'),
+      user: null,
+      onlineBoard: null,
+      onlineBoardComment: null,
+    };
+    jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+    try {
+      const result = await service.verifyCommentOwner(
+        expectedValue.userId,
+        expectedValue.id,
+      );
+    } catch (err) {
+      console.log(err);
+      expect(err).toBeInstanceOf(ForbiddenException);
+      expect(err.message).toEqual('접근 권한이 없습니다.');
+    }
+    expect(repository.findOne).toHaveBeenCalledTimes(1);
   });
 });

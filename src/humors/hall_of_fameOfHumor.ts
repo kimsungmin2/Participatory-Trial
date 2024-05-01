@@ -10,7 +10,7 @@ import { HumorVotes } from './entities/HumorVote.entity';
 import { HumorsHallOfFame } from './entities/humor_hall_of_fame.entity';
 import { HumorsLikeHallOfFames } from './entities/humor_hall_of_fame.like.entity';
 import { HumorsViewHallOfFames } from './entities/humor_hall_of_fame.view.entity';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PaginationQueryDto } from './dto/get-humorBoard.dto';
 import { HumorVotesService } from '../humors_votes/humors_votes.service';
 
@@ -71,7 +71,7 @@ export class HumorHallOfFameService {
     await this.updateViewHallOfFameDatabase(viewHallOfFameData);
   }
 
-  private getLastWeekRange() {
+  getLastWeekRange() {
     // 1. 현재 날짜와 시간 laskWeekStart에 할당
     const lastWeekStart = new Date(); // 현재 날짜와 시간 laskWeekStart에 할당
     // 2. lastWeekStart의 날짜를 지난 주의 첫번째 날로 설정
@@ -92,7 +92,7 @@ export class HumorHallOfFameService {
   }
 
   // 날짜 추상화 매서드(getThisMonthRange 메서드는 이번 달의 시작과 끝을 정확히 나타내는 날짜 범위를 제공)
-  private getThisMonthRange() {
+  getThisMonthRange() {
     const start = new Date();
     // start의 날짜를 이번 달의 첫 번째 날로 설정한다. 이는 Date 객체의 setDate 메서드를 사용하여 달의 날짜를 1로 설정함으로써 달의 시작을 나타낸다.
     start.setDate(1); // 이번달 첫쨰날
@@ -105,7 +105,7 @@ export class HumorHallOfFameService {
   }
 
   // 투표 데이터 집계 매서드(좋아요 수 기준)
-  private async aggVotesLikeForHallOfFame(humorBoards: HumorBoards[]) {
+  async aggVotesLikeForHallOfFame(humorBoards: HumorBoards[]) {
     const { start, end } = this.getThisMonthRange();
 
     const candidates = await this.humorsRepository
@@ -130,7 +130,7 @@ export class HumorHallOfFameService {
   }
 
   // 투표 데이터 집계 매서드(조회수 수 기준)
-  private async aggVotesViewForHallOfFame(humorBoards: HumorBoards[]) {
+  async aggVotesViewForHallOfFame(humorBoards: HumorBoards[]) {
     const { start, end } = this.getThisMonthRange();
 
     const candidates = await this.humorsRepository
@@ -151,7 +151,7 @@ export class HumorHallOfFameService {
   }
 
   // 투표 데이터 집계 매서드(투표 수 기준)
-  private async aggVotesForHallOfFame(humorVotes: HumorVotes[]) {
+  async aggVotesForHallOfFame(humorVotes: HumorVotes[]) {
     const { start, end } = this.getThisMonthRange();
 
     const candidates = await this.humorVotesRepository
@@ -161,8 +161,8 @@ export class HumorHallOfFameService {
         'humorVote.id',
         'humorVote.title1',
         'humorVote.title2',
-        'humorVote.userId',
-        'humorVote.content',
+        'humorBoards.userId',
+        'humorBoards.content',
       ])
       .addSelect('humorVote.voteCount1 + humorVote.voteCount2', 'totalVotes')
       .where('humorVote.createdAt BETWEEN :start AND :end', {
@@ -179,7 +179,7 @@ export class HumorHallOfFameService {
   }
 
   // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(투표수)
-  private async updateHallOfFameDatabase(hallOfFameData: any) {
+  async updateHallOfFameDatabase(hallOfFameData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -211,7 +211,7 @@ export class HumorHallOfFameService {
   }
 
   // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(좋아요)
-  private async updateLikeHallOfFameDatabase(hallOfFameData: any) {
+  async updateLikeHallOfFameDatabase(hallOfFameData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -246,7 +246,7 @@ export class HumorHallOfFameService {
   }
 
   // DB에 명예의 전당 데이터를 업데이트(배열형태로 받아서 한번에 저장) ver 1.(조회수)
-  private async updateViewHallOfFameDatabase(hallOfFameData: any) {
+  async updateViewHallOfFameDatabase(hallOfFameData: any) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -296,6 +296,7 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
+      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는 도중오류가 발생했습니다',
       );
@@ -322,6 +323,7 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
+      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는 도중오류가발생했습니다.',
       );
@@ -348,6 +350,7 @@ export class HumorHallOfFameService {
         },
       });
     } catch (err) {
+      console.log(err.message);
       throw new InternalServerErrorException(
         '명예의 전당을 불러오는도중 오류가 발생했습니다.',
       );

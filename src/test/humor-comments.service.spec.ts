@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HumorCommentsService } from './humor-comments.service';
-import { HumorComments } from './entities/humor_comment.entity';
+import { HumorCommentsService } from '../humor-comments/humor-comments.service';
+import { HumorComments } from '../humor-comments/entities/humor_comment.entity';
 import { HumorBoards } from '../humors/entities/humor-board.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Role } from '../users/types/userRole.type';
@@ -32,6 +32,12 @@ const mockedUser = {
   humorComment: [new HumorComments()],
   polticalDebateBoards: [new PolticalDebateBoards()],
   polticalDebateComments: [new PolticalDebateComments()],
+  eachHumorVote: [],
+  eachPolticalVote: [],
+  eachVote: [],
+  humorLike: [],
+  onlineBoardLike: [],
+  trialsChat: [],
 } as Users;
 
 describe('HumorCommentsService', () => {

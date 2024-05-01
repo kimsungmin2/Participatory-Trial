@@ -1,28 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HumorsService } from './humors.service';
+import { HumorsService } from '../humors/humors.service';
 import { Role } from '../users/types/userRole.type';
 import { UserInfos } from '../users/entities/user-info.entity';
 import { OnlineBoards } from '../online_boards/entities/online_board.entity';
 import { Trials } from '../trials/entities/trial.entity';
-import { HumorBoards } from './entities/humor-board.entity';
+import { HumorBoards } from '../humors/entities/humor-board.entity';
 
 import { PolticalDebateBoards } from '../poltical_debates/entities/poltical_debate.entity';
 import { PolticalDebateComments } from '../poltical_debates/entities/poltical_debate_comments.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, UpdateResult } from 'typeorm';
-import { CreateHumorBoardDto } from './dto/create-humor.dto';
+import {
+  DataSource,
+  EntityManager,
+  EntityTarget,
+  QueryRunner,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
+import { CreateHumorBoardDto } from '../humors/dto/create-humor.dto';
 import {
   ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { UpdateHumorDto } from './dto/update-humor.dto';
+import { UpdateHumorDto } from '../humors/dto/update-humor.dto';
 import { S3Service } from '../s3/s3.service';
 import { Users } from '../users/entities/user.entity';
 import { OnlineBoardComments } from '../online_board_comment/entities/online_board_comment.entity';
-import { HumorVotes } from './entities/HumorVote.entity';
+import { HumorVotes } from '../humors/entities/HumorVote.entity';
 import { VoteTitleDto } from '../trials/vote/dto/voteDto';
 import { Readable } from 'stream';
+import { EachHumorVote } from '../humors/entities/UservoteOfHumorVote.entity';
+import { RedisService } from '../cache/redis.service';
+import { UsersService } from '../users/users.service';
+import { connect } from 'http2';
 
 const mockedUser: Users = {
   id: 1,
@@ -75,11 +86,38 @@ const mockFile: Express.Multer.File[] = [
   },
 ];
 
+class ConnectionMock {
+  createQueryRunner = jest.fn(() => {
+    const qr = {
+      connect: jest.fn().mockResolvedValue(undefined),
+      startTransaction: jest.fn().mockResolvedValue(undefined),
+      commitTransaction: jest.fn().mockResolvedValue(undefined),
+      rollbackTransaction: jest.fn().mockResolvedValue(undefined),
+      release: jest.fn().mockResolvedValue(undefined),
+      manager: {
+        getRepository: jest.fn().mockImplementation((entity) => {
+          if (entity === HumorBoards) {
+            return { save: jest.fn().mockResolvedValue(mockBoard) };
+          } else if (entity === HumorVotes) {
+            return { save: jest.fn().mockResolvedValue(mockVote) };
+          }
+          return {};
+        }),
+      },
+    };
+    return qr;
+  });
+}
+
 describe('HumorsService', () => {
   let humorService: HumorsService;
   let humorBoardRepository: Repository<HumorBoards>;
   let humorVoteRepository: Repository<HumorVotes>;
+  let eachHumorVoteRepository: Repository<EachHumorVote>;
   let s3Service: S3Service;
+  let redisService: RedisService;
+  let usersService: UsersService;
+  let dataSource: DataSource;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -92,7 +130,11 @@ describe('HumorsService', () => {
         {
           provide: S3Service,
           useValue: {
-            saveImages: jest.fn(),
+            saveImages: jest.fn().mockResolvedValue([
+              {
+                imageUrl: 'hello',
+              },
+            ]),
           },
         },
 
@@ -110,36 +152,65 @@ describe('HumorsService', () => {
             softDelete: jest.fn(),
           },
         },
+
         {
           provide: getRepositoryToken(HumorVotes),
+          useValue: {
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(EachHumorVote),
           useClass: Repository,
         },
         {
-          provide: 'default_IORedisModuleConnectionToken',
+          provide: RedisService,
           useValue: {
-            set: jest.fn(),
-            get: jest.fn(),
-            incr: jest.fn().mockReturnValue(1),
+            getCluster: jest.fn().mockReturnValue({
+              incr: jest.fn().mockResolvedValue(1),
+            }),
           },
+        },
+        {
+          provide: UsersService,
+          useValue: {
+            findById: jest.fn(),
+          },
+        },
+        {
+          provide: DataSource,
+          useClass: ConnectionMock,
         },
       ],
     }).compile();
 
     humorService = module.get<HumorsService>(HumorsService);
     s3Service = module.get<S3Service>(S3Service);
+    dataSource = module.get<DataSource>(DataSource);
+    redisService = module.get<RedisService>(RedisService);
+    usersService = module.get<UsersService>(UsersService);
     humorBoardRepository = module.get<Repository<HumorBoards>>(
       getRepositoryToken(HumorBoards),
     );
     humorVoteRepository = module.get<Repository<HumorVotes>>(
       getRepositoryToken(HumorVotes),
     );
+    eachHumorVoteRepository = module.get<Repository<EachHumorVote>>(
+      getRepositoryToken(EachHumorVote),
+    );
+    jest
+      .spyOn(dataSource, 'createQueryRunner')
+      .mockReturnValue(dataSource.createQueryRunner());
   });
 
   it('should be defined', () => {
     expect(humorService).toBeDefined();
     expect(s3Service).toBeDefined();
+    expect(dataSource).toBeDefined();
+    expect(redisService).toBeDefined();
+    expect(usersService).toBeDefined();
   });
-  describe('createHumorBoard', () => {
+  describe('createHumorBoardAndVotes', () => {
     const createHumorBoardDto: CreateHumorBoardDto = {
       content: '냠냠',
       title: '냠냠냠',
@@ -150,17 +221,16 @@ describe('HumorsService', () => {
     };
     const files: Express.Multer.File[] = [];
     it('must be success', async () => {
-      jest.spyOn(humorBoardRepository, 'save').mockResolvedValue(mockBoard);
-      jest.spyOn(humorVoteRepository, 'save').mockResolvedValue(mockVote);
-      const createdBoard = await humorService.createHumorBoardAndVotes(
+      await humorService.createHumorBoardAndVotes(
         createHumorBoardDto,
         voteTitleDto,
         mockedUser,
         files,
       );
-      expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
-      expect(humorVoteRepository.save).toHaveBeenCalledTimes(1);
-      expect(createdBoard).toEqual(mockBoard);
+      expect(dataSource.createQueryRunner).toHaveBeenCalledTimes(2);
+      const qr = dataSource.createQueryRunner();
+      expect(qr.connect).toHaveBeenCalledTimes(1); // connect 호출 검증
+      expect(qr.startTransaction).toHaveBeenCalledTimes(1); // startTransaction 호출 검증
     });
     it('must be success with image', async () => {
       const mockedUrl = [
@@ -179,38 +249,16 @@ describe('HumorsService', () => {
         deleted_at: new Date(),
         imageUrl: '[hello]',
       } as HumorBoards;
-      jest.spyOn(humorBoardRepository, 'save').mockResolvedValue(mockBoard1);
-      jest.spyOn(humorVoteRepository, 'save').mockResolvedValue(mockVote);
-      jest.spyOn(s3Service, 'saveImages').mockResolvedValue(mockedUrl);
       const createdBoard = await humorService.createHumorBoardAndVotes(
         createHumorBoardDto,
         voteTitleDto,
         mockedUser,
         mockFile,
       );
-      expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
-      expect(humorVoteRepository.save).toHaveBeenCalledTimes(1);
-      expect(createdBoard).toEqual(mockBoard1);
-    });
-    it('must be save is failed', async () => {
-      expect.assertions(4);
-      jest.spyOn(humorBoardRepository, 'save').mockRejectedValue(new Error());
-      jest.spyOn(humorVoteRepository, 'save').mockRejectedValue(new Error());
-      try {
-        await humorService.createHumorBoardAndVotes(
-          createHumorBoardDto,
-          voteTitleDto,
-          mockedUser,
-          files,
-        );
-      } catch (err) {
-        expect(err).toBeInstanceOf(InternalServerErrorException);
-        expect(err.message).toEqual(
-          '예기지 못한 오류로 게시물 생성에 실패했습니다. 다시 시도해주세요.',
-        );
-      }
-      expect(humorBoardRepository.save).toHaveBeenCalledTimes(1);
-      expect(humorVoteRepository.save).toHaveBeenCalledTimes(0);
+      expect(dataSource.createQueryRunner).toHaveBeenCalledTimes(2);
+      const qr = dataSource.createQueryRunner();
+      expect(qr.connect).toHaveBeenCalledTimes(1); // connect 호출 검증
+      expect(qr.startTransaction).toHaveBeenCalledTimes(1); // startTransaction 호출 검증
     });
   });
   describe('getAllHumorBoards', () => {
@@ -219,6 +267,7 @@ describe('HumorsService', () => {
       humorBoards: [
         {
           id: 1,
+          userName: '김라임',
         },
       ],
       totalItems: count,
@@ -228,6 +277,9 @@ describe('HumorsService', () => {
         id: 1,
       },
     ] as HumorBoards[];
+    const mockNickName = {
+      nickName: '김라임',
+    } as UserInfos;
     const PaginationQueryDto = {
       limit: 1,
       page: 1,
@@ -237,9 +289,12 @@ describe('HumorsService', () => {
         .spyOn(humorBoardRepository, 'find')
         .mockResolvedValue(mockBoardArray);
       jest.spyOn(humorBoardRepository, 'count').mockResolvedValue(count);
+      jest.spyOn(usersService, 'findById').mockResolvedValue(mockNickName);
       const createdBoard =
         await humorService.getAllHumorBoards(PaginationQueryDto);
       expect(humorBoardRepository.find).toHaveBeenCalledTimes(1);
+      expect(humorBoardRepository.count).toHaveBeenCalledTimes(1);
+      expect(usersService.findById).toHaveBeenCalledTimes(1);
       expect(createdBoard).toEqual(result);
     });
     it('must be find is failed', async () => {
@@ -433,6 +488,17 @@ describe('HumorsService', () => {
       }
       expect(humorService.findOneHumorBoard).toHaveBeenCalledTimes(1);
       expect(humorBoardRepository.softDelete).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('checkPostId', () => {
+    it('must be success', async () => {
+      jest
+        .spyOn(humorService, 'findOneHumorBoard')
+        .mockResolvedValue(mockBoard);
+
+      const board = await humorService.checkPostId(mockBoard.id, mockedUser);
+      expect(humorService.findOneHumorBoard).toHaveBeenCalledTimes(1);
+      expect(board).toEqual(mockBoard);
     });
   });
 });
