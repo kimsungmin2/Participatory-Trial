@@ -18,7 +18,7 @@ export class SearchService {
     const boolQuery = {
       bool: {
         should: [],
-        minimum_should_match: '50%',
+        minimum_should_match: 1,
       },
     };
 

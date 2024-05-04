@@ -8,7 +8,7 @@ form.addEventListener('submit', (event) => {
     password: document.getElementById('password').value,
   };
 
-  fetch('http://localhost:3000/login', {
+  fetch('/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -24,7 +24,7 @@ form.addEventListener('submit', (event) => {
       }
     })
     .then((data) => {
-      window.location.href = 'http://localhost:3000';
+      window.location.href = '/';
     })
     .catch((error) => {
       // 요청이 실패했을 때의 처리

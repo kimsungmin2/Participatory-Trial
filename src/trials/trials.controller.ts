@@ -44,6 +44,8 @@ import { Users } from '../users/entities/user.entity';
 import { PaginateQueryDto } from 'src/search/dto/paginateQuery.dto';
 import { HalloffameType } from 'src/s3/halloffame-type';
 import { PaginationQueryHallOfFameDto } from 'src/humors/dto/get-pagenation.dto';
+import { PolticalDebatesService } from '../poltical_debates/poltical_debates.service';
+import { HumorsService } from '../humors/humors.service';
 
 @ApiTags('재판')
 @Controller('trials')
@@ -52,6 +54,8 @@ export class TrialsController {
     private readonly trialsService: TrialsService,
     private readonly trialHallOfFameService: TrialHallOfFameService,
     private readonly likeServise: LikeService,
+    private readonly politicalService: PolticalDebatesService,
+    private readonly humorsService: HumorsService,
   ) {}
   // 모든 API는 비동기 처리
   // -------------------------------------------------------------------------- 재판 API ----------------------------------------------------------------------//
@@ -692,20 +696,28 @@ export class TrialsController {
     };
   }
 
-
   // 가장 인기있는 투표 탑 10 조회
   @Get('Top10/Votes')
-  async findTop10TrialsByVotes(
-    @Req() req: Request,
-  ){
-    const data = await this.trialsService.findTop10TrialsByVotes()
-    
+  @Render('index.ejs')
+  async getTop10VotesByType(@Req() req: Request, @Query('type') type: string) {
+    let data;
+    switch (type) {
+      case '':
+        data = await this.trialsService.findTop10TrialsByVotes();
+        break;
+      case 'option2':
+        data = await this.humorsService.findTop10VotedHumorPosts();
+        break;
+      case 'option3':
+        data = await this.politicalService.findTop10PolticalByVotes();
+        break;
+    }
     return {
       statusCode: HttpStatus.OK,
       message: '실시간핫한투표수데이터입니다.',
       data,
       isLoggedIn: req['isLoggedIn'],
-    }
+    };
   }
 
   // 판례 조회 API

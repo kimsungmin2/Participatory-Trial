@@ -31,4 +31,3 @@ export class SearchQueryDto {
   @IsString()
   type: string;
 }
-//http://localhost:3000/search?search=%E3%84%B9%E3%85%88%E3%85%81&type=title&boardName=humor

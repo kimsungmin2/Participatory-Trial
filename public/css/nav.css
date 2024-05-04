@@ -19,3 +19,12 @@
 /* body {
   background-color: lightskyblue;
 } */
+
+header {
+  position: -webkit-sticky; /* 사파리 브라우저 지원을 위함 */
+  position: sticky;
+  width: 100%;
+  top: 0;
+  background-color: #f4edcc;
+  z-index: 1000;
+}

@@ -168,7 +168,7 @@ export class AuthService {
 
   async verifiCationEmail(verifiCation: VerifiCation) {
     const code = await this.redisService.getCluster().get(verifiCation.email);
-
+    console.log(code);
     const user = await this.usersService.findByEmail(verifiCation.email);
     if (!user) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');

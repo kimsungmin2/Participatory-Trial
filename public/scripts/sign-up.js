@@ -10,10 +10,7 @@ form.addEventListener('submit', (event) => {
     nickName: document.getElementById('nickName').value,
     birth: document.getElementById('birth').value,
   };
-  console.log(formData.birth, formData.confirmPassword);
-  console.log(JSON.stringify(formData));
-  console.log(formData.email);
-  fetch('http://localhost:3000/sign-up', {
+  fetch('/sign-up', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -30,7 +27,7 @@ form.addEventListener('submit', (event) => {
     })
     .then((data) => {
       alert('가입을 완료하였습니다. 해당 이메일로 인증코드를 전송하였습니다.');
-      window.location.href = 'http://localhost:3000/sign-up/verification';
+      window.location.href = '/verification';
     })
     .catch((error) => {
       alert(error);

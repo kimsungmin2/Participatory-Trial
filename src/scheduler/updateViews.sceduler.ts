@@ -24,7 +24,7 @@ export class UpdateViewsScheduler {
     do {
       const reply = await this.redisService
         .getCluster()
-        .scan(cursor, 'MATCH', 'humors:*:view');
+        .scan(cursor, 'MATCH', '{humors}:*:view');
       cursor = reply[0];
       const keys = reply[1];
       keysBatch = keysBatch.concat(keys);
@@ -34,7 +34,7 @@ export class UpdateViewsScheduler {
       const values = await this.redisService.getCluster().mget(...keysBatch);
       keysBatch.forEach(async (key, index) => {
         const viewCount = values[index];
-        const match = key.match(/humors:(.*):view/);
+        const match = key.match(/{humors}:(.*):view/);
         if (match && viewCount) {
           const id = match[1];
           await this.humorBoardRepository
@@ -56,7 +56,7 @@ export class UpdateViewsScheduler {
     do {
       const reply = await this.redisService
         .getCluster()
-        .scan(cursor, 'MATCH', 'online:*:view');
+        .scan(cursor, 'MATCH', '{online}:*:view');
       cursor = reply[0];
       const keys = reply[1];
       keysBatch = keysBatch.concat(keys);
@@ -66,7 +66,7 @@ export class UpdateViewsScheduler {
       const values = await this.redisService.getCluster().mget(...keysBatch);
       keysBatch.forEach(async (key, index) => {
         const viewCount = values[index];
-        const match = key.match(/online:(.*):view/);
+        const match = key.match(/{online}:(.*):view/);
         if (match && viewCount) {
           const id = match[1];
           await this.onlineBoardRepository

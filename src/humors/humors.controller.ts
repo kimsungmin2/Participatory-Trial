@@ -451,20 +451,6 @@ export class HumorsController {
   }
 
   // 가장 인기있는 투표 탑 10 조회
-  @Get('Top10/Votes')
-  async findTop10HumorsByVotes(
-    @Req() req: Request,
-  ){
-    const data = await this.humorsService.findTop10HumorsByVotes()
-    
-    return {
-      statusCode: HttpStatus.OK,
-      message: '실시간핫한투표수데이터입니다.',
-      data,
-      isLoggedIn: req['isLoggedIn'],
-    }
-  }
-
 
   @ApiOperation({ summary: '더미 생성' })
   @ApiParam({
